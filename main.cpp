@@ -1,6 +1,8 @@
 #include <windows.h>
 #include <tchar.h>
 
+#include "Vector2D.h"
+
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -27,7 +29,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			////////////////////////
 			Rectangle(mdc, 0, 0, rt.right, rt.bottom);
 			////////////////////////
-
+			POINT start_point { 100, 100 };
+			Vector2D v { 100, 100 };
+			MoveToEx(mdc, start_point.x, start_point.y, NULL);
+			LineTo(mdc, start_point.x + v.x, start_point.y + v.y);
 			////////////////////////
 
 			BitBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, SRCCOPY);
