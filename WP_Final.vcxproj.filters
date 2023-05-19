@@ -22,14 +22,26 @@
     <Filter Include="Util">
       <UniqueIdentifier>{901b7c47-2e21-4b94-abe4-01d24f510853}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scene\Button">
+      <UniqueIdentifier>{f6fe4edc-27d8-4a83-95cb-366734f6fd6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene\TextBox">
+      <UniqueIdentifier>{9164984d-7def-4ec1-a14d-728932c33e85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{81a44d3a-f467-4af2-8b90-7ee5edf23d4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\Point">
+      <UniqueIdentifier>{460c9dd8-e2c4-46a9-9f4e-2aeb4ed0ad01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\Vector">
+      <UniqueIdentifier>{77665f3a-ac64-46dd-ae7c-56fcc9ce3ddf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="TODOLIST.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Vector2D.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -39,11 +51,32 @@
     <ClCompile Include="Util.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="TextBox.cpp">
+      <Filter>Scene\TextBox</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector.cpp">
+      <Filter>Math\Vector</Filter>
+    </ClCompile>
+    <ClCompile Include="Point.cpp">
+      <Filter>Math\Point</Filter>
+    </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>Scene\Button</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="MainScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="GameManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Vector2D.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="images.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -55,6 +88,30 @@
     </ClInclude>
     <ClInclude Include="Util.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="TextBox.h">
+      <Filter>Scene\TextBox</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>Math\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Point.h">
+      <Filter>Math\Point</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>Scene\Button</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="MainScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameManager.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
