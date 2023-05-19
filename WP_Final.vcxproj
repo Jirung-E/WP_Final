@@ -139,8 +139,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainScene.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Point.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="target.cpp" />
     <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="Util.cpp" />
@@ -154,6 +157,12 @@
     <ClInclude Include="images.h" />
     <ClInclude Include="MainScene.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="player_move.h" />
+    <ClInclude Include="Point.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="Sprite.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Scene.h" />

@@ -46,6 +46,12 @@ void GameManager::keyboardInput(const HWND& hWnd, int keycode) {
 		case L'r': case L'R':
 			gameStart(hWnd);
 			break;
+		case L'a': case L'A':
+			game_scene.moveLeft();
+			break;
+		case L'd': case L'D':
+			game_scene.moveRight();
+			break;
 		}
 		break;
 	}
