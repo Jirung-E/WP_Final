@@ -17,3 +17,16 @@ A; 좌측 이동
 D: 우측 이동
 SPACE: 점프
 ESC: 종료
+
+//2023.05.20 업데이트
+-player_move.h를 player.h로 변경 (기능은 동일)
+-images.h에 있던 CM_x, CM_y를 player.h로 위치 이동
+-마우스 커서 대신 조준점 출력
+-사격 기능 추가(LBUTTON)
+-반동으로 인한 탄퍼짐 구현
+-총알이 날아가는 애니메이션, 재장전 표시기, 장탄수 표시기 추가 
+-총알 관련 기능을 담당하는 ammo.h, ammo.cpp, 조준점 기능을 하는 target.h, target.cpp 추가
+-총기 번호에 총기 이름 할당(define), main.cpp의 맨 위쪽 참조
+-0번 타이머 재활성화 (키보드 입력이 전혀 작동하지 않았음)
+-이미지출력 부분을 조건문에서 switch-case문으로 변경
+-일부 mx, my, CM_x, CM_y의 자료 타입을 double로 변경, atan2 함수 정확도를 높이기 위함

@@ -104,6 +104,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -130,6 +132,7 @@
     <None Include="TODOLIST.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ammo.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameScene.cpp" />
@@ -141,11 +144,13 @@
     <ClCompile Include="Point.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="target.cpp" />
     <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ammo.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameScene.h" />
@@ -158,6 +163,10 @@
     <ClInclude Include="Point.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Sprite.h" />
+    <ClInclude Include="player.h" />
+    <ClInclude Include="Point.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="target.h" />
     <ClInclude Include="TextBox.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Vector.h" />
