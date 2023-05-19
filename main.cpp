@@ -3,7 +3,7 @@
 #include <atlImage.h>
 #include "ammo.h" //총알 관련 기능을 하는 헤더
 #include "target.h" //조준점 관련 기능을 하는 헤더
-#include "player.h" //플레이어 관련 변수를 저장하는 헤더
+#include "player_info.h" //플레이어 관련 변수를 저장하는 헤더
 #include "images.h" //이미지 관련 변수를 저장하는 헤더. 배경, 일부 몬스터, 일부 무기를 제외한 나머지 이미지의 크기는 
                     //모두 100 x 100 px로 하도록 함. 이는 작업 시 좀 더 직관적으로 작업하기 위한 것임.
 #include "GameManager.h"
