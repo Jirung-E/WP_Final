@@ -43,11 +43,25 @@ void GameScene::update(const POINT& point) {
         end_time = clock();
         play_time += end_time - start_time;
         start_time = clock();
-        //updatePlayer(point);
+        updatePlayer(point);
     }
     //updateEnemy();
     //collisionCheck();
 }
+
+void GameScene::updatePlayer(const POINT& point) {
+    player.move(map);
+}
+
+
+void GameScene::moveLeft() {
+    player.move({ -0.1, 0 }, map);
+}
+
+void GameScene::moveRight() {
+    player.move({ 0.1, 0 }, map);
+}
+
 
 void GameScene::togglePauseState() {
     if(paused) {

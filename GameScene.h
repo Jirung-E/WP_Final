@@ -32,6 +32,10 @@ public:
 public:
     void setUp();
     void update(const POINT& point);
+    void updatePlayer(const POINT& point);      // 마우스 위치에 따라 총구가 향하는 방향이 바뀌어야 하므로 마우스 위치를 인자로 넘김
+
+    void moveLeft();
+    void moveRight();
 
     void togglePauseState();
     void pause();

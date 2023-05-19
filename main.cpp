@@ -43,6 +43,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_KEYDOWN:
+		manager.keyboardInput(hWnd, wParam);
 		switch(wParam) {
 		case VK_ESCAPE: //종료
 			DestroyWindow(hWnd);
@@ -100,6 +101,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 		case UPDATE: //게임 전체 타이머
+			manager.update(hWnd);
 		//점프
 		{
 			if (CM_jump == 1) { //위로 올라가는 중
