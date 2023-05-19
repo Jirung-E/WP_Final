@@ -15,6 +15,10 @@ HDC hdc, mdc; PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt; //모든 메시지에서 공용으
 static int mx, my; //마우스 좌표
 static BOOL is_click = FALSE; //마우스 클릭 여부
 
+enum Timer {
+	KEYDOWN, UPDATE
+};
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch(uMsg) {
 	case WM_CREATE: //이미지 로드 및 초기 변수값 세팅
@@ -27,7 +31,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		//이미지 관련된 것들은 모두 images.h 파일에 선언되어있음
 		//리소스 이미지가 포함된 'res' 폴더가 비주얼 스튜디오 솔루션 파일(.sln)과 같은 위치에 있어야함.
 
-		SetTimer(hWnd, 0, 0, NULL); //KEYDOWN 전용 타이머, 이 타이머에 키보드 입력을 제외한 어떠한 다른것도 작성하지 말 것!
+		//SetTimer(hWnd, 0, 0, NULL); //KEYDOWN 전용 타이머, 이 타이머에 키보드 입력을 제외한 어떠한 다른것도 작성하지 말 것!
 
 		SetTimer(hWnd, 1, 5, NULL); //게임 전체 타이머, 추후 애니메이션 전용 타이어도 추가 예정
 
@@ -70,7 +74,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_TIMER:
 		switch (wParam) {
-		case 0: //키보드 입력 전용 타이머. 이동과 점프를 동시에 할 수 있음.
+		case KEYDOWN: //키보드 입력 전용 타이머. 이동과 점프를 동시에 할 수 있음.
 		{
 			if (GetAsyncKeyState('A') & 0x8000)  //좌측 이동
 				CM_move_dir = 0;
@@ -89,7 +93,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		}
 		break;
 
-		case 1: //게임 전체 타이머
+		case UPDATE: //게임 전체 타이머
 		//점프
 		{
 			if (CM_jump == 1) { //위로 올라가는 중
