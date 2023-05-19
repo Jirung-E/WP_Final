@@ -4,7 +4,6 @@
 #include "player_move.h" //플레이어 관련 변수를 저장하는 헤더
 #include "images.h" //이미지 관련 변수를 저장하는 헤더. 배경, 일부 몬스터, 일부 무기를 제외한 나머지 이미지의 크기는 
                     //모두 100 x 100 px로 하도록 함. 이는 작업 시 좀 더 직관적으로 작업하기 위한 것임.
-
 #include "GameManager.h"
 
 HINSTANCE g_hInst;
@@ -151,7 +150,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			BackGround.Draw(mdc, 0, 0, rt.right, rt.bottom, 0, 0, BG_w, BG_h); //배경 출력 겸 더블 버퍼링
 
 			manager.syncSize(hWnd);
-			manager.show(mdc);			// 배경 격자 표시용
+			manager.show(mdc);
 			
 
 			//이미지 출력

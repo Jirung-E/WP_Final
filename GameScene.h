@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include "Map.h"
+#include "Player.h"
 
 #include <list>
 #include <ctime>
@@ -22,6 +23,8 @@ private:
     double play_time;
     clock_t start_time;
     clock_t end_time;
+
+    Player player;
 
 public:
     GameScene();

@@ -8,7 +8,8 @@
 GameScene::GameScene() : Scene { Game },
 map { 16, 9 },      // 좌표계.  전체화면비율인 16:9에 맞춥니다.
 resume_button { L"Resume", { 20, 30 }, 60, 15 }, quit_button { L"Quit", { 20, 60 }, 60, 15 },
-game_over_message { L"Game Over", { 10, 30 }, 80, 15 } {
+game_over_message { L"Game Over", { 10, 30 }, 80, 15 },
+player { { 8, 4.5 } } {
     setUp();
     resume_button.border_color = Gray;
     resume_button.border_width = 3;
@@ -19,6 +20,8 @@ game_over_message { L"Game Over", { 10, 30 }, 80, 15 } {
     game_over_message.text_color = Red;
     game_over_message.background_color = LightGray;
     game_over_message.bold = 4;
+
+    player.addSprite(new Sprite { L"./res/commando_right.png" });
 }
 
 
@@ -80,9 +83,7 @@ void GameScene::draw(const HDC& hdc) const {
     //for(auto e : enemies) {
     //    e->draw(hdc, map, view_area);
     //}
-    //if(!game_over) {
-    //    player.draw(hdc, map, view_area);
-    //}
+    player.draw(hdc, view_area, map);
 
     drawScore(hdc);
 
