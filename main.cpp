@@ -42,10 +42,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		//이미지 관련된 것들은 모두 images.h 파일에 선언되어있음
 		//리소스 이미지가 포함된 'res' 폴더가 비주얼 스튜디오 솔루션 파일(.sln)과 같은 위치에 있어야함.
 
-		SetTimer(hWnd, 0, 0, NULL); //KEYDOWN 전용 타이머, 이 타이머에 키보드 입력을 제외한 어떠한 다른것도 작성하지 말 것!
+		SetTimer(hWnd, KEYDOWN, 0, NULL); //KEYDOWN 전용 타이머, 이 타이머에 키보드 입력을 제외한 어떠한 다른것도 작성하지 말 것!
 		//키보드 입력이 안되어 다시 활성화 시킴
 
-		SetTimer(hWnd, 1, 5, NULL); //게임 전체 타이머, 추후 애니메이션 전용 타이머도 추가 예정
+		SetTimer(hWnd, UPDATE, 5, NULL); //게임 전체 타이머, 추후 애니메이션 전용 타이머도 추가 예정
 
 		CM_x = 700, CM_y = 600; //초기 플레이어 위치
 		CM_jump_acc = 28; //점프 시 가해지는 가속도, 줄거나 늘어남 (WM_TIMER case UPDATE 참고)
@@ -55,12 +55,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_KEYDOWN:
 		manager.keyboardInput(hWnd, wParam);
-		switch(wParam) {
-		case VK_ESCAPE: //종료
-			DestroyWindow(hWnd);
-			PostQuitMessage(0);
-			break;
-		}
 		break;
 
 	case WM_KEYUP:
@@ -102,23 +96,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	}
 
 	case WM_TIMER:
-		switch (wParam) {
+		switch(wParam) {
 		case KEYDOWN: //키보드 입력 전용 타이머. 이동과 점프를 동시에 할 수 있음.
 		{
-			if (GetAsyncKeyState('A') & 0x8000)  //좌측 이동
+			if(GetAsyncKeyState('A') & 0x8000)  //좌측 이동
 				CM_move_dir = 0;
-			
-			if (GetAsyncKeyState('D') & 0x8000)  //우측 이동
+
+			if(GetAsyncKeyState('D') & 0x8000)  //우측 이동
 				CM_move_dir = 1;
 
-			if (GetAsyncKeyState('R') & 0x8000) //재장전
-				if (r_down == 0) {
+			if(GetAsyncKeyState('R') & 0x8000) //재장전
+				if(r_down == 0) {
 					reload = 1;
 					r_down = 1; //1이면 입력되지 않음, 중복 입력 방지
 				}
-			
-			if (GetAsyncKeyState(VK_SPACE) & 0x8000 && space_down == 0) {
-				if (space_down == 0) { //VK_SPACE를 계속 누르고 있을 경우 발생할 수 있는 중복 입력 오류를 방지하기 위함
+
+			if(GetAsyncKeyState(VK_SPACE) & 0x8000 && space_down == 0) {
+				if(space_down == 0) { //VK_SPACE를 계속 누르고 있을 경우 발생할 수 있는 중복 입력 오류를 방지하기 위함
 					CM_jump = 1;
 					space_down = 1; //1이면 VK_SPACE는 입력되지 않음
 				}
@@ -128,85 +122,82 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		case UPDATE: //게임 전체 타이머
 			manager.update(hWnd);
-        
-		//점프, 좌우이동
-		{
-			if (CM_jump == 1) { //위로 올라가는 중
-				CM_y -= CM_jump_acc; CM_jump_acc--; //위로 올라갈수록 가속이 줄어듬
-				if (CM_jump_acc == -1) { //가속이 완전히 줄어들면
-					CM_jump_acc = 0; CM_jump = 2; //떨어지기 시작 
+			{
+				//점프, 좌우이동
+				if(CM_jump == 1) { //위로 올라가는 중
+					CM_y -= CM_jump_acc; CM_jump_acc--; //위로 올라갈수록 가속이 줄어듬
+					if(CM_jump_acc == -1) { //가속이 완전히 줄어들면
+						CM_jump_acc = 0; CM_jump = 2; //떨어지기 시작 
+					}
 				}
-			}
-			else if (CM_jump == 2) { //떨어지는 중
-				CM_y += CM_jump_acc; CM_jump_acc++; //떨어지면서 가속이 증가함
-				if (CM_jump_acc == 29) { //땅에 닿으면
-					CM_jump_acc = 28; CM_jump = 0; space_down = 0; //플레이어는 땅에 착지하고 VK_SPACE 입력을 받을 준비를 함
+				else if(CM_jump == 2) { //떨어지는 중
+					CM_y += CM_jump_acc; CM_jump_acc++; //떨어지면서 가속이 증가함
+					if(CM_jump_acc == 29) { //땅에 닿으면
+						CM_jump_acc = 28; CM_jump = 0; space_down = 0; //플레이어는 땅에 착지하고 VK_SPACE 입력을 받을 준비를 함
+					}
 				}
-			}
-	
-			if (CM_move_dir == 0) { //좌측 이동
-				CM_x -= 10;
-				if (CM_x <= rt.left) //벽에 닿으면
-					CM_x += 10; //이동 중지
-			}
-			else if (CM_move_dir == 1) { //우측 이동
-				CM_x += 10;
-				if (CM_x + 100 >= rt.right)
+
+				if(CM_move_dir == 0) { //좌측 이동
 					CM_x -= 10;
-			}
-		}
+					if(CM_x <= rt.left) //벽에 닿으면
+						CM_x += 10; //이동 중지
+				}
+				else if(CM_move_dir == 1) { //우측 이동
+					CM_x += 10;
+					if(CM_x + 100 >= rt.right)
+						CM_x -= 10;
+				}
 
-		//사격
-		switch (GUN_number) { 
-		case scar_h: //케이스 넘버에 define한 총 이름을 넣으면 됨
-			if (is_click == TRUE && reload == 0 && apx < 30) { //해당 총기의 장탄 수 만큼 인덱스 증가에 제한을 둠, 절대로 apx를 엉뚱한 곳에서 초기화 해서는 안됨.
-				shoot_delay++; //LBUTTON이 눌려있는 동안 딜레이 값이 계속 증가함
-				if (shoot_delay == 6) { //딜레이 값이 정해진 값에 도달하면
-					make_ammo(apx, CM_x, CM_y, mx, my, var); //플레이어의 위치에 총알 객체를 만든다. 이때 반동으로 인해 분산도가 발생한다. ammo.h에 선언
-					apx++; //총알의 위치, 각도, 움직임 여부를 저장하는 인덱스를 1 증가
-					var += 3; //반동으로 인해 조준점이 넓어진다.
-					shoot_delay = 0; //딜레이는 0이되어 다시 딜레이가 증가하기 시작
+				//사격
+				switch(GUN_number) {
+				case scar_h: //케이스 넘버에 define한 총 이름을 넣으면 됨
+					if(is_click == TRUE && reload == 0 && apx < 30) { //해당 총기의 장탄 수 만큼 인덱스 증가에 제한을 둠, 절대로 apx를 엉뚱한 곳에서 초기화 해서는 안됨.
+						shoot_delay++; //LBUTTON이 눌려있는 동안 딜레이 값이 계속 증가함
+						if(shoot_delay == 6) { //딜레이 값이 정해진 값에 도달하면
+							make_ammo(apx, CM_x, CM_y, mx, my, var); //플레이어의 위치에 총알 객체를 만든다. 이때 반동으로 인해 분산도가 발생한다. ammo.h에 선언
+							apx++; //총알의 위치, 각도, 움직임 여부를 저장하는 인덱스를 1 증가
+							var += 3; //반동으로 인해 조준점이 넓어진다.
+							shoot_delay = 0; //딜레이는 0이되어 다시 딜레이가 증가하기 시작
 
-					ind_ani = 1; //장탄수 인디케이터의 애니메이션 활성화
-					ind_size = 150;
-					ind_x = 1305;
-					ind_y = 615;
+							ind_ani = 1; //장탄수 인디케이터의 애니메이션 활성화
+							ind_size = 150;
+							ind_x = 1305;
+							ind_y = 615;
+						}
+					}
+					break;
+				}
+
+				//사격 중지 시 조준점이 다시 회복됨
+				if(is_click == FALSE || reload == 1) {
+					if(var >= 0)
+						var--;
+				}
+
+				for(int i = 0; i < apx; i++) //총알이 날아가는것을 그림
+					ammo_move(i, ap[i].is_shoot, rt); //ammo.h에 선언
+
+				//장탄수, 재장전 인디케이터
+				if(ind_ani == 1) { //장탄수 인디케이터 애니메이션
+					ind_size -= 10;
+					ind_x += 5;
+					ind_y += 5;
+
+					if(ind_size == 100)
+						ind_ani = 0;
+				}
+
+				if(reload == 1) { //재장전 인디케이터
+					reload_x += 2; //재장전 인디케이터의 게이지가 채워진다
+					if(reload_x + CM_x == CM_x + 100) { //모두 채워지면
+						apx = 0; //총알 인덱스는 0으로 초기화
+						reload = 0; //재장전 완료
+						r_down = 0;
+						reload_x = 0;
+					}
 				}
 			}
 			break;
-		}
-
-		//사격 중지 시 조준점이 다시 회복됨
-		if (is_click == FALSE || reload == 1) {
-			if(var >= 0)
-				var--;
-		}
-		
-		for (int i = 0; i < apx; i++) //총알이 날아가는것을 그림
-			ammo_move(i, ap[i].is_shoot, rt); //ammo.h에 선언
-
-		//장탄수, 재장전 인디케이터
-		{
-			if (ind_ani == 1) { //장탄수 인디케이터 애니메이션
-				ind_size -= 10;
-				ind_x += 5;
-				ind_y += 5;
-
-				if (ind_size == 100)
-					ind_ani = 0;
-			}
-
-			if (reload == 1) { //재장전 인디케이터
-				reload_x += 2; //재장전 인디케이터의 게이지가 채워진다
-				if (reload_x + CM_x == CM_x + 100) { //모두 채워지면
-					apx = 0; //총알 인덱스는 0으로 초기화
-					reload = 0; //재장전 완료
-					r_down = 0;
-					reload_x = 0;
-				}
-			}
-		}
-
 		}
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;

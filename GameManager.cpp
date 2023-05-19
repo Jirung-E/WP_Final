@@ -36,15 +36,9 @@ void GameManager::keyboardInput(const HWND& hWnd, int keycode) {
 		break;
 	case Game:
 		switch(keycode) {
-		case VK_ESCAPE: case L'q': case L'Q':
-			quit(hWnd);
-			break;
-		case L's': case L'S':
+		case VK_ESCAPE:
 			game_scene.togglePauseState();
 			releaseCursor();
-			break;
-		case L'r': case L'R':
-			gameStart(hWnd);
 			break;
 		case L'a': case L'A':
 			game_scene.moveLeft();
