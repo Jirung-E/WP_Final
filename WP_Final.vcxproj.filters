@@ -104,17 +104,11 @@
     <ClInclude Include="Util.h">
       <Filter>Util</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
     <ClInclude Include="TextBox.h">
       <Filter>Scene\TextBox</Filter>
     </ClInclude>
     <ClInclude Include="Vector.h">
       <Filter>Math\Vector</Filter>
-    </ClInclude>
-    <ClInclude Include="Point.h">
-      <Filter>Math\Point</Filter>
     </ClInclude>
     <ClInclude Include="Button.h">
       <Filter>Scene\Button</Filter>
@@ -134,9 +128,6 @@
     <ClInclude Include="Object.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="player.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="target.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -148,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="player_info.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
