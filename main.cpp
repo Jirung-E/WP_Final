@@ -6,6 +6,8 @@
 #include "images.h" //이미지 관련 변수를 저장하는 헤더. 배경, 일부 몬스터, 일부 무기를 제외한 나머지 이미지의 크기는 
                     //모두 100 x 100 px로 하도록 함. 이는 작업 시 좀 더 직관적으로 작업하기 위한 것임.
 
+#include "Map.h"
+
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"NON STOP";
@@ -14,6 +16,8 @@ HDC hdc, mdc; PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt; //모든 메시지에서 공용으
 
 static int mx, my; //마우스 좌표
 static BOOL is_click = FALSE; //마우스 클릭 여부
+
+Map map { 16, 9 };		// 좌표계.  전체화면비율인 16:9에 맞춥니다.
 
 enum Timer {
 	KEYDOWN, UPDATE
@@ -143,6 +147,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			BG_h = BackGround.GetHeight(); //배경 이미지 사이즈 알아낸 후 저장
 			BackGround.Draw(mdc, 0, 0, rt.right, rt.bottom, 0, 0, BG_w, BG_h); //배경 출력 겸 더블 버퍼링
 
+			map.draw(mdc, rt);			// 배경 격자 표시용
+			
+
 			//이미지 출력
 			{
 				if (CM_img_dir == 0) { //플레이어, 무기 좌측 이미지 출력
@@ -170,10 +177,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 
 			////////////////////////
-			POINT start_point { 100, 100 };
-			Vector2D v { 100, 100 };
-			MoveToEx(mdc, start_point.x, start_point.y, NULL);
-			LineTo(mdc, start_point.x + v.x, start_point.y + v.y);
+
 			////////////////////////
 
 			BitBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, SRCCOPY);
