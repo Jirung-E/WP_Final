@@ -22,7 +22,7 @@ void make_ammo(int apx, double CM_x, double CM_y, double mx, double my, double v
 	std::uniform_int_distribution<int> y(my - (10 + var), my + (10 + var));
 	ap[apx].angle = atan2(y(gen) - (CM_y + 60), x(gen) - (CM_x + 50)); //atan2 함수로 총알이 그려지는 각도를 계산한다.
 	//아래 4개의 값들은 선의 좌표
-	ap[apx].x = CM_x + 50; 
+	ap[apx].x = CM_x + 50;
 	ap[apx].y = CM_y + 60;
 	ap[apx].x2 = ap[apx].x + (50 * cos(ap[apx].angle));
 	ap[apx].y2 = ap[apx].y + (50 * sin(ap[apx].angle)); //ap[apx].x2, ap[apx].y2가 몬스터와 충돌하는 조건에 쓰일 예정
@@ -40,18 +40,18 @@ void draw_ammo(HDC mdc, double x, double y, double x2, double y2) {
 	DeleteObject(hpen);
 }
 
-void ammo_move(int apx, int is_shoot, RECT rt) { //총알 애니메이션
+void ammo_move(int apx, int is_shoot, RECT rt, int BG_scanner) { //총알 애니메이션
 	if (ap[apx].is_shoot == 1) {
 		ap[apx].x += 100 * cos(ap[apx].angle); //make_ammo에서 구한 각도로 날아간다
 		ap[apx].y += 100 * sin(ap[apx].angle);
 		ap[apx].x2 += 100 * cos(ap[apx].angle);
 		ap[apx].y2 += 100 * sin(ap[apx].angle);
 
-		if (ap[apx].x >= rt.right || ap[apx].x <= rt.left) { //총알 뒤쪽의 x좌표가 화면 왼쪽이나 오른쪽을 넘어가면
-			ap[apx].x = NULL; //총알 객체는 삭제되고 더 이상 날아가지 않는다
-			ap[apx].y = NULL;
-			ap[apx].x2 = NULL;
-			ap[apx].y2 = NULL;
+		if (ap[apx].x >= rt.right + (2990 - BG_scanner) || ap[apx].x <= rt.left - BG_scanner) { //총알 뒤쪽의 x좌표가 맵 왼쪽이나 오른쪽을 넘어가면
+			ap[apx].x = -10; //총알 객체는 윈도우 밖으로 이동되고 더 이상 날아가지 않는다
+			ap[apx].y = -10;
+			ap[apx].x2 = -10;
+			ap[apx].y2 = -10;
 			ap[apx].angle = NULL;
 			ap[apx].is_shoot = 0;
 		}
@@ -65,6 +65,7 @@ void ammo_indicator(HDC mdc, int apx, int GUN_number, int ind_size, int ind_x, i
 	hfont = CreateFont(ind_size, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("맑은 고딕"));
 	oldfont = (HFONT)SelectObject(mdc, hfont);
 	SetBkMode(mdc, TRANSPARENT);
+	SetTextColor(mdc, RGB(255, 212, 0));
 
 	switch (GUN_number) { //최대 장탄수에서 총알 인덱스를 뺀 값이 현재 장탄수
 	case scar_h:
@@ -95,7 +96,7 @@ void ammo_indicator(HDC mdc, int apx, int GUN_number, int ind_size, int ind_x, i
 
 	SelectObject(mdc, oldfont);
 	DeleteObject(hfont);
-	
+
 }
 
 void reload_indicator(HDC mdc, int x, int y, int x2, int y2, int x3, int y3, int x4, int y4) { //재장전 표시기
