@@ -8,6 +8,7 @@
                     //모두 100 x 100 px로 하도록 함. 이는 작업 시 좀 더 직관적으로 작업하기 위한 것임.
 #include "GameManager.h"
 
+
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"NON STOP";
@@ -25,6 +26,152 @@ enum Timer {
 #define mp_44 3
 #define mg_42 4
 #define p90 5
+
+
+void show_player(HDC mdc) {
+	//이미지 출력
+	switch(CM_img_dir) {
+	case 0:
+		CM_w = commando_left.GetWidth();
+		CM_h = commando_left.GetHeight();
+		commando_left.Draw(mdc, CM_x, CM_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+
+		switch(GUN_number) {
+		case scar_h:
+			GUN_w = m1_left.GetWidth();
+			GUN_h = m1_left.GetWidth();
+			m1_left.Draw(mdc, CM_x - 20, CM_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			break;
+		}
+
+		break;
+
+		//////////////////////
+
+	case 1:
+		CM_w = commando_right.GetWidth();
+		CM_h = commando_right.GetHeight();
+		commando_right.Draw(mdc, CM_x, CM_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+
+		switch(GUN_number) {
+		case scar_h:
+			GUN_w = m1_right.GetWidth();
+			GUN_h = m1_right.GetWidth();
+			m1_right.Draw(mdc, CM_x + 20, CM_y, 100, 100, 0, 0, GUN_w, GUN_h);
+			break;
+		}
+
+		break;
+	}
+}
+
+void show_shoot_animation(HDC mdc, int mouse_x, int mouse_y) {
+	//총알 출력
+	for(int i = 0; i < apx; i++)
+		draw_ammo(mdc, ap[i].x, ap[i].y, ap[i].x2, ap[i].y2); //ammo.h에 선언
+
+	//타겟 출력
+	draw_target(mdc, mouse_x, mouse_y, var); //target.h에 선언
+
+	//장탄 수 출력
+	switch(GUN_number) { //ammo.h에 선언
+	case scar_h:
+		ammo_indicator(mdc, apx, scar_h, ind_size, ind_x, ind_y); //ammo.h에 선언
+		break;
+	}
+
+	//재장전 게이지 출력
+	if(reload == 1)
+		reload_indicator(mdc, CM_x, CM_y - 30, CM_x + reload_x, CM_y - 10, CM_x, CM_y - 30, CM_x + 100, CM_y - 10);
+
+}
+
+void set_player_direction(int mouse_x) {
+	if(mouse_x < CM_x + 50) //마우스 좌표가 플레이어보다 왼쪽에 있으면 왼쪽을 바라보고, 오른쪽에 있으면 오른쪽을 바라봄
+		CM_img_dir = 0;
+	if(mouse_x > CM_x + 50)
+		CM_img_dir = 1;
+}
+
+void player_update(RECT movable_area) {
+	//점프, 좌우이동
+	if(CM_jump == 1) { //위로 올라가는 중
+		CM_y -= CM_jump_acc; CM_jump_acc--; //위로 올라갈수록 가속이 줄어듬
+		if(CM_jump_acc == -1) { //가속이 완전히 줄어들면
+			CM_jump_acc = 0; CM_jump = 2; //떨어지기 시작 
+		}
+	}
+	else if(CM_jump == 2) { //떨어지는 중
+		CM_y += CM_jump_acc; CM_jump_acc++; //떨어지면서 가속이 증가함
+		if(CM_jump_acc == 29) { //땅에 닿으면
+			CM_jump_acc = 28; CM_jump = 0; space_down = 0; //플레이어는 땅에 착지하고 VK_SPACE 입력을 받을 준비를 함
+		}
+	}
+
+	if(CM_move_dir == 0) { //좌측 이동
+		CM_x -= 10;
+		if(CM_x <= movable_area.left) //벽에 닿으면
+			CM_x += 10; //이동 중지
+	}
+	else if(CM_move_dir == 1) { //우측 이동
+		CM_x += 10;
+		if(CM_x + 100 >= movable_area.right)
+			CM_x -= 10;
+	}
+}
+
+void update_shoot_animation(RECT movable_area, int mouse_x, int mouse_y) {
+	//사격
+	switch(GUN_number) {
+	case scar_h: //케이스 넘버에 define한 총 이름을 넣으면 됨
+		if(triggered && reload == 0 && apx < 30) { //해당 총기의 장탄 수 만큼 인덱스 증가에 제한을 둠, 절대로 apx를 엉뚱한 곳에서 초기화 해서는 안됨.
+			shoot_delay++; //LBUTTON이 눌려있는 동안 딜레이 값이 계속 증가함
+			if(shoot_delay == 6) { //딜레이 값이 정해진 값에 도달하면
+				make_ammo(apx, CM_x, CM_y, mouse_x, mouse_y, var); //플레이어의 위치에 총알 객체를 만든다. 이때 반동으로 인해 분산도가 발생한다. ammo.h에 선언
+				apx++; //총알의 위치, 각도, 움직임 여부를 저장하는 인덱스를 1 증가
+				var += 3; //반동으로 인해 조준점이 넓어진다.
+				shoot_delay = 0; //딜레이는 0이되어 다시 딜레이가 증가하기 시작
+
+				ind_ani = 1; //장탄수 인디케이터의 애니메이션 활성화
+				ind_size = 150;
+				ind_x = 1305;
+				ind_y = 615;
+			}
+		}
+		break;
+	}
+
+	//사격 중지 시 조준점이 다시 회복됨
+	if(!triggered || reload == 1) {
+		if(var >= 0)
+			var--;
+	}
+
+	for(int i = 0; i < apx; i++) //총알이 날아가는것을 그림
+		ammo_move(i, ap[i].is_shoot, movable_area); //ammo.h에 선언
+
+	//장탄수, 재장전 인디케이터
+	if(ind_ani == 1) { //장탄수 인디케이터 애니메이션
+		ind_size -= 10;
+		ind_x += 5;
+		ind_y += 5;
+
+		if(ind_size == 100)
+			ind_ani = 0;
+	}
+
+	if(reload == 1) { //재장전 인디케이터
+		reload_x += 2; //재장전 인디케이터의 게이지가 채워진다
+		if(reload_x + CM_x == CM_x + 100) { //모두 채워지면
+			apx = 0; //총알 인덱스는 0으로 초기화
+			reload = 0; //재장전 완료
+			r_down = 0;
+			reload_x = 0;
+		}
+	}
+}
+
+
 
 HDC hdc, mdc; PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt; //모든 메시지에서 공용으로 사용하기 위해 잔역 선언으로 변경
 static double mx, my; //마우스 좌표
@@ -63,6 +210,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_LBUTTONDOWN:
 		is_click = TRUE;
+		triggered = true;
 
 		switch (GUN_number) { //총마다 연사속도가 다르므로 딜레이 수치를 다르게 줘야함. 연사력이 높을수록 딜레이 수치는 낮음
 		case scar_h:
@@ -76,6 +224,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_LBUTTONUP:
 		is_click = FALSE;
+		triggered = false;
 		shoot_delay = 0; //버튼을 떼면 딜레이 수치가 0으로 초기화 된다.
 		break;
 
@@ -87,11 +236,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_MOUSEMOVE:
 	{
 		mx = LOWORD(lParam); my = HIWORD(lParam);
-		if (mx < CM_x + 50) //마우스 좌표가 플레이어보다 왼쪽에 있으면 왼쪽을 바라보고, 오른쪽에 있으면 오른쪽을 바라봄
-			CM_img_dir = 0;
-		if (mx > CM_x + 50)
-			CM_img_dir = 1;
-
+		set_player_direction(mx);
 		break;
 	}
 
@@ -122,81 +267,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 		case UPDATE: //게임 전체 타이머
 			manager.update(hWnd);
-			{
-				//점프, 좌우이동
-				if(CM_jump == 1) { //위로 올라가는 중
-					CM_y -= CM_jump_acc; CM_jump_acc--; //위로 올라갈수록 가속이 줄어듬
-					if(CM_jump_acc == -1) { //가속이 완전히 줄어들면
-						CM_jump_acc = 0; CM_jump = 2; //떨어지기 시작 
-					}
-				}
-				else if(CM_jump == 2) { //떨어지는 중
-					CM_y += CM_jump_acc; CM_jump_acc++; //떨어지면서 가속이 증가함
-					if(CM_jump_acc == 29) { //땅에 닿으면
-						CM_jump_acc = 28; CM_jump = 0; space_down = 0; //플레이어는 땅에 착지하고 VK_SPACE 입력을 받을 준비를 함
-					}
-				}
-
-				if(CM_move_dir == 0) { //좌측 이동
-					CM_x -= 10;
-					if(CM_x <= rt.left) //벽에 닿으면
-						CM_x += 10; //이동 중지
-				}
-				else if(CM_move_dir == 1) { //우측 이동
-					CM_x += 10;
-					if(CM_x + 100 >= rt.right)
-						CM_x -= 10;
-				}
-
-				//사격
-				switch(GUN_number) {
-				case scar_h: //케이스 넘버에 define한 총 이름을 넣으면 됨
-					if(is_click == TRUE && reload == 0 && apx < 30) { //해당 총기의 장탄 수 만큼 인덱스 증가에 제한을 둠, 절대로 apx를 엉뚱한 곳에서 초기화 해서는 안됨.
-						shoot_delay++; //LBUTTON이 눌려있는 동안 딜레이 값이 계속 증가함
-						if(shoot_delay == 6) { //딜레이 값이 정해진 값에 도달하면
-							make_ammo(apx, CM_x, CM_y, mx, my, var); //플레이어의 위치에 총알 객체를 만든다. 이때 반동으로 인해 분산도가 발생한다. ammo.h에 선언
-							apx++; //총알의 위치, 각도, 움직임 여부를 저장하는 인덱스를 1 증가
-							var += 3; //반동으로 인해 조준점이 넓어진다.
-							shoot_delay = 0; //딜레이는 0이되어 다시 딜레이가 증가하기 시작
-
-							ind_ani = 1; //장탄수 인디케이터의 애니메이션 활성화
-							ind_size = 150;
-							ind_x = 1305;
-							ind_y = 615;
-						}
-					}
-					break;
-				}
-
-				//사격 중지 시 조준점이 다시 회복됨
-				if(is_click == FALSE || reload == 1) {
-					if(var >= 0)
-						var--;
-				}
-
-				for(int i = 0; i < apx; i++) //총알이 날아가는것을 그림
-					ammo_move(i, ap[i].is_shoot, rt); //ammo.h에 선언
-
-				//장탄수, 재장전 인디케이터
-				if(ind_ani == 1) { //장탄수 인디케이터 애니메이션
-					ind_size -= 10;
-					ind_x += 5;
-					ind_y += 5;
-
-					if(ind_size == 100)
-						ind_ani = 0;
-				}
-
-				if(reload == 1) { //재장전 인디케이터
-					reload_x += 2; //재장전 인디케이터의 게이지가 채워진다
-					if(reload_x + CM_x == CM_x + 100) { //모두 채워지면
-						apx = 0; //총알 인덱스는 0으로 초기화
-						reload = 0; //재장전 완료
-						r_down = 0;
-						reload_x = 0;
-					}
-				}
-			}
+			player_update(rt);
+			update_shoot_animation(rt, mx, my);
 			break;
 		}
 		InvalidateRect(hWnd, NULL, FALSE);
@@ -218,59 +290,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			manager.syncSize(hWnd);
 			manager.show(mdc);
 			
+			show_player(mdc);
 
-			//이미지 출력
-			switch (CM_img_dir) {
-			case 0:
-				CM_w = commando_left.GetWidth();
-				CM_h = commando_left.GetHeight();
-				commando_left.Draw(mdc, CM_x, CM_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
-
-				switch (GUN_number) {
-				case scar_h:
-					GUN_w = m1_left.GetWidth();
-					GUN_h = m1_left.GetWidth();
-					m1_left.Draw(mdc, CM_x - 20, CM_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
-					break;
-				}
-
-				break;
-
-			//////////////////////
-
-			case 1:
-				CM_w = commando_right.GetWidth();
-				CM_h = commando_right.GetHeight();
-				commando_right.Draw(mdc, CM_x, CM_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
-
-				switch (GUN_number) {
-				case scar_h:
-					GUN_w = m1_right.GetWidth();
-					GUN_h = m1_right.GetWidth();
-					m1_right.Draw(mdc, CM_x + 20, CM_y, 100, 100, 0, 0, GUN_w, GUN_h);
-					break;
-				}
-
-				break;
-			}
-				
-			//총알 출력
-			for (int i = 0; i < apx; i++)
-				draw_ammo(mdc, ap[i].x, ap[i].y, ap[i].x2, ap[i].y2); //ammo.h에 선언
-
-			//타겟 출력
-			draw_target(mdc, mx, my, var); //target.h에 선언
-			
-			//장탄 수 출력
-			switch (GUN_number) { //ammo.h에 선언
-			case scar_h: 
-				ammo_indicator(mdc, apx, scar_h, ind_size, ind_x, ind_y); //ammo.h에 선언
-				break;
-			}
-
-			//재장전 게이지 출력
-			if(reload == 1)
-				reload_indicator(mdc, CM_x, CM_y - 30, CM_x + reload_x, CM_y - 10, CM_x, CM_y - 30, CM_x + 100, CM_y - 10);
+			show_shoot_animation(mdc, mx, my);
 
 			////////////////////////
 			////////////////////////

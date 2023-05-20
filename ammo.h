@@ -20,6 +20,8 @@ static int ind_ani; //총알이 소모 될 때마다 애니메이션 재생, 0: 재생 안함, 1: 재
 
 static int reload_x; //재장전 표시기 x2좌표
 
+static bool triggered;	// 방아쇠를 당겼는지 여부
+
 void make_ammo(int apx, double CM_x, double CM_y, double my, double mx, double var); //총알 객체를 만드는 함수
 void draw_ammo(HDC mdc, double x, double y, double x2, double y2); //총알을 그리는 함수
 void ammo_move(int apx, int is_shoot, RECT rt);
