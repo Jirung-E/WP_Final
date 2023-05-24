@@ -45,3 +45,21 @@ ESC: 종료
 -메인 함수의 전역 변수의 위치를 맨 위로 통일
 -update_shoot_animation 사격 파트와 애니메이션 파트 분리
 -테스트용 총 이미지를 SCAR_H 이미지로 교체 <- 기본 총이 될 예정
+
+
+//2023.05.25 업데이트
+-사격 시 흔들림 효과가 부드럽고 자연스러워짐, shake_acc 변수 추가, update_shoot_animation 함수의 주석 참조
+-SCAR_H 반동 상향, 장탄수 하향
+-조준점이 복구되는 속도 상향
+-플레이어 점프 이미지 commando_jump_right.png, commando_jump_left.png 추가, 이제 점프 시 몸을 기울임
+-몬스터 테스트 이미지 추가
+-몬스터 정보를 저장하는 구조체 추가, monster_info.h에 선언
+-monster_info.h 추가, 아직 미사용, 곧 몬스터 스폰 구현 예정
+-총기 번호를 define에서 열거형으로 변경, images.h에 gun_name_images로 선언 (예외적으로 ammo.cpp에는 gun_name_ammo로 별도 열거형 선언)
+-main.cpp의 전역변수들을 콜백함수로 이전
+-WM_CREATE의 일부 정의들을 헤더파일로 이전
+-주석 가독성 개선
+-target.h, target.cpp 제거, 기존의 기능은 main.cpp의 show_target 함수가 대체함
+-main.cpp 있는 함수 및 인자들의 이름을 통일성 있게 변경
+-main.cpp의 일부 함수 위치 변경
+-이제 이미지 파일 로드는 void IMG_FILE_LOAD() 함수에서 실행

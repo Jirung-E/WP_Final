@@ -144,7 +144,6 @@
     <ClCompile Include="Point.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sprite.cpp" />
-    <ClCompile Include="target.cpp" />
     <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Vector.cpp" />
@@ -157,11 +156,11 @@
     <ClInclude Include="images.h" />
     <ClInclude Include="MainScene.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="monster_info.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="player_info.h" />
     <ClInclude Include="Sprite.h" />
-    <ClInclude Include="target.h" />
     <ClInclude Include="TextBox.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Vector.h" />
