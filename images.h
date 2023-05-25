@@ -6,7 +6,6 @@ static CImage monster_right, monster_left, monster_big_right, monster_big_left;
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지
-//backGround: 버퍼용 이미지로, 배경의 역할을 겸함. 아직은 테스트용 흰 배경으로, 추후 다른 이미지로 교체 예정
 
 //배경 이미지 관련 (background)
 static int BG_w, BG_h; //배경이미지의 가로, 세로 사이즈

@@ -90,6 +90,6 @@ void reload_indicator(HDC mdc, int x, int y, int x2, int y2, int x3, int y3, int
 
 	SelectObject(mdc, oldbrush);
 	DeleteObject(hbrush);
-	SelectObject(mdc, hpen);
-	DeleteObject(oldpen);
+	SelectObject(mdc, oldpen);
+	DeleteObject(hpen);
 }
