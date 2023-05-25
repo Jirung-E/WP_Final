@@ -90,6 +90,9 @@
     <ClCompile Include="ammo.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="monster_info.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="images.h">
