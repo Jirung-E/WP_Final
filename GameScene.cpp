@@ -7,16 +7,16 @@
 
 GameScene::GameScene() : Scene { Game },
 map { 16, 9 },      // 좌표계.  전체화면비율인 16:9에 맞춥니다.
-resume_button { L"Resume", { 20, 30 }, 60, 15 }, quit_button { L"Quit", { 20, 60 }, 60, 15 },
+resume_button { Resume, L"Resume", { 20, 30 }, 60, 15 }, quit_button { Quit, L"Quit", { 20, 60 }, 60, 15 },
 game_over_message { L"Game Over", { 10, 30 }, 80, 15 },
 player { { 8, 4.5 } } {
     setUp();
     resume_button.border_color = Gray;
     resume_button.border_width = 3;
-    resume_button.id = ResumeGame;
+
     quit_button.border_color = Gray;
     quit_button.border_width = 3;
-    quit_button.id = QuitGame;
+
     game_over_message.text_color = Red;
     game_over_message.background_color = LightGray;
     game_over_message.bold = 4;
@@ -92,12 +92,12 @@ void GameScene::draw(const HDC& hdc) const {
 
     RECT view_area = getViewArea();
 
-    map.draw(hdc, view_area);
+    //map.draw(hdc, view_area);
 
     //for(auto e : enemies) {
     //    e->draw(hdc, map, view_area);
     //}
-    player.draw(hdc, view_area, map);
+    //player.draw(hdc, view_area, map);
 
     drawScore(hdc);
 
@@ -175,22 +175,22 @@ void GameScene::drawGameOverScene(const HDC& hdc) const {
 }
 
 
-ButtonID GameScene::clickL(const POINT& point) {
+int GameScene::clickL(const POINT& point) {
     if(paused) {
         RECT r = resume_button.absoluteArea(valid_area);
         if(PtInRect(&r, point)) {
-            return resume_button.id;
+            return resume_button.getID();
         }
         r = quit_button.absoluteArea(valid_area);
         if(PtInRect(&r, point)) {
-            return quit_button.id;
+            return quit_button.getID();
         }
         return None;
     }
     if(game_over) {
         RECT r = quit_button.absoluteArea(valid_area);
         if(PtInRect(&r, point)) {
-            return quit_button.id;
+            return quit_button.getID();
         }
         return None;
     }
@@ -198,7 +198,7 @@ ButtonID GameScene::clickL(const POINT& point) {
     return None;
 }
 
-ButtonID GameScene::clickR(const POINT& point) {
+int GameScene::clickR(const POINT& point) {
     if(paused) {
         return None;
     }

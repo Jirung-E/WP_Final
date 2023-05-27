@@ -10,6 +10,9 @@
 
 class GameScene : public Scene {
 public:
+    enum ButtonID {
+        None, Resume, Quit
+    };
 
 private:
     Map map;
@@ -32,7 +35,7 @@ public:
 public:
     void setUp();
     void update(const POINT& point);
-    void updatePlayer(const POINT& point);      // 마우스 위치에 따라 총구가 향하는 방향이 바뀌어야 하므로 마우스 위치를 인자로 넘김
+    void updatePlayer(const POINT& point);
 
     void moveLeft();
     void moveRight();
@@ -56,6 +59,6 @@ protected:
     void drawGameOverScene(const HDC& hdc) const;
 
 public:
-    ButtonID clickL(const POINT& point);
-    ButtonID clickR(const POINT& point);
+    int clickL(const POINT& point);
+    int clickR(const POINT& point);
 };

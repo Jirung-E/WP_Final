@@ -3,10 +3,22 @@
 #include "Util.h"
 
 
-MainScene::MainScene() : Scene { Main }, start_button { L"Start", { 25, 40 }, 50, 20 } {
-    start_button.border_color = Red;
-    start_button.border_width = 3;
-    start_button.id = StartButton;
+MainScene::MainScene() : Scene { Main }, 
+start_button { Start, L"Start", { 25, 40 }, 50, 20 }, 
+quit_button { Quit, L"Quit", { 35, 70 }, 30, 15 },
+armory_button { Armory, L"Armory", { 10, 40 }, 30, 15 },
+shop_button { Shop, L"Shop", { 65, 70 }, 30, 15 } {
+    start_button.border_color = Gray;
+    start_button.border_width = 10;
+
+    quit_button.border_color = Gray;
+    quit_button.border_width = 10;
+
+    armory_button.border_color = Gray;
+    armory_button.border_width = 10;
+
+    shop_button.border_color = Gray;
+    shop_button.border_width = 10;
 }
 
 
@@ -20,18 +32,31 @@ void MainScene::draw(const HDC& hdc) const {
 
 
     // Draw Quit Button
+    quit_button.show(hdc, valid_area);
     
 }
 
 
-ButtonID MainScene::clickL(const POINT& point) const {
+int MainScene::clickL(const POINT& point) const {
     RECT r = start_button.absoluteArea(valid_area);
     if(PtInRect(&r, point)) {
-        return start_button.id;
+        return start_button.getID();
+    }
+    r = quit_button.absoluteArea(valid_area);
+    if(PtInRect(&r, point)) {
+        return quit_button.getID();
+    }
+    r = armory_button.absoluteArea(valid_area);
+    if(PtInRect(&r, point)) {
+        return armory_button.getID();
+    }
+    r = shop_button.absoluteArea(valid_area);
+    if(PtInRect(&r, point)) {
+        return shop_button.getID();
     }
     return None;
 }
 
-ButtonID MainScene::clickR(const POINT& point) const {
+int MainScene::clickR(const POINT& point) const {
     return ButtonID();
 }

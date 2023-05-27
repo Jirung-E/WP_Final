@@ -18,7 +18,6 @@ public:
 	double size_per;		// 0이면 안보임, 100일때 기본사이즈
 
 public:
-	//Sprite(const CImage& source);
 	Sprite(const tstring& file_name);
 
 public:

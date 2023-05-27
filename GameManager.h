@@ -42,7 +42,7 @@ private:
     void fixCursor(const HWND& hWnd);
     void releaseCursor();
 
-    ButtonID buttonClicked(const POINT& point);
+    int buttonClicked(const POINT& point);
 
     void syncMousePosition(const HWND& hWnd);
 };

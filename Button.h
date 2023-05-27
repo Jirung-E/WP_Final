@@ -3,15 +3,13 @@
 #include "TextBox.h"
 
 
-enum ButtonID {
-    None, StartButton, ResumeGame, QuitGame, 
-};
-
-
 class Button : public TextBox {
-public:
-    ButtonID id;
+private:
+    int id;
 
 public:
-    Button(const tstring& text = L"", const Point& position = { 0, 0 }, double width = 1, double height = 1);
+    Button(int id, const tstring& text = L"", const Point& position = { 0, 0 }, double width = 1, double height = 1);
+
+public:
+    int getID() const;
 };

@@ -21,7 +21,7 @@ void Map::draw(const HDC& hdc, const RECT& valid_area) const {
 	int w = rect.right - rect.left;
 	int h = rect.bottom - rect.top;
 
-	Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom);
+	//Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom);
 
 	for(int i = 0; i <= height; ++i) {
 		MoveToEx(hdc, rect.left, rect.top + i * h / height, NULL);

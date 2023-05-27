@@ -621,8 +621,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			BackGround.Draw(mdc, rt.left + ss_x, rt.top - 30 + landing_shake + ss_y, rt.right, rt.bottom + 30, BG_scanner, 0, BG_w, BG_h);
 			//BG_scanner가 클수록 배경은 오른쪽으로 이동하게 됨
 
-			//manager.syncSize(hWnd); //스크롤 배경 출력을 위해 임시로 비활성화
-			//manager.show(mdc);
+			manager.syncSize(hWnd); //스크롤 배경 출력을 위해 임시로 비활성화
+			manager.show(mdc);
 
 			//총알 궤적 그리기
 			if(is_draw == TRUE)
