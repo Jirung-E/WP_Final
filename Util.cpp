@@ -1,6 +1,54 @@
 #include "Util.h"
 
 
+COLORREF mixColor(const COLORREF& color1, const COLORREF& color2) {
+	int r1 = color1 & Red;
+	int g1 = (color1 & Green) / 0x000100;
+	int b1 = (color1 & Blue) / 0x010000;
+	int r2 = color2 & Red;
+	int g2 = (color2 & Green) / 0x000100;
+	int b2 = (color2 & Blue) / 0x010000;
+
+	int max = 0;
+	int red = r1 + r2;
+	if(red > max) {
+		max = red;
+	}
+	int green = g1 + g2;
+	if(green > max) {
+		max = green;
+	}
+	int blue = b1 + b2;
+	if(blue > max) {
+		max = blue;
+	}
+
+	int sub = 0;
+	if(max > 255) {
+		sub = max - 255;
+	}
+
+	red = red - sub;
+	if(red < 0) {
+		red = 0;
+	}
+	green = green - sub;
+	if(green < 0) {
+		green = 0;
+	}
+	blue = blue - sub;
+	if(blue < 0) {
+		blue = 0;
+	}
+
+	return RGB(red, green, blue);
+}
+
+COLORREF mixLight(const COLORREF& color1, const COLORREF& color2) {
+	return color1 | color2;
+}
+
+
 COLORREF getRandomColor() {
 	std::uniform_int_distribution<> random_color { 0 + 0x11, 0xFF - 0x11 };
 	return RGB(random_color(rd), random_color(rd), random_color(rd));

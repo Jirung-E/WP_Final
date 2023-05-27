@@ -2,6 +2,8 @@
 
 #include "Scene.h"
 
+#include "Sprite.h"
+
 
 class MainScene : public Scene {
 public:
@@ -14,6 +16,7 @@ private:
     Button quit_button;
     Button armory_button;
     Button shop_button;
+    Sprite background_image;
 
 public:
     MainScene();

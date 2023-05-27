@@ -21,5 +21,5 @@ public:
 	Sprite(const tstring& file_name);
 
 public:
-	void draw(const HDC& hdc, const RECT& draw_area);
+	void draw(const HDC& hdc, const RECT& draw_area) const;
 };

@@ -14,6 +14,9 @@ enum Color {
 	Yellow = 0x00ffff, Cyan = 0xffff00, Magenta = 0xff00ff, 
 };
 
+COLORREF mixColor(const COLORREF& color1, const COLORREF& color2);
+COLORREF mixLight(const COLORREF& color1, const COLORREF& color2);
+
 
 class Range {
 public:

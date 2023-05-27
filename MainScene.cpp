@@ -6,34 +6,35 @@
 MainScene::MainScene() : Scene { Main }, 
 start_button { Start, L"Start", { 25, 40 }, 50, 20 }, 
 quit_button { Quit, L"Quit", { 35, 70 }, 30, 15 },
-armory_button { Armory, L"Armory", { 10, 40 }, 30, 15 },
-shop_button { Shop, L"Shop", { 65, 70 }, 30, 15 } {
-    start_button.border_color = Gray;
+armory_button { Armory, L"Armory", { -30, 40 }, 50, 20 },
+shop_button { Shop, L"Shop", { 80, 40 }, 50, 20 },
+background_image { L"./res/Armory_background(temp).jpg" } {
+    start_button.border_color = DarkGray;
     start_button.border_width = 10;
+    start_button.background_color = Gray;
 
-    quit_button.border_color = Gray;
+    quit_button.border_color = DarkGray;
     quit_button.border_width = 10;
+    quit_button.background_color = Gray;
 
-    armory_button.border_color = Gray;
+    armory_button.border_color = DarkGray;
     armory_button.border_width = 10;
+    armory_button.background_color = Gray;
 
-    shop_button.border_color = Gray;
+    shop_button.border_color = DarkGray;
     shop_button.border_width = 10;
+    shop_button.background_color = Gray;
 }
 
 
 void MainScene::draw(const HDC& hdc) const {
-    drawBackground(hdc, White);
+    //drawBackground(hdc, White);
+    background_image.draw(hdc, valid_area);
 
-    // Draw Start Button
     start_button.show(hdc, valid_area);
-
-    // Draw Customize Button
-
-
-    // Draw Quit Button
     quit_button.show(hdc, valid_area);
-    
+    armory_button.show(hdc, valid_area);
+    shop_button.show(hdc, valid_area);
 }
 
 

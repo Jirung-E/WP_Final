@@ -61,6 +61,9 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 			case MainScene::Start:
 				gameStart(hWnd);
 				break;
+			case MainScene::Quit:
+				PostQuitMessage(0);
+				break;
 			}
 			break;
 		case Game:

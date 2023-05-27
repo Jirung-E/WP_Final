@@ -11,6 +11,6 @@ Sprite::Sprite(const tstring& file_name) : position { }, size_per { 100 }, flip_
 }
 
 
-void Sprite::draw(const HDC& hdc, const RECT& draw_area) {
+void Sprite::draw(const HDC& hdc, const RECT& draw_area) const {
 	source.Draw(hdc, draw_area);
 }

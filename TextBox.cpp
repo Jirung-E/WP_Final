@@ -58,7 +58,17 @@ void TextBox::drawText(const HDC& hdc, const RECT& valid_area) const {
 
     RECT rect = absoluteArea(valid_area);
     rect %= 90;
-    logfont.lfHeight = (rect.bottom - rect.top) * 90 / 100;
+
+    SIZE size;
+    GetTextExtentPoint32(hdc, text.c_str(), text.length(), &size);
+    if(size.cx*height - size.cy*width > 0) {   // °¡·Î°¡ ´õ ±è
+        logfont.lfHeight = (rect.bottom - rect.top) * 90 / 100 / size.cx * width;
+        rect.top += ((rect.bottom - rect.top) * 90 / 100 - logfont.lfHeight) / 2;
+    }
+    else {      // ¼¼·Î°¡ ´õ ±è
+        logfont.lfHeight = (rect.bottom - rect.top) * 90 / 100;
+    }
+
     switch(bold) {
     case 1:
         logfont.lfWeight = FW_BOLD;
@@ -77,11 +87,6 @@ void TextBox::drawText(const HDC& hdc, const RECT& valid_area) const {
 
     HFONT hNewFont = CreateFontIndirect(&logfont);
     HFONT old_font = (HFONT)SelectObject(hdc, hNewFont);
-
-    int center_x = (rect.left + rect.right) / 2;
-    int center_y = (rect.top + rect.bottom) / 2;
-    SIZE size;
-    GetTextExtentPoint32W(hdc, text.c_str(), text.length(), &size);
 
     COLORREF old_text_color = SetTextColor(hdc, text_color);
     COLORREF old_bk_color = SetBkColor(hdc, background_color);
