@@ -36,6 +36,9 @@ public:
 
     void interrupt();
 
+    SceneID getCurrentSceneID() const;
+    bool isPaused() const;
+
 private:
     void gameStart(const HWND& hWnd);
     void lockCursor(const HWND& hWnd);

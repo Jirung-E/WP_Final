@@ -44,6 +44,8 @@ public:
     void pause();
     void resume();
 
+    bool isPaused() const;
+
 private:
     //void updatePlayer(const POINT& mouse_cursor_point);
     //void updateEnemy();

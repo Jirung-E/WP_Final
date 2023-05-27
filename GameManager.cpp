@@ -27,11 +27,6 @@ void GameManager::keyboardInput(const HWND& hWnd, int keycode) {
 		case VK_ESCAPE:
 			quit(hWnd);
 			break;
-		case L'n': case L'N':
-			if(current_scene->getID() == Main) {
-				gameStart(hWnd);
-			}
-			break;
 		}
 		break;
 	case Game:
@@ -142,11 +137,26 @@ void GameManager::interrupt() {
 }
 
 
+SceneID GameManager::getCurrentSceneID() const {
+	return current_scene->getID();
+}
+
+bool GameManager::isPaused() const {
+	switch(current_scene->getID()) {
+	case Game:
+		return game_scene.isPaused();
+	}
+	return false;
+}
+
+
 void GameManager::gameStart(const HWND& hWnd) {
 	fixCursor(hWnd);
 
 	game_scene.setUp();
 	current_scene = &game_scene;
+
+	ShowCursor(FALSE);                //커서 대신 조준점 보이기
 }
 
 void GameManager::lockCursor(const HWND& hWnd) {

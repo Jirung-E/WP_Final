@@ -76,6 +76,7 @@ void GameScene::pause() {
     if(!game_over) {
         paused = true;
     }
+    ShowCursor(true);                //커서 대신 조준점 보이기
 }
 
 void GameScene::resume() {
@@ -84,6 +85,11 @@ void GameScene::resume() {
         end_time = clock();
         start_time = clock();
     }
+    ShowCursor(false);                //커서 대신 조준점 보이기
+}
+
+bool GameScene::isPaused() const {
+    return paused;
 }
 
 
