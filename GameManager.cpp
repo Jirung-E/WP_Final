@@ -59,6 +59,9 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 			case MainScene::Quit:
 				PostQuitMessage(0);
 				break;
+			case MainScene::Armory:
+				current_scene = &armory_scene;
+				break;
 			}
 			break;
 		case Game:
@@ -69,6 +72,13 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 				break;
 			case GameScene::Quit:
 				quit(hWnd);
+				break;
+			}
+			break;
+		case Armory:
+			switch(buttonClicked(point)) {
+			case ArmoryScene::Quit:
+				current_scene = &main_scene;
 				break;
 			}
 			break;
@@ -129,9 +139,6 @@ void GameManager::interrupt() {
 	switch(current_scene->getID()) {
 	case Game:
 		game_scene.pause();
-		break;
-	case Main:
-
 		break;
 	}
 }
@@ -194,6 +201,8 @@ int GameManager::buttonClicked(const POINT& point) {
 		return main_scene.clickL(point);
 	case SceneID::Game:
 		return game_scene.clickL(point);
+	case SceneID::Armory:
+		return armory_scene.clickL(point);
 	default:
 		return 0;
 	}

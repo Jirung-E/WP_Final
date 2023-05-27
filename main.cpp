@@ -510,6 +510,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		SetTimer(hWnd, KEYDOWN, 0, NULL); //KEYDOWN 전용 타이머, 이 타이머에 키보드 입력을 제외한 어떠한 다른것도 작성하지 말 것!
 		SetTimer(hWnd, UPDATE, 5, NULL);  //게임 전체 타이머, 추후 애니메이션 전용 타이머도 추가 예정
 		break;
+	case WM_ACTIVATE:
+		switch(LOWORD(wParam)) {
+		case WA_INACTIVE:
+			manager.interrupt();
+			break;
+		}
+		break;
 
 	case WM_KEYDOWN:
 		manager.keyboardInput(hWnd, wParam);
@@ -649,7 +656,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 			
 			////////////////////////
-			manager.syncSize(hWnd); //스크롤 배경 출력을 위해 임시로 비활성화
+			manager.syncSize(hWnd);
 			manager.show(mdc);
 			////////////////////////
 

@@ -8,6 +8,9 @@ using tstring = std::basic_string<TCHAR>;
 static std::random_device rd;
 
 
+double percentOf(double num, double per);
+
+
 enum Color {
 	White = 0xffffff, LightGray = 0xcccccc, Gray = 0x888888, DarkGray = 0x444444, Black = 0x000000,
 	Red = 0x0000ff, Green = 0x00ff00, Blue = 0xff0000, 
@@ -16,6 +19,7 @@ enum Color {
 
 COLORREF mixColor(const COLORREF& color1, const COLORREF& color2);
 COLORREF mixLight(const COLORREF& color1, const COLORREF& color2);
+COLORREF brighter(const COLORREF& color, short int n = 10);
 
 
 class Range {
@@ -34,6 +38,16 @@ double getRandomNumberOf(const Range& range, double interval = 1);
 COLORREF getRandomColor();
 COLORREF getRandomColor(const Range& r, const Range& g, const Range& b, const Range& base = { 0, 0 });
 COLORREF getRandomColor(int r, int g, int b, const Range& base = { 0, 0xff });
+
+enum Direction {
+	Right, Down, Left, Up, None
+};
+
+Direction& operator++(Direction& dir);
+Direction operator++(Direction& dir, int);
+Direction& operator--(Direction& dir);
+Direction operator--(Direction& dir, int);
+
 POINT getCenterOf(const RECT& rect);
 RECT rectToSquare(const RECT& rect);
 RECT expand(const RECT& rect, int percentage);
@@ -58,15 +72,5 @@ public:
 	RectSize expand(int percentage) const;
 	RectSize square() const;
 };
-
-
-enum Direction {
-	Right, Down, Left, Up
-};
-
-Direction& operator++(Direction& dir);
-Direction operator++(Direction& dir, int);
-Direction& operator--(Direction& dir);
-Direction operator--(Direction& dir, int);
 
 RECT& operator%=(RECT& rect, double per);

@@ -7,7 +7,7 @@
 
 
 enum SceneID {
-    Main, Game, PlayerInfo, GameSetting, Shop
+    Main, Game, Armory, Shop
 };
 
 

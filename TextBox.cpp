@@ -2,9 +2,11 @@
 
 
 TextBox::TextBox(const tstring& text, const Point& position, double width, double height) : text { text },
-position { position }, width { width }, height { height }, transparent_background { false }, transparent_border { false },
+position { position }, width { width }, height { height }, bias { None },
+transparent_background { false }, transparent_border { false },
 square { true }, bold { 0 }, italic { false },
-background_color { White }, text_color { Black }, border_color { White }, border_width { 1 }, align { DT_CENTER } {
+background_color { White }, text_color { Black }, 
+border_color { White }, border_width { 1 }, align { DT_CENTER }, absolute { false } {
 
 }
 
@@ -15,12 +17,31 @@ void TextBox::show(const HDC& hdc, const RECT& valid_area) const {
 }
 
 RECT TextBox::absoluteArea(const RECT& valid_area) const {
+    if(absolute) {
+        return { LONG(position.x), LONG(position.y), LONG(position.x + width), LONG(position.y + height) };
+    }
+
     RECT area = valid_area;
     if(square) {
         area = rectToSquare(valid_area);
-    }
-    else {
-        area = valid_area;
+        switch(bias) {
+        case Left:
+            area.right -= area.left - valid_area.left;
+            area.left = valid_area.left;
+            break;
+        case Right:
+            area.left += valid_area.right - area.right;
+            area.right = valid_area.right;
+            break;
+        case Up:
+            area.bottom -= area.top - valid_area.top;
+            area.top = valid_area.top;
+            break;
+        case Down:
+            area.top += valid_area.bottom - area.bottom;
+            area.bottom = valid_area.bottom;
+            break;
+        }
     }
     int w = area.right - area.left;
     int h = area.bottom - area.top;

@@ -1,6 +1,11 @@
 #include "Util.h"
 
 
+double percentOf(double num, double per) {
+	return num*per/100;
+}
+
+
 COLORREF mixColor(const COLORREF& color1, const COLORREF& color2) {
 	int r1 = color1 & Red;
 	int g1 = (color1 & Green) / 0x000100;
@@ -46,6 +51,36 @@ COLORREF mixColor(const COLORREF& color1, const COLORREF& color2) {
 
 COLORREF mixLight(const COLORREF& color1, const COLORREF& color2) {
 	return color1 | color2;
+}
+
+COLORREF brighter(const COLORREF& color, short int n) {
+	int red = color & Red;
+	int green = (color & Green) / 0x000100;
+	int blue = (color & Blue) / 0x010000;
+
+	red += n;
+	if(red > 255) {
+		red = 255;
+	}
+	else if(red < 0) {
+		red = 0;
+	}
+	green += n;
+	if(green > 255) {
+		green = 255;
+	}
+	else if(green < 0) {
+		green = 0;
+	}
+	blue += n;
+	if(blue > 255) {
+		blue = 255;
+	}
+	else if(blue < 0) {
+		blue = 0;
+	}
+
+	return RGB(red, green, blue);
 }
 
 

@@ -9,6 +9,7 @@ public:
     Point position;
     double width;
     double height;
+    Direction bias;
     COLORREF background_color;
     COLORREF text_color;
     COLORREF border_color;
@@ -20,6 +21,7 @@ public:
     bool square;
     int bold;
     int italic;
+    bool absolute;
 
 public:
     TextBox(const tstring& text = L"", const Point& position = { 0, 0 }, double width = 1, double height = 1);

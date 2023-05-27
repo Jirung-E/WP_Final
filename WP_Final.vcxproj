@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ammo.cpp" />
+    <ClCompile Include="ArmoryScene.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameScene.cpp" />
@@ -151,6 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ammo.h" />
+    <ClInclude Include="ArmoryScene.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameScene.h" />
