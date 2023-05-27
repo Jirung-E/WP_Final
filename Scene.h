@@ -27,7 +27,7 @@ protected:
 
 public:
     virtual void show(const HDC& hdc) const;
-    void syncSize(const HWND& hWnd);
+    virtual void syncSize(const HWND& hWnd);
     SceneID getID() const;
     virtual int clickL(const POINT& point) const;
     virtual int clickR(const POINT& point) const;

@@ -5,6 +5,18 @@ double percentOf(double num, double per) {
 	return num*per/100;
 }
 
+RECT percentOf(const RECT& rect, double per) {
+	RECT r = rect;
+	int w = rect.right - rect.left;
+	int h = rect.bottom - rect.top;
+	r.left += w * (100 - per)/2 / 100;
+	r.right -= w * (100 - per)/2 / 100;
+	r.top += h * (100 - per)/2 / 100;
+	r.bottom -= h * (100 - per)/2 / 100;
+
+	return r;
+}
+
 
 COLORREF mixColor(const COLORREF& color1, const COLORREF& color2) {
 	int r1 = color1 & Red;
@@ -112,12 +124,34 @@ POINT getCenterOf(const RECT& rect) {
 	return { rect.left + width/2, rect.top + height/2 };
 }
 
-RECT rectToSquare(const RECT& rect) {
+RECT rectToSquare(const RECT& rect, const Direction& bias) {
 	int width = rect.right - rect.left;
 	int height = rect.bottom - rect.top;
 	int n = width < height ? width/2 : height/2;
 	POINT center = getCenterOf(rect);
-	return { center.x-n, center.y-n, center.x+n, center.y+n };
+
+	RECT r = { center.x-n, center.y-n, center.x+n, center.y+n };
+
+	switch(bias) {
+	case Left:
+		r.left = rect.left;
+		r.right = rect.left + 2*n;
+		break;
+	case Right:
+		r.left = rect.right - 2*n;
+		r.right = rect.right;
+		break;
+	case Up:
+		r.top = rect.top;
+		r.bottom = rect.top + 2*n;
+		break;
+	case Down:
+		r.top = rect.bottom - 2*n;
+		r.bottom = rect.bottom;
+		break;
+	}
+
+	return r;
 }
 
 RECT expand(const RECT& rect, int percentage) {
@@ -222,7 +256,7 @@ RECT& operator%=(RECT& rect, double per) {
 	rect.left += w * (100 - per)/2 / 100;
 	rect.right -= w * (100 - per)/2 / 100;
 	rect.top += h * (100 - per)/2 / 100;
-	rect.right -= h * (100 - per)/2 / 100;
+	rect.bottom -= h * (100 - per)/2 / 100;
 
 	return rect;
 }

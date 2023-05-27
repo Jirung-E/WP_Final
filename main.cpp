@@ -695,7 +695,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	WndClass.lpszClassName = lpszClass;
 	WndClass.hIconSm = LoadIcon(NULL, IDI_QUESTION);
 	RegisterClassEx(&WndClass);
-	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_EX_TOPMOST, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
+	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_EX_TOPMOST | WS_THICKFRAME, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 

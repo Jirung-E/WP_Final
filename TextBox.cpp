@@ -23,25 +23,7 @@ RECT TextBox::absoluteArea(const RECT& valid_area) const {
 
     RECT area = valid_area;
     if(square) {
-        area = rectToSquare(valid_area);
-        switch(bias) {
-        case Left:
-            area.right -= area.left - valid_area.left;
-            area.left = valid_area.left;
-            break;
-        case Right:
-            area.left += valid_area.right - area.right;
-            area.right = valid_area.right;
-            break;
-        case Up:
-            area.bottom -= area.top - valid_area.top;
-            area.top = valid_area.top;
-            break;
-        case Down:
-            area.top += valid_area.bottom - area.bottom;
-            area.bottom = valid_area.bottom;
-            break;
-        }
+        area = rectToSquare(valid_area, bias);
     }
     int w = area.right - area.left;
     int h = area.bottom - area.top;
@@ -77,14 +59,14 @@ void TextBox::drawText(const HDC& hdc, const RECT& valid_area) const {
     LOGFONT logfont;
     GetObject((HFONT)GetStockObject(DEFAULT_GUI_FONT), sizeof(LOGFONT), &logfont);
 
-    RECT rect = absoluteArea(valid_area);
-    rect %= 90;
+    RECT rect = percentOf(absoluteArea(valid_area), 90);
 
     SIZE size;
     GetTextExtentPoint32(hdc, text.c_str(), text.length(), &size);
-    if(size.cx*height - size.cy*width > 0) {   // °¡·Î°¡ ´õ ±è
-        logfont.lfHeight = (rect.bottom - rect.top) * 90 / 100 / size.cx * width;
-        rect.top += ((rect.bottom - rect.top) * 90 / 100 - logfont.lfHeight) / 2;
+    if(size.cx*height > size.cy*width) {   // °¡·Î°¡ ´õ ±è
+        logfont.lfHeight *= (rect.right - rect.left) * 90.0 / 100 / size.cx;
+        //rect.top += ((rect.bottom - rect.top) * 90 / 100 - logfont.lfHeight) / 2.0;
+        //rect.bottom -= ((rect.bottom - rect.top) * 90.0 / 100 - logfont.lfHeight) / 2;
     }
     else {      // ¼¼·Î°¡ ´õ ±è
         logfont.lfHeight = (rect.bottom - rect.top) * 90 / 100;

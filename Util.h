@@ -9,6 +9,7 @@ static std::random_device rd;
 
 
 double percentOf(double num, double per);
+RECT percentOf(const RECT& rect, double per);
 
 
 enum Color {
@@ -49,7 +50,7 @@ Direction& operator--(Direction& dir);
 Direction operator--(Direction& dir, int);
 
 POINT getCenterOf(const RECT& rect);
-RECT rectToSquare(const RECT& rect);
+RECT rectToSquare(const RECT& rect, const Direction& bias = None);
 RECT expand(const RECT& rect, int percentage);
 int fps(int frame);
 
