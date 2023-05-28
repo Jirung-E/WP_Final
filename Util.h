@@ -51,6 +51,7 @@ Direction operator--(Direction& dir, int);
 
 POINT getCenterOf(const RECT& rect);
 RECT rectToSquare(const RECT& rect, const Direction& bias = None);
+RECT ratio(const RECT& rect, double width, double height, const Direction& bias = None);
 RECT expand(const RECT& rect, int percentage);
 int fps(int frame);
 

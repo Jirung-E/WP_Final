@@ -12,16 +12,20 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
     quit_button.absolute = true;
 
     weapon_buttons.reserve(5);              // 장비가 추가될때마다 이 숫자 증가
-    weapon_buttons.push_back(Button { Weapon0, L"SCAR_H", {}, 0, 0 });
+    weapon_buttons.push_back(Button { Weapon0, L"SCAR_H", { }, 0, 0 });
+    weapon_buttons.back().sprite = new Sprite { L"./res/scar_h_right.png" };
+    weapon_buttons.back().sprite->fix_ratio = true;
     weapon_buttons.push_back(Button { Weapon1, L"M16", {}, 0, 0 });
     weapon_buttons.push_back(Button { Weapon2, L"MP_44", {}, 0, 0 });
     weapon_buttons.push_back(Button { Weapon3, L"MG_42", {}, 0, 0 });
     weapon_buttons.push_back(Button { Weapon4, L"P90", {}, 0, 0 });
 
     for(auto& e : weapon_buttons) {
+        e.background_color = LightGray;
         e.border_color = Gray;
         e.border_width = 2;
         e.absolute = true;
+        e.padding = 5; 
     }
 }
 
@@ -36,7 +40,12 @@ void ArmoryScene::draw(const HDC& hdc) const {
     RECT area = preview_area;
     area.top = area.top + percentOf(preview_area.bottom - preview_area.top, 20);
     area.bottom = area.top + percentOf(preview_area.bottom - preview_area.top, 40);
-    player_preview.draw(hdc, rectToSquare(area, Up));
+    area = rectToSquare(area, Up);
+    player_preview.draw(hdc, area);
+    int w = percentOf(area.right-area.left, 40);
+    area.left += w;
+    area.right += w;
+    Sprite { L"./res/scar_h_right.png" }.draw(hdc, area);
 
     TextBox weapon_info { L"무기 정보를 출력합니다.", { 0, 70 },
         100, 30 };
@@ -70,6 +79,7 @@ void ArmoryScene::syncSize(const HWND& hWnd) {
             weapon_list_view_area.top + 5 + (5.0 + percentOf(w, 70))*(i/3) };
         weapon_buttons[i].width = w;
         weapon_buttons[i].height = percentOf(w, 70);
+        weapon_buttons[i].font_size = percentOf(weapon_buttons[i].height, 30);
     }
 }
 

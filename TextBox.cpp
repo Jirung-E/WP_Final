@@ -6,7 +6,7 @@ position { position }, width { width }, height { height }, bias { None },
 transparent_background { false }, transparent_border { false },
 square { true }, bold { 0 }, italic { false },
 background_color { White }, text_color { Black }, 
-border_color { White }, border_width { 1 }, align { DT_CENTER }, absolute { false } {
+border_color { White }, border_width { 1 }, align { DT_CENTER }, absolute { false }, font_size { 0 } {
 
 }
 
@@ -61,15 +61,20 @@ void TextBox::drawText(const HDC& hdc, const RECT& valid_area) const {
 
     RECT rect = percentOf(absoluteArea(valid_area), 90);
 
-    SIZE size;
-    GetTextExtentPoint32(hdc, text.c_str(), text.length(), &size);
-    if(size.cx*height > size.cy*width) {   // °¡·Î°¡ ´õ ±è
-        logfont.lfHeight *= (rect.right - rect.left) * 90.0 / 100 / size.cx;
-        //rect.top += ((rect.bottom - rect.top) * 90 / 100 - logfont.lfHeight) / 2.0;
-        //rect.bottom -= ((rect.bottom - rect.top) * 90.0 / 100 - logfont.lfHeight) / 2;
+    if(font_size == 0) {
+        SIZE size;
+        GetTextExtentPoint32(hdc, text.c_str(), text.length(), &size);
+        if(size.cx*height > size.cy*width) {   // °¡·Î°¡ ´õ ±è
+            logfont.lfHeight *= (rect.right - rect.left) * 90.0 / 100 / size.cx;
+            //rect.top += ((rect.bottom - rect.top) * 90 / 100 - logfont.lfHeight) / 2.0;
+            //rect.bottom -= ((rect.bottom - rect.top) * 90.0 / 100 - logfont.lfHeight) / 2;
+        }
+        else {      // ¼¼·Î°¡ ´õ ±è
+            logfont.lfHeight = (rect.bottom - rect.top) * 90 / 100;
+        }
     }
-    else {      // ¼¼·Î°¡ ´õ ±è
-        logfont.lfHeight = (rect.bottom - rect.top) * 90 / 100;
+    else {
+        logfont.lfHeight = font_size;
     }
 
     switch(bold) {

@@ -22,6 +22,7 @@ public:
     int bold;
     int italic;
     bool absolute;
+    int font_size;
 
 public:
     TextBox(const tstring& text = L"", const Point& position = { 0, 0 }, double width = 1, double height = 1);
@@ -30,7 +31,7 @@ public:
     void show(const HDC& hdc, const RECT& valid_area) const;
     RECT absoluteArea(const RECT& valid_area) const;
 
-private:
+protected:
     void drawBase(const HDC& hdc, const RECT& valid_area) const;
     void drawText(const HDC& hdc, const RECT& valid_area) const;
 };
