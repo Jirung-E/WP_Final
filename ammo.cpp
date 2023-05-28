@@ -6,7 +6,7 @@
 #include "ammo.h"
 
 enum gun_name_ammo {
-	null, scar_h, m16, mp_44, mg_42, p90
+	null, scar_h, m16, mp_44, mg_42, awp
 };
 
 void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2) { //ÃÑ¾Ë ±ËÀû ±×¸®±â

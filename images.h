@@ -1,7 +1,7 @@
 #pragma once
 static CImage BackGround, indicator_back, ammo_icon;
 static CImage commando_right, commando_left, commando_jump_right, commando_jump_left;
-static CImage SCAR_H_right, SCAR_H_left;
+static CImage SCAR_H_right, SCAR_H_left, M16_right, M16_left, MP44_right, MP44_left, MG42_right, MG42_left, AWP_right, AWP_left;
 static CImage monster_right, monster_left, monster_big_right, monster_big_left;
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
@@ -20,7 +20,7 @@ static int MST_big_w, MST_big_h; //대형 몬스터 이미지의 사이즈
 
 //무기 이미지 관련 (gun)
 enum gun_name_images {
-	null, scar_h, m16, mp_44, mg_42, p90
+	null, scar_h, m16, mp_44, mg_42, awp
 };
 
 static int GUN_number = 1;    //무기 번호

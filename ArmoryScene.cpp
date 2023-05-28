@@ -1,5 +1,8 @@
 #include "ArmoryScene.h"
 
+enum gun_name_amory {
+    null, scar_h, m16, mp44, mg42, awp
+};
 
 ArmoryScene::ArmoryScene() : Scene { Armory }, 
 quit_button { Quit, L"Quit", { 15, 15 }, 80, 40 },
@@ -12,13 +15,25 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
     quit_button.absolute = true;
 
     weapon_buttons.reserve(5);              // 장비가 추가될때마다 이 숫자 증가
-    weapon_buttons.push_back(Button { Weapon0, L"SCAR_H", { }, 0, 0 });
+    weapon_buttons.push_back(Button { Weapon0, L"SCAR-H", { }, 0, 0 });
     weapon_buttons.back().sprite = new Sprite { L"./res/scar_h_right.png" };
     weapon_buttons.back().sprite->fix_ratio = true;
+
     weapon_buttons.push_back(Button { Weapon1, L"M16", {}, 0, 0 });
-    weapon_buttons.push_back(Button { Weapon2, L"MP_44", {}, 0, 0 });
-    weapon_buttons.push_back(Button { Weapon3, L"MG_42", {}, 0, 0 });
-    weapon_buttons.push_back(Button { Weapon4, L"P90", {}, 0, 0 });
+    weapon_buttons.back().sprite = new Sprite{ L"./res/m16_right.png" };
+    weapon_buttons.back().sprite->fix_ratio = true;
+
+    weapon_buttons.push_back(Button { Weapon2, L"MP-44", {}, 0, 0 });
+    weapon_buttons.back().sprite = new Sprite{ L"./res/mp44_right.png" };
+    weapon_buttons.back().sprite->fix_ratio = true;
+
+    weapon_buttons.push_back(Button { Weapon3, L"MG-42", {}, 0, 0 });
+    weapon_buttons.back().sprite = new Sprite{ L"./res/mg42_right.png" };
+    weapon_buttons.back().sprite->fix_ratio = true;
+
+    weapon_buttons.push_back(Button { Weapon4, L"AWP", {}, 0, 0 });
+    weapon_buttons.back().sprite = new Sprite{ L"./res/awp_right.png" };
+    weapon_buttons.back().sprite->fix_ratio = true;
 
     for(auto& e : weapon_buttons) {
         e.background_color = LightGray;

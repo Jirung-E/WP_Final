@@ -44,6 +44,14 @@ void IMG_FILE_LOAD() {
 
 	SCAR_H_right.Load(L".\\res\\SCAR_H_right.png");
 	SCAR_H_left.Load(L".\\res\\SCAR_H_left.png");
+	M16_right.Load(L".\\res\\m16_right.png");
+	M16_left.Load(L".\\res\\m16_left.png");
+	MP44_right.Load(L".\\res\\mp44_right.png");
+	MP44_left.Load(L".\\res\\mp44_left.png");
+	MG42_right.Load(L".\\res\\mg42_right.png");
+	MG42_left.Load(L".\\res\\mg42_left.png");
+	AWP_right.Load(L".\\res\\awp_right.png");
+	AWP_left.Load(L".\\res\\awp_left.png");
 
 	indicator_back.Load(L".\\res\\indicator_back.png");
 	ammo_icon.Load(L".\\res\\ammo_icon.png");
@@ -646,13 +654,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				//몬스터 이미지 출력
 				show_monster(mdc, ss_x, ss_y, landing_shake);
 
-				if(!manager.isPaused()) {
+				//인터페이스 출력
+				show_interface(mdc, rt);
+
+				if (!manager.isPaused()) {
 					//조준점 출력
 					show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
 				}
-
-				//인터페이스 출력
-				show_interface(mdc, rt);
 			}
 			
 			////////////////////////
