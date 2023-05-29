@@ -6,10 +6,11 @@ static double angle;							  //총알 궤적의 각도
 static double ammo_x1, ammo_y1, ammo_x2, ammo_y2; //총알 궤적이 그려지는 좌표
 static double dist;//플레이어와 히트 판정점 사이의 거리
 
-static BOOL draw_hit = FALSE;
-static int hit_timer;
-static int hit;
+static BOOL draw_hit = FALSE;					  //TRUE일 시 히트 포인트를 그림
+static int hit_timer;							  //히트 포인트가 그려지는 시간	
+static int hit;									  //히트 판정을 받은 몬스터의 인덱스
 static double hit_x, hit_y;   //조준점 내부에서 생성되는 실제 x,y 좌표
+
 static double var;            //총을 오래 사격할 수록 반동으로 인해 정확도가 떨어짐, 수치가 증가할 수록 분산도가 커짐
 
 static int ind_size = 100; //ammo_indicator의 폰트 크기

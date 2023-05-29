@@ -99,8 +99,7 @@ void reload_indicator(HDC mdc, int x, int y, int x2, int y2, int x3, int y3, int
 
 //플레이어와 히트 포인트의 거리 계산
 int cal_dist(double x1, double y1, double x2, double y2) {
-	double distance = 0;
-	distance = sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)));
+	double distance = sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)));
 
 	return distance;
 }

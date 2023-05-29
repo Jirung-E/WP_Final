@@ -87,17 +87,17 @@ void show_target(HDC mdc, int mouse_x, int mouse_y, double var) {
 //히트 포인트 표시
 void show_hit(HDC mdc, int hit_x, int hit_y) {
 	HPEN hpen, oldpen;
-	hpen = CreatePen(PS_SOLID, 8, RGB(255, 0, 0));
+	hpen = CreatePen(PS_SOLID, 4, RGB(255, 0, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
-	MoveToEx(mdc, hit_x, hit_y, NULL);
-	LineTo(mdc, hit_x - 10, hit_y - 10);
-	MoveToEx(mdc, hit_x, hit_y, NULL);
-	LineTo(mdc, hit_x + 10, hit_y - 10);
-	MoveToEx(mdc, hit_x, hit_y, NULL);
-	LineTo(mdc, hit_x - 10, hit_y + 10);
-	MoveToEx(mdc, hit_x, hit_y, NULL);
-	LineTo(mdc, hit_x + 10, hit_y + 10);
+	MoveToEx(mdc, hit_x - 5, hit_y - 5, NULL);
+	LineTo(mdc, hit_x - 15, hit_y - 15);
+	MoveToEx(mdc, hit_x + 5, hit_y - 5, NULL);
+	LineTo(mdc, hit_x + 15, hit_y - 15);
+	MoveToEx(mdc, hit_x - 5, hit_y + 5, NULL);
+	LineTo(mdc, hit_x - 15, hit_y + 15);
+	MoveToEx(mdc, hit_x + 5, hit_y + 5, NULL);
+	LineTo(mdc, hit_x + 15, hit_y + 15);
 
 	SelectObject(mdc, oldpen);
 	DeleteObject(hpen);
@@ -196,6 +196,37 @@ void show_player(HDC mdc) {
 		}
 
 		break;
+	}
+}
+
+//몬스터 생성
+void make_monster(RECT rt) {
+	//spawn_timer의 수치가 0이 되면 몬스터가 한 마리씩 스폰
+	//일반 몬스터
+	spawn_timer_r--;
+	if (spawn_timer_r == 0) {
+		spawn_timer_r = 500;
+		if (mdx_r < 99) {
+			spawn_monster_regular(mdx_r, BG_scanner, rt); mdx_r++;
+		}
+	}
+
+	//대형 몬스터
+	spawn_timer_big--;
+	if (spawn_timer_big == 0) {
+		spawn_timer_big = 1000;
+		if (mdx_big < 99) {
+			spawn_monster_big(mdx_big, BG_scanner, rt); mdx_big++;
+		}
+	}
+
+	//공중 몬스터
+	spawn_timer_air--;
+	if (spawn_timer_air == 0) {
+		spawn_timer_air = 600;
+		if (mdx_air < 99) {
+			spawn_monster_air(mdx_air, BG_scanner, rt); mdx_air++;
+		}
 	}
 }
 
@@ -373,12 +404,11 @@ void update_monster_position() {
 }
 
 //몬스터 명중 판정
-void check_hit(double hit_x, double hit_y) {
+void check_hit() {
 	//일반 몬스터 히트 판정
 	for (int i = 0; i < mdx_r; i++) {  
 		if (hit_x >= mst_r[i].x && hit_x <= mst_r[i].x + 100 && hit_y >= mst_r[i].y && hit_y <= mst_r[i].y + 100) { 
-			hit = i;    //조준점 내부의 좌표가 몬스터 이미지 내부에 위치하면 히트로 판정
-			//총알은 해당 몬스터에 가로막힌다.
+			hit = i;    //조준점 내부의 좌표가 몬스터 이미지 내부에 위치하면 히트로 판정되어 총알은 해당 몬스터에 가로막힌다.
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
 			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
 			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
@@ -418,7 +448,7 @@ void check_hit(double hit_x, double hit_y) {
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
 			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
 			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
-			mst_air[hit].hp -= 8; //cal_damage(mst_air[hit].hp, GUN_number);
+			mst_air[hit].hp = cal_damage(mst_air[hit].hp, GUN_number);
 			if (mst_air[hit].hp <= 0) {
 				if (hit < mdx_air - 1) monster_array_push_air(hit, mdx_air);
 				if (hit == mdx_air - 1) mdx_air--;
@@ -427,29 +457,55 @@ void check_hit(double hit_x, double hit_y) {
 	}
 }
 
+//총알 발사 시 수행되는 작업 모음
+void make_rand_ammo() {
+	std::random_device rd_ammo;
+	std::mt19937 gen(rd_ammo());
+	std::uniform_int_distribution<int> x(mx - (10 + var), mx + (10 + var)); //분산도가 넓어질수록 정확도가 떨어지게됨
+	std::uniform_int_distribution<int> y(my - (10 + var), my + (10 + var));
+	hit_x = x(gen); hit_y = y(gen);									//이 좌표가 몬스터의 이미지 안쪽에 위치해야 대미지 판정을 받는다.
+	angle = atan2(y(gen) - (CM_y + 60), x(gen) - (CM_x + 50));      //atan2 함수로 총알이 그려지는 각도를 계산한다.
+	ammo_x1 = CM_x + 50; ammo_y1 = CM_y + 60;
+	ammo_x2 = ammo_x1 + (1500 * cos(angle));
+	ammo_y2 = ammo_y1 + (1500 * sin(angle));
+
+	//히트 판정
+	check_hit();
+
+	is_draw = TRUE; draw_hit = TRUE; //그리기 시작
+	ammo++; ind_effect = 1; shake_effect = 1; //각각 인터페이스 이펙트, 흔들림 이펙트
+	shoot_delay = 0;	//딜레이는 0이되어 다시 딜레이가 증가하기 시작
+
+	if (ammo == 30) empty = 1;							//총알 소모가 정히진 값에 도달하면 더 이상 발사되지 않는다
+}
+
+//사격 시 화면 흔들림 생성
+void make_shake(int shake_acc, int shake_end) {
+	std::random_device rd_shake; 
+	std::mt19937 gen(rd_shake());
+	std::uniform_int_distribution<int> shake_x(-shake_acc, shake_acc); //숫자가 클 수록 반동이 커 화면 흔들림이 격해짐
+	std::uniform_int_distribution<int> shake_y(-shake_acc, shake_acc); //짧은 순간에 ss_x, ss_y에 랜덤한 값을 넣어 흔들림 표현
+	ss_x = shake_x(gen); ss_y = shake_y(gen);
+	shake_count++;          //몇 번 카운트를 세냐에 따라 화면 흔들리는 시간이 달라진다. 많이 세면 샐 수록 흔들리는 시간이 길어진다.
+	shake_acc -= 2;          //변경되는 좌표의 크기가 점차 줄면서 좀 더 자연스러운 흔들림을 만듬
+	if (shake_count == shake_end) { //특정 횟수가 되면
+		shake_count = 0;    //카운트 초기화
+		ss_x = 0; ss_y = 0; //화면 좌표는 원래대로 돌아온다
+		shake_effect = 0;   //더 이상 흔들리지 않는다.
+		shake_acc = 10;     //흔들림 가속값 다시 초기화
+	}
+}
+
 //사격 애니메이션 업데이트
 void update_shoot_animation(RECT rt, int mouse_x, int mouse_y, BOOL is_click) {
 	//사격
-	if (is_click == TRUE && reload == 0) {
+	if (is_click == TRUE && reload == 0 && empty == 0) {
 		switch (GUN_number) {
-		case scar_h: //케이스 넘버에 define한 총 이름을 넣으면 됨
-			if (ammo < 30) {
-				shoot_delay++;                                         //LBUTTON이 눌려있는 동안 딜레이 값이 계속 증가함
-				if (shoot_delay == 6) {                                //딜레이 값이 정해진 값에 도달하면
-					std::uniform_int_distribution<int> x(mx - (10 + var), mx + (10 + var)); //분산도가 넓어질수록 정확도가 떨어지게됨
-					std::uniform_int_distribution<int> y(my - (10 + var), my + (10 + var));
-					hit_x = x(gen); hit_y = y(gen);									//이 좌표가 몬스터의 이미지 안쪽에 위치해야 대미지 판정을 받는다.
-					angle = atan2(y(gen) - (CM_y + 60), x(gen) - (CM_x + 50));      //atan2 함수로 총알이 그려지는 각도를 계산한다.
-					ammo_x1 = CM_x + 50; ammo_y1 = CM_y + 60;
-					ammo_x2 = ammo_x1 + (1500 * cos(angle));
-					ammo_y2 = ammo_y1 + (1500 * sin(angle));
-					check_hit(hit_x, hit_y);
-					is_draw = TRUE; draw_hit = TRUE;//그리기 시작
-					ammo++; var += 4; ind_effect = 1; shake_effect = 1; //각각 인터페이스 이펙트, 흔들림 이펙트
-					shoot_delay = 0;	//딜레이는 0이되어 다시 딜레이가 증가하기 시작
-
-					if (ammo == 30) empty = 1;							//총알 소모가 정히진 값에 도달하면 더 이상 발사되지 않는다
-				}
+		case scar_h:	
+			shoot_delay++;                                       
+			if (shoot_delay == 6) {					          
+				make_rand_ammo();
+				var += 4;
 			}
 			break;
 		}
@@ -457,6 +513,16 @@ void update_shoot_animation(RECT rt, int mouse_x, int mouse_y, BOOL is_click) {
 
 	 //애니매이션
 	{
+		//사격 시 화면 흔들림
+		//좌측 값: 흔들리는 정도, 오른쪽 값: 흔들리는 시간
+		if (shake_effect == 1) {
+			switch (GUN_number) {
+			case scar_h:
+				make_shake(10, 5);
+				break;
+			}
+		}
+
 		//아주 짧은 시간동안 총알의 궤적을 그린다.
 		if (is_draw == TRUE) { 
 			draw_timer++;
@@ -491,29 +557,6 @@ void update_shoot_animation(RECT rt, int mouse_x, int mouse_y, BOOL is_click) {
 			if (ind_size == 100) ind_ani = 0;
 		}
 
-		//사격 시 화면 흔들림
-		if (shake_effect == 1) {
-			std::random_device rd; std::mt19937 gen(rd());
-
-			//총기마다 반동 수치가 달라 값을 달리해야 함
-			switch (GUN_number) { 
-			case scar_h:
-				shake_acc = 10; //SCAR_H의 경우 흔들림 가속 수치를 10을 줌
-				std::uniform_int_distribution<int> shake_x(-shake_acc, shake_acc); //숫자가 클 수록 반동이 커 화면 흔들림이 격해짐
-				std::uniform_int_distribution<int> shake_y(-shake_acc, shake_acc); //짧은 순간에 ss_x, ss_y에 랜덤한 값을 넣어 흔들림 표현
-				ss_x = shake_x(gen); ss_y = shake_y(gen);						  
-				shake_count++;          //몇 번 카운트를 세냐에 따라 화면 흔들리는 시간이 달라진다. 많이 세면 샐 수록 흔들리는 시간이 길어진다.
-				shake_acc -=2;          //변경되는 좌표의 크기가 점차 줄면서 좀 더 자연스러운 흔들림을 만듬
-				if (shake_count == 5) { //특정 횟수가 되면
-					shake_count = 0;    //카운트 초기화
-					ss_x = 0; ss_y = 0; //화면 좌표는 원래대로 돌아온다
-					shake_effect = 0;   //더 이상 흔들리지 않는다.
-					shake_acc = 10;     //흔들림 가속값 다시 초기화
-				}
-				break;
-			}
-		}
-
 		//재장전 인디케이터
 		if (reload == 1) { 
 			switch (GUN_number) {
@@ -536,10 +579,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_CREATE:
 		IMG_FILE_LOAD();                  //이미지 로드 함수
 		CM_x = 700, CM_y = 600;           //초기 플레이어 위치
-		//ShowCursor(FALSE);              //커서 대신 조준점 보이기 >>> GameManager의 gameStart 밑 GameScene의 pause/resume으로 옮겼습니다.
 		SetTimer(hWnd, KEYDOWN, 0, NULL); //KEYDOWN 전용 타이머, 이 타이머에 키보드 입력을 제외한 어떠한 다른것도 작성하지 말 것!
 		SetTimer(hWnd, UPDATE, 5, NULL);  //게임 전체 타이머, 추후 애니메이션 전용 타이머도 추가 예정
 		break;
+
 	case WM_ACTIVATE:
 		switch(LOWORD(wParam)) {
 		case WA_INACTIVE:
@@ -552,23 +595,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		manager.keyboardInput(hWnd, wParam);
 		break;
 
+		//정지상태로 변경
 	case WM_KEYUP:
-		CM_move_dir = -1; //정지상태로 변경
+		CM_move_dir = -1; 
 		break;
 
 	case WM_LBUTTONDOWN:
 		if(manager.getCurrentSceneID() == Game && !manager.isPaused()) {
 			is_click = TRUE;
-			if(empty == 1) {
+
+			if (empty == 1) {
 				reload = 1; break;
 			}
-			//triggered = true;    //스크롤 배경 출력으로 인해 임시 비활성화
 
-			switch(GUN_number) {  //총마다 연사속도가 다르므로 딜레이 수치를 다르게 줘야함. 연사력이 높을수록 딜레이 수치는 낮음
+			//연사력이 높을수록 딜레이 수치는 낮음
+			//타이머에서 검사하는 딜레이 수치보다 1 적게 초기화
+			switch(GUN_number) { 
 			case scar_h:
-				shoot_delay = 5;  break;  //타이머에서 검사하는 딜레이 수치보다 1 적게 초기화해야 발사됨
+				shoot_delay = 5;  break; 
 			}
-
 		}
 		manager.clickScene(hWnd, { LOWORD(lParam), HIWORD(lParam) }, Left);
 		InvalidateRect(hWnd, NULL, FALSE);
@@ -576,8 +621,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_LBUTTONUP:
 		is_click = FALSE;
-		//triggered = false; //스크롤 배경 출력으로 인해 임시 비활성화
-		shoot_delay = 0;     //버튼을 떼면 딜레이 수치가 0으로 초기화 된다.
+		//딜레이 수치가 0으로 초기화
+		shoot_delay = 0;  
 		break;
 
 	case WM_RBUTTONDOWN:
@@ -587,31 +632,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_MOUSEMOVE:
 		mx = LOWORD(lParam); my = HIWORD(lParam);
-		if(manager.getCurrentSceneID() == Game && !manager.isPaused()) {
-			update_player_direction(mx);
-		}
+		if(manager.getCurrentSceneID() == Game && !manager.isPaused())  update_player_direction(mx);
 		break;
 
 	case WM_TIMER:
 		switch(wParam) {
 		case KEYDOWN: //키보드 입력 전용 타이머. 이동과 점프를 동시에 할 수 있음.
 			if(manager.getCurrentSceneID() == Game && !manager.isPaused()) {
-				if(GetAsyncKeyState('A') & 0x8000)  //좌측 이동
-					CM_move_dir = 0;
+				//좌측 이동
+				if(GetAsyncKeyState('A') & 0x8000)  CM_move_dir = 0; 
 
-				else if(GetAsyncKeyState('D') & 0x8000)  //우측 이동
-					CM_move_dir = 1;
+				//우측 이동
+				else if(GetAsyncKeyState('D') & 0x8000)   CM_move_dir = 1;
 
-				if(GetAsyncKeyState('R') & 0x8000)  //재장전
+				//재장전
+				if(GetAsyncKeyState('R') & 0x8000)  
 					if(r_pressed == 0) {
-						reload = 1; r_pressed = 1; //1이면 입력되지 않음, 중복 입력 방지
+						reload = 1; r_pressed = 1;
 					}
 
-				if(GetAsyncKeyState(VK_SPACE) & 0x8000 && space_pressed == 0) {
-					if(space_pressed == 0) { //VK_SPACE를 계속 누르고 있을 경우 발생할 수 있는 중복 입력 오류를 방지하기 위함
-						CM_jump = 1; space_pressed = 1;   //1이면 VK_SPACE는 입력되지 않음
+				//점프
+				if(GetAsyncKeyState(VK_SPACE) & 0x8000 && space_pressed == 0)
+					if(space_pressed == 0) { 
+						CM_jump = 1; space_pressed = 1;
 					}
-				}
 			}
 		break;
 
@@ -625,65 +669,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				update_monster_direction(CM_x);
 				update_monster_position();
 
-				//스폰 타이머
-				{
-					//spawn_timer의 수치가 0이 되면 몬스터가 한 마리씩 스폰
-					//일반 몬스터
-					spawn_timer_r--;
-					if (spawn_timer_r == 0) {
-						spawn_timer_r = 500;
-						if (mdx_r < 99) {
-							spawn_monster_regular(mdx_r, BG_scanner, rt);
-							mdx_r++;
-						}
-					}
-
-					//대형 몬스터
-					spawn_timer_big--;
-					if (spawn_timer_big == 0) {
-						spawn_timer_big = 1000;
-						if (mdx_big < 99) {
-							spawn_monster_big(mdx_big, BG_scanner, rt);
-							mdx_big++;
-						}
-					}
-
-					//공중 몬스터
-					spawn_timer_air--;
-					if (spawn_timer_air == 0) {
-						spawn_timer_air = 500;
-						if (mdx_air < 99) {
-							spawn_monster_air(mdx_air, BG_scanner, rt);
-							mdx_air++;
-						}
-					}
-				}
+				//몬스터 생성
+				make_monster(rt);
 
 				// 몬스터 애니메이션
-				{
-					if (up_down == 1) {  //공중 몬스터 애니메이션 인덱스
-						Fdelay_air++;
-						if (Fdelay_air == 7) {
-							air++;
-							Fdelay_air = 0;
-							if (air == 2) 
-								up_down = 0;
-							
-						}
-					}
-					else if (up_down == 0) {
-						Fdelay_air++;
-						if (Fdelay_air == 7) {
-							air--;
-							Fdelay_air = 0;
-							if (air == 0)
-								up_down = 1;
-						}
+				//공중 몬스터 애니메이션
+				if (up_down == 1) { 
+					Fdelay_air++;
+					if (Fdelay_air == 7) {
+						air++; Fdelay_air = 0;
+						if (air == 2)  up_down = 0;
 					}
 				}
-
-
-
+				else if (up_down == 0) {
+					Fdelay_air++;
+					if (Fdelay_air == 7) {
+						air--; Fdelay_air = 0;
+						if (air == 0) up_down = 1;
+					}
+				}
 			}
 			break;
 		}
@@ -709,23 +713,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				show_monster(mdc, ss_x, ss_y, landing_shake);
 
 				//총알 궤적 그리기
-				if (is_draw == TRUE)
-					draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2);
+				if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2);
 
 				//플레이어 이미지 출력
 				show_player(mdc);
 
 				//히트 포인트 그리기
-				if(draw_hit == TRUE)
-					show_hit(mdc, ammo_x2, ammo_y2);
+				if(draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2);
 
 				//인터페이스 출력
 				show_interface(mdc, rt);
 
-				if (!manager.isPaused()) {
-					//조준점 출력
-					show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
-				}
+				//조준점 출력
+				if (!manager.isPaused()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
 			}
 			
 			////////////////////////

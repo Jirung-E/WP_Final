@@ -85,3 +85,27 @@ monster_hp_ind(HDC mdc, int x1, int y1, int x2, int y2, int x3, int y3, int x4, 
 
 *현재의 몬스터 이미지는 테스트용 이미지로, 추후 다른 이미지로 교체 예정
 *몬스터는 앞으로 2종류 더 추가 예정(빠른 몬스터, 공중 몬스터)
+
+
+//20203.05.29 업데이트
+-플레이어 이미지 변경
+-모든 총기 이미지 추가
+-bat%frame_right.png, bat%frame_left.png 추가, 한 방향 당 3프레임, 총 6개
+-공중 몬스터 추가
+-몬스터의 hp가 0 미만이 되어도 바로 죽지 않는 버그 수정
+-몬스터 히트 판정 및 총알이 몬스터에 막히는 알고리즘 대폭 개선
+-사격 파트, 흔들림 효과 파트의 코드 등 길이가 긴 코드들은 모두 함수로 묶음
+-몬스터 히트 판정 시 히트 포인트를 표시하는 기능 추가
+
+-함수 추가(각 함수의 역할은 코드의 주석 참조)
+make_rand_ammo()
+void show_hit(HDC mdc, int hit_x, int hit_y)
+void make_monster(RECT rt)
+make_shake(int shake_acc, int shake_end)
+cal_damage(int monster_hp, int GUN_number)
+cal_dist(double x1, double y1, double x2, double y2)
+void spawn_monster_air(int mdx_air, int BG_scanner, RECT rt)
+void update_monster_dir_air(double monster_x, double CM_x, int mdx_air)
+void monster_array_push_r(int hit, int idx)
+void monster_array_push_big(int hit, int idx)
+void monster_array_push_air(int hit, int idx)

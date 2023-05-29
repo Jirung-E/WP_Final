@@ -8,6 +8,7 @@ monster_info_regular mst_r[100];
 monster_info_big mst_big[100];
 monster_info_air mst_air[100];
 
+//일반 몬스터 생성
 void spawn_monster_regular(int mdx_r, int BG_scanner, RECT rt) {
 	int spawn_dir = 0;
 	std::random_device rd_mst;
@@ -25,6 +26,7 @@ void spawn_monster_regular(int mdx_r, int BG_scanner, RECT rt) {
 	mst_r[mdx_r].hp = 50;
 }
 
+//대형 몬스터 생성
 void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt) {
 	int spawn_dir = 0;
 	std::random_device rd_mst;
@@ -42,6 +44,7 @@ void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt) {
 	mst_big[mdx_big].hp = 100;
 }
 
+//공중 몬스터 생성
 void spawn_monster_air(int mdx_air, int BG_scanner, RECT rt) {
 	int spawn_dir = 0;
 	std::random_device rd_mst;
@@ -122,7 +125,7 @@ void monster_hp_ind(HDC mdc, int x1, int y1, int x2, int y2, int x3, int y3, int
 
 //일반 몬스터 배열 밀어내기
 void monster_array_push_r(int hit, int idx) {
-	for (int i = hit; i < idx - 1; i++) {
+	for (int i = hit; i < idx; i++) {
 		mst_r[i].x = mst_r[i + 1].x;
 		mst_r[i].y = mst_r[i + 1].y;
 		mst_r[i].hp = mst_r[i + 1].hp;
@@ -130,11 +133,16 @@ void monster_array_push_r(int hit, int idx) {
 		mst_r[i].move_dir = mst_r[i + 1].move_dir;
 	}
 	idx--;
+	mst_r[idx].x = -400;
+	mst_r[idx].y = -400;
+	mst_r[idx].hp = 0;
+	mst_r[idx].move_dir = -1;
+	mst_r[idx].img_dir = -1; //현재 인덱스의 바로 전 인덱스까지 모두 한 칸씩 앞으로 당긴 후 남는 인덱스의 몬스터는 화면 밖으로 이동(나중에 몬스터 스폰 시 다시 값이 생성되므로 문제 없음)
 }
 
 //대형 몬스터 배열 빌어내기
 void monster_array_push_big(int hit, int idx) {
-	for (int i = hit; i < idx - 1; i++) {
+	for (int i = hit; i < idx; i++) {
 		mst_big[i].x = mst_big[i + 1].x;
 		mst_big[i].y = mst_big[i + 1].y;
 		mst_big[i].hp = mst_big[i + 1].hp;
@@ -142,16 +150,26 @@ void monster_array_push_big(int hit, int idx) {
 		mst_big[i].move_dir = mst_big[i + 1].move_dir;
 	}
 	idx--;
+	mst_big[idx].x = -400;
+	mst_big[idx].y = -400;
+	mst_big[idx].hp = 0;
+	mst_big[idx].move_dir = -1;
+	mst_big[idx].img_dir = -1;
 }
 
 //공중 몬스터 배열 밀어내기
 void monster_array_push_air(int hit, int idx) {
-	for (int i = hit; i < idx - 1; i++) {
+	for (int i = hit; i < idx; i++) {
 		mst_air[i].x = mst_air[i + 1].x;
 		mst_air[i].y = mst_air[i + 1].y;
 		mst_air[i].hp = mst_air[i + 1].hp;
 		mst_air[i].img_dir = mst_air[i + 1].img_dir;
 		mst_air[i].move_dir = mst_air[i + 1].move_dir;
 	}
-	idx--;
+	idx --;
+	mst_air[idx].x = -400;
+	mst_air[idx].y = -400;
+	mst_air[idx].hp = 0;
+	mst_air[idx].move_dir = -1;
+	mst_air[idx].img_dir = -1;
 }

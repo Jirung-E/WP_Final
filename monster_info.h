@@ -27,7 +27,7 @@ static int mdx_big = 0;				  //대형 몬스터 수
 static int spawn_timer_big = 1000;
 
 static int mdx_air = 0;				  //공중 몬스터 수
-static int spawn_timer_air = 300;
+static int spawn_timer_air = 600;
 
 void spawn_monster_regular(int mdx, int BG_scanner, RECT rt);
 void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt);
