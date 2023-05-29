@@ -6,6 +6,7 @@
 
 monster_info_regular mst_r[100];
 monster_info_big mst_big[100];
+monster_info_air mst_air[100];
 
 void spawn_monster_regular(int mdx_r, int BG_scanner, RECT rt) {
 	int spawn_dir = 0;
@@ -41,7 +42,25 @@ void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt) {
 	mst_big[mdx_big].hp = 100;
 }
 
-void update_monster_dir_r(double monster_x, double CM_x, int mdx_r) { //몬스터는 항상 플레이어를 바라본다
+void spawn_monster_air(int mdx_air, int BG_scanner, RECT rt) {
+	int spawn_dir = 0;
+	std::random_device rd_mst;
+	std::mt19937 gen(rd_mst());
+	std::uniform_int_distribution<int> left_or_right(0, 1); //몬스터는 맵 왼쪽 끝 또는 오른쪽 끝에서 생성된다
+	spawn_dir = left_or_right(gen);							//0이면 왼쪽, 1이면 오른쪽
+	if (spawn_dir == 0) {
+		mst_air[mdx_air].x = rt.left - BG_scanner - 150;				//맵의 왼쪽 끝에서 생성
+		mst_air[mdx_air].y = 200;
+	}
+	else if (spawn_dir == 1) {
+		mst_air[mdx_air].x = rt.right + 3000 - BG_scanner + 150;    //맵의 오른쪽 끝에서 생성
+		mst_air[mdx_air].y = 200;
+	}
+	mst_air[mdx_air].hp = 30;
+}
+
+//일반 몬스터 이미지 방향
+void update_monster_dir_r(double monster_x, double CM_x, int mdx_r) { 
 	if (mst_r[mdx_r].x < CM_x)
 		mst_r[mdx_r].img_dir = 1;  //오른쪽 방향
 
@@ -49,7 +68,8 @@ void update_monster_dir_r(double monster_x, double CM_x, int mdx_r) { //몬스터는
 		mst_r[mdx_r].img_dir = 0;  //왼쪽 방향
 }
 
-void update_monster_dir_big(double monster_x, double CM_x, int mdx_big) { //몬스터는 항상 플레이어를 바라본다
+//대형 몬스터 이미지 방향
+void update_monster_dir_big(double monster_x, double CM_x, int mdx_big) {
 	if (mst_big[mdx_big].x + 50 < CM_x)
 		mst_big[mdx_big].img_dir = 1;  //오른쪽 방향
 
@@ -57,6 +77,16 @@ void update_monster_dir_big(double monster_x, double CM_x, int mdx_big) { //몬스
 		mst_big[mdx_big].img_dir = 0;  //왼쪽 방향
 }
 
+//공중 몬스터 이미지 방향
+void update_monster_dir_air(double monster_x, double CM_x, int mdx_air) {
+	if (mst_air[mdx_air].x + 75 < CM_x)
+		mst_air[mdx_air].img_dir = 1;  //오른쪽 방향
+
+	else if (mst_air[mdx_air].x + 75 > CM_x)
+		mst_air[mdx_air].img_dir = 0;  //왼쪽 방향
+}
+
+//몬스터 체력 표시
 void monster_hp_ind(HDC mdc, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) {
 	HBRUSH hbrush, oldbrush;
 	HPEN hpen, oldpen;
@@ -88,4 +118,40 @@ void monster_hp_ind(HDC mdc, int x1, int y1, int x2, int y2, int x3, int y3, int
 	DeleteObject(hbrush);
 	SelectObject(mdc, oldpen);
 	DeleteObject(hpen);
+}
+
+//일반 몬스터 배열 밀어내기
+void monster_array_push_r(int hit, int idx) {
+	for (int i = hit; i < idx - 1; i++) {
+		mst_r[i].x = mst_r[i + 1].x;
+		mst_r[i].y = mst_r[i + 1].y;
+		mst_r[i].hp = mst_r[i + 1].hp;
+		mst_r[i].img_dir = mst_r[i + 1].img_dir;
+		mst_r[i].move_dir = mst_r[i + 1].move_dir;
+	}
+	idx--;
+}
+
+//대형 몬스터 배열 빌어내기
+void monster_array_push_big(int hit, int idx) {
+	for (int i = hit; i < idx - 1; i++) {
+		mst_big[i].x = mst_big[i + 1].x;
+		mst_big[i].y = mst_big[i + 1].y;
+		mst_big[i].hp = mst_big[i + 1].hp;
+		mst_big[i].img_dir = mst_big[i + 1].img_dir;
+		mst_big[i].move_dir = mst_big[i + 1].move_dir;
+	}
+	idx--;
+}
+
+//공중 몬스터 배열 밀어내기
+void monster_array_push_air(int hit, int idx) {
+	for (int i = hit; i < idx - 1; i++) {
+		mst_air[i].x = mst_air[i + 1].x;
+		mst_air[i].y = mst_air[i + 1].y;
+		mst_air[i].hp = mst_air[i + 1].hp;
+		mst_air[i].img_dir = mst_air[i + 1].img_dir;
+		mst_air[i].move_dir = mst_air[i + 1].move_dir;
+	}
+	idx--;
 }

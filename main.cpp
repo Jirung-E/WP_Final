@@ -20,6 +20,7 @@ std::mt19937 gen(rd_main());
 GameManager manager;
 extern monster_info_regular mst_r[100]; //몬스터 정보를 저정하는 구조체, monster_info.h에 선언
 extern monster_info_big mst_big[100];
+extern monster_info_air mst_air[100];
 
 enum Timer {
 	KEYDOWN, UPDATE
@@ -41,6 +42,13 @@ void IMG_FILE_LOAD() {
 	monster_left.Load(L".\\res\\monster_left.png");
 	monster_big_right.Load(L".\\res\\monster_big_right.png");
 	monster_big_left.Load(L".\\res\\monster_big_left.png");
+	monster_air_right[0].Load(L".\\res\\bat\\bat1_right.png");
+	monster_air_right[1].Load(L".\\res\\bat\\bat2_right.png");
+	monster_air_right[2].Load(L".\\res\\bat\\bat3_right.png");
+	monster_air_left[0].Load(L".\\res\\bat\\bat1_left.png");
+	monster_air_left[1].Load(L".\\res\\bat\\bat2_left.png");
+	monster_air_left[2].Load(L".\\res\\bat\\bat3_left.png");
+
 
 	SCAR_H_right.Load(L".\\res\\SCAR_H_right.png");
 	SCAR_H_left.Load(L".\\res\\SCAR_H_left.png");
@@ -64,13 +72,32 @@ void show_target(HDC mdc, int mouse_x, int mouse_y, double var) {
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
 	MoveToEx(mdc, mouse_x + 10 + var, mouse_y, NULL);
-	LineTo(mdc, mouse_x + 30 + var, mouse_y);
+	LineTo(mdc, mouse_x + 40 + var, mouse_y);
 	MoveToEx(mdc, mouse_x - 10 - var, mouse_y, NULL);
-	LineTo(mdc, mouse_x - 30 - var, mouse_y);
+	LineTo(mdc, mouse_x - 40 - var, mouse_y);
 	MoveToEx(mdc, mouse_x, mouse_y - 10 - var, NULL);
-	LineTo(mdc, mouse_x, mouse_y - 30 - var);
+	LineTo(mdc, mouse_x, mouse_y - 40 - var);
 	MoveToEx(mdc, mouse_x, mouse_y + 10 + var, NULL);
-	LineTo(mdc, mouse_x, mouse_y + 30 + var);
+	LineTo(mdc, mouse_x, mouse_y + 40 + var);
+
+	SelectObject(mdc, oldpen);
+	DeleteObject(hpen);
+}
+
+//히트 포인트 표시
+void show_hit(HDC mdc, int hit_x, int hit_y) {
+	HPEN hpen, oldpen;
+	hpen = CreatePen(PS_SOLID, 8, RGB(255, 0, 0));
+	oldpen = (HPEN)SelectObject(mdc, hpen);
+
+	MoveToEx(mdc, hit_x, hit_y, NULL);
+	LineTo(mdc, hit_x - 10, hit_y - 10);
+	MoveToEx(mdc, hit_x, hit_y, NULL);
+	LineTo(mdc, hit_x + 10, hit_y - 10);
+	MoveToEx(mdc, hit_x, hit_y, NULL);
+	LineTo(mdc, hit_x - 10, hit_y + 10);
+	MoveToEx(mdc, hit_x, hit_y, NULL);
+	LineTo(mdc, hit_x + 10, hit_y + 10);
 
 	SelectObject(mdc, oldpen);
 	DeleteObject(hpen);
@@ -107,15 +134,20 @@ void show_interface(HDC mdc, RECT rt) {
 	//재장전 게이지 출력
 	if (reload == 1)
 		reload_indicator(mdc, CM_x, CM_y - 30 + landing_shake, CM_x + reload_x, CM_y - 10 + landing_shake, CM_x, CM_y - 30 + landing_shake, CM_x + 100, CM_y - 10 + landing_shake);
-	
+
 	//몬스터 체력 게이지 출력
 	for (int i = 0; i < mdx_r; i++)
 		monster_hp_ind(mdc, mst_r[i].x + ss_x, mst_r[i].y - 30 + landing_shake + ss_y, mst_r[i].x + mst_r[i].hp * 2 + ss_x, mst_r[i].y - 15 + landing_shake + ss_y,
-						mst_r[i].x + ss_x, mst_r[i].y - 30 + landing_shake + ss_y, mst_r[i].x + 100 + ss_x, mst_r[i].y - 15 + landing_shake + ss_y);
+			mst_r[i].x + ss_x, mst_r[i].y - 30 + landing_shake + ss_y, mst_r[i].x + 100 + ss_x, mst_r[i].y - 15 + landing_shake + ss_y);
 	//대형 몬스터
 	for (int i = 0; i < mdx_big; i++)
 		monster_hp_ind(mdc, mst_big[i].x + ss_x, mst_big[i].y - 30 + landing_shake + ss_y, mst_big[i].x + mst_big[i].hp * 2 + ss_x, mst_big[i].y - 15 + landing_shake + ss_y,
 			mst_big[i].x + ss_x, mst_big[i].y - 30 + landing_shake + ss_y, mst_big[i].x + 200 + ss_x, mst_big[i].y - 15 + landing_shake + ss_y);
+
+	//공중 몬스터
+	for (int i = 0; i < mdx_air; i++)
+		monster_hp_ind(mdc, mst_air[i].x + ss_x, mst_air[i].y - 30 + landing_shake + ss_y, mst_air[i].x + mst_air[i].hp * 5 + ss_x, mst_air[i].y - 15 + landing_shake + ss_y,
+			mst_air[i].x + ss_x, mst_air[i].y - 30 + landing_shake + ss_y, mst_air[i].x + 150 + ss_x, mst_air[i].y - 15 + landing_shake + ss_y);
 }
 
 //플레이어 이미지, 총 이미지 출력
@@ -202,6 +234,23 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 			break;
 		}
 	}
+
+	//공중 몬스터 출력
+	for (int i = 0; i < mdx_air; i++) {
+		switch (mst_air[i].img_dir) {
+		case 0:
+			MST_air_w = monster_air_left[air].GetWidth();
+			MST_air_h = monster_air_left[air].GetHeight();
+			monster_air_left[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, 60, 0, 0, MST_air_w, MST_air_h);
+			break;
+
+		case 1:
+			MST_air_w = monster_air_right[air].GetWidth();
+			MST_air_h = monster_air_right[air].GetHeight();
+			monster_air_right[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, 60, 0, 0, MST_air_w, MST_air_h);
+			break;
+		}
+	}
 }
 
 //플레이어 이미지 방향 업데이트
@@ -250,6 +299,8 @@ void update_player_position(RECT rt) {
 				mst_r[i].x += 15;
 			for (int i = 0; i < mdx_big; i++)		
 				mst_big[i].x += 15;
+			for (int i = 0; i < mdx_air; i++)
+				mst_air[i].x += 15;
 		}
 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2900 && CM_x >= 700)) //배경 인식 좌표가 10이되고 플레이어가 다시 가운데로 이동할 때까지
@@ -266,6 +317,8 @@ void update_player_position(RECT rt) {
 				mst_r[i].x -= 15;
 			for (int i = 0; i < mdx_big; i++)
 				mst_big[i].x -= 15;
+			for (int i = 0; i < mdx_air; i++)
+				mst_air[i].x -= 15;
 		}
 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2900 && CM_x >= 700))
@@ -286,6 +339,10 @@ void update_monster_direction(double CM_x) {
 	//대형 몬스터
 	for (int i = 0; i < mdx_big; i++)
 		update_monster_dir_big(mst_big[i].x + ss_x, CM_x + ss_x, i);
+
+	//공중 몬스터
+	for (int i = 0; i < mdx_air; i++)
+		update_monster_dir_air(mst_air[i].x + ss_x, CM_x + ss_x, i);
 }
 
 //몬스터 위치 업데이트
@@ -305,60 +362,36 @@ void update_monster_position() {
 		else if (mst_big[i].img_dir == 1)
 			mst_big[i].x += 3;
 	}
+
+	//공중 몬스터 위치
+	for (int i = 0; i < mdx_air; i++) {
+		if (mst_air[i].img_dir == 0)
+			mst_air[i].x -= 2;
+		else if (mst_air[i].img_dir == 1)
+			mst_air[i].x += 2;
+	}
 }
 
 //몬스터 명중 판정
-void check_hit() {
-	int hit = 0;
-
+void check_hit(double hit_x, double hit_y) {
 	//일반 몬스터 히트 판정
 	for (int i = 0; i < mdx_r; i++) {  
 		if (hit_x >= mst_r[i].x && hit_x <= mst_r[i].x + 100 && hit_y >= mst_r[i].y && hit_y <= mst_r[i].y + 100) { 
 			hit = i;    //조준점 내부의 좌표가 몬스터 이미지 내부에 위치하면 히트로 판정
-
 			//총알은 해당 몬스터에 가로막힌다.
-			std::uniform_int_distribution<int> x((mst_r[hit].x + 50) - (10 + var), (mst_r[hit].x + 50) + (10 + var));
-			std::uniform_int_distribution<int> y((mst_r[hit].y + 50) - (10 + var), (mst_r[hit].y + 50) + (10 + var));
-			angle = atan2(y(gen) - (CM_y + 60), x(gen) - (CM_x + 50));
-			ammo_x1 = CM_x + 50;  ammo_y1 = CM_y + 60;
-			
-			if (CM_img_dir == 0) {
-				ammo_x2 = ammo_x1 + (((CM_x + 50) - (mst_r[hit].x + 50)) * cos(angle));
-				ammo_y2 = ammo_y1 + (((CM_x + 50) - (mst_r[hit].x + 50) ) * sin(angle));
-			}
-			else if (CM_img_dir == 1) {
-				ammo_x2 = ammo_x1 + (((mst_r[hit].x + 50) - (CM_x + 50)) * cos(angle));
-				ammo_y2 = ammo_y1 + (((mst_r[hit].x + 50) - (CM_x + 50)) * sin(angle));
-			}
-			
+			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
+			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
+			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
 
 			//총마다 대미지를 다르게 줌
-			switch (GUN_number) {	   
-			case scar_h:
-				mst_r[hit].hp -= 8; break;
-			}
-			
-			//몬스터의 hp가 0이 되면 보이지 않는 곳으로 이동된다. 몬스터의 인덱스는 라운드가 올라가거나 게임 오버 시 초기화 된다.
-			if (mst_r[hit].hp <= 0) {  
-				mst_r[hit].x = -200; mst_r[hit].y = -200;
-				mst_r[hit].hp = 0; mst_r[hit].img_dir = -1;
-				mst_r[hit].move_dir = -1;
+			mst_r[hit].hp = cal_damage(mst_r[hit].hp, GUN_number);
 
+			if (mst_r[hit].hp <= 0) {  
 				//중간 인덱스를 가진 몬스터를 처치할 경우 나머지 몬스터들의 인덱스가 한 칸씩 앞당겨지고 인덱스 1 감소시킨다.
-				if (hit < mdx_r - 1) {
-					for (int i = hit; i < mdx_r - 1; i++) {
-						mst_r[i].x = mst_r[i + 1].x;
-						mst_r[i].y = mst_r[i + 1].y;
-						mst_r[i].hp = mst_r[i + 1].hp;
-						mst_r[i].img_dir = mst_r[i + 1].img_dir;
-						mst_r[i].move_dir = mst_r[i + 1].move_dir;
-					}
-					mdx_r--;
-				}
+				if (hit < mdx_r - 1) monster_array_push_r(hit, mdx_r);
 
 				//최신 인덱스를 가진 몬스터의 경우 그냥 인덱스를 감소시킨다.
-				else if (hit == mdx_r - 1)
-					mdx_r--;
+				else if (hit == mdx_r - 1) mdx_r--;
 			}
 		}
 	}
@@ -366,51 +399,29 @@ void check_hit() {
 	//대형 몬스터 히트 판정
 	for (int i = 0; i < mdx_big; i++) {
 		if (hit_x >= mst_big[i].x && hit_x <= mst_big[i].x + 200 && hit_y >= mst_big[i].y && hit_y <= mst_big[i].y + 200) {
-			hit = i;    //조준점 내부의 좌표가 몬스터 이미지 내부에 위치하면 히트로 판정
-
-			//총알은 해당 몬스터에 가로막힌다.
-			std::uniform_int_distribution<int> x((mst_big[hit].x + 100) - (10 + var), (mst_big[hit].x + 100) + (10 + var));
-			std::uniform_int_distribution<int> y((mst_big[hit].y + 100) - (10 + var), (mst_big[hit].y + 100) + (10 + var));
-			angle = atan2(y(gen) - (CM_y + 60), x(gen) - (CM_x + 50));
-			ammo_x1 = CM_x + 50;  ammo_y1 = CM_y + 60;
-
-			if (CM_img_dir == 0) {
-				ammo_x2 = ammo_x1 + (((CM_x + 50) - (mst_big[hit].x + 100)) * cos(angle));
-				ammo_y2 = ammo_y1 + (((CM_x + 50) - (mst_big[hit].x + 100)) * sin(angle));
-			}
-			else if (CM_img_dir == 1) {
-				ammo_x2 = ammo_x1 + (((mst_big[hit].x + 100) - (CM_x + 50)) * cos(angle));
-				ammo_y2 = ammo_y1 + (((mst_big[hit].x + 100) - (CM_x + 50)) * sin(angle));
-			}
-
-
-			//총마다 대미지를 다르게 줌
-			switch (GUN_number) {
-			case scar_h:
-				mst_big[hit].hp -= 8; break;
-			}
-
-			//몬스터의 hp가 0이 되면 보이지 않는 곳으로 이동된다. 몬스터의 인덱스는 라운드가 올라가거나 게임 오버 시 초기화 된다.
+			hit = i;
+			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
+			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
+			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+			mst_big[hit].hp = cal_damage(mst_big[hit].hp, GUN_number);
 			if (mst_big[hit].hp <= 0) {
-				mst_big[hit].x = -400; mst_big[hit].y = -400;
-				mst_big[hit].hp = 0; mst_big[hit].img_dir = -1;
-				mst_big[hit].move_dir = -1;
-				
-				//중간 인덱스를 가진 몬스터를 처치할 경우 나머지 몬스터들의 인덱스가 한 칸씩 앞당겨지고 인덱스 1 감소시킨다.
-				if (hit < mdx_big - 1) {
-					for (int i = hit; i < mdx_big - 1; i++) {
-						mst_big[i].x = mst_big[i + 1].x;
-						mst_big[i].y = mst_big[i + 1].y;
-						mst_big[i].hp = mst_big[i + 1].hp;
-						mst_big[i].img_dir = mst_big[i + 1].img_dir;
-						mst_big[i].move_dir = mst_big[i + 1].move_dir;
-					}
-					mdx_big--;
-				}
+				if (hit < mdx_big - 1)  monster_array_push_big(hit, mdx_big);
+				if (hit == mdx_big - 1) mdx_big--;
+			}
+		}
+	}
 
-				//최신 인덱스를 가진 몬스터의 경우 그냥 인덱스를 감소시킨다.
-				else if (hit == mdx_big - 1)
-					mdx_big--;
+	//공중 몬스터 히트 판정
+	for (int i = 0; i < mdx_air; i++) {
+		if (hit_x >= mst_air[i].x && hit_x <= mst_air[i].x + 150 && hit_y >= mst_air[i].y && hit_y <= mst_air[i].y + 200) {
+			hit = i; 
+			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
+			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
+			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+			mst_air[hit].hp -= 8; //cal_damage(mst_air[hit].hp, GUN_number);
+			if (mst_air[hit].hp <= 0) {
+				if (hit < mdx_air - 1) monster_array_push_air(hit, mdx_air);
+				if (hit == mdx_air - 1) mdx_air--;
 			}
 		}
 	}
@@ -422,7 +433,7 @@ void update_shoot_animation(RECT rt, int mouse_x, int mouse_y, BOOL is_click) {
 	if (is_click == TRUE && reload == 0) {
 		switch (GUN_number) {
 		case scar_h: //케이스 넘버에 define한 총 이름을 넣으면 됨
-			if (ammo < 25) {
+			if (ammo < 30) {
 				shoot_delay++;                                         //LBUTTON이 눌려있는 동안 딜레이 값이 계속 증가함
 				if (shoot_delay == 6) {                                //딜레이 값이 정해진 값에 도달하면
 					std::uniform_int_distribution<int> x(mx - (10 + var), mx + (10 + var)); //분산도가 넓어질수록 정확도가 떨어지게됨
@@ -432,18 +443,17 @@ void update_shoot_animation(RECT rt, int mouse_x, int mouse_y, BOOL is_click) {
 					ammo_x1 = CM_x + 50; ammo_y1 = CM_y + 60;
 					ammo_x2 = ammo_x1 + (1500 * cos(angle));
 					ammo_y2 = ammo_y1 + (1500 * sin(angle));
-					check_hit(); is_draw = TRUE;													//그리기 시작
-					
+					check_hit(hit_x, hit_y);
+					is_draw = TRUE; draw_hit = TRUE;//그리기 시작
 					ammo++; var += 4; ind_effect = 1; shake_effect = 1; //각각 인터페이스 이펙트, 흔들림 이펙트
-					shoot_delay = 0;								    //딜레이는 0이되어 다시 딜레이가 증가하기 시작
-					if (ammo == 25) empty = 1;							//총알 소모가 정히진 값에 도달하면 더 이상 발사되지 않는다
+					shoot_delay = 0;	//딜레이는 0이되어 다시 딜레이가 증가하기 시작
+
+					if (ammo == 30) empty = 1;							//총알 소모가 정히진 값에 도달하면 더 이상 발사되지 않는다
 				}
 			}
 			break;
 		}
 	}
-
-	
 
 	 //애니매이션
 	{
@@ -452,6 +462,14 @@ void update_shoot_animation(RECT rt, int mouse_x, int mouse_y, BOOL is_click) {
 			draw_timer++;
 			if (draw_timer == 3) {
 				draw_timer = 0; is_draw = FALSE;
+			}
+		}
+
+		//몬스터가 총알에 맞은 부분을 보여준다.
+		if (draw_hit == TRUE) {
+			hit_timer++;
+			if (hit_timer == 10) {
+				hit_timer = 0; draw_hit = FALSE;
 			}
 		}
 
@@ -498,9 +516,13 @@ void update_shoot_animation(RECT rt, int mouse_x, int mouse_y, BOOL is_click) {
 
 		//재장전 인디케이터
 		if (reload == 1) { 
-			reload_x += 2;
-			if (reload_x + CM_x == CM_x + 100) { 
-				ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
+			switch (GUN_number) {
+			case scar_h:
+				reload_x += 3;
+				if (reload_x + CM_x >= CM_x + 100) {
+					ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
+				}
+				break;
 			}
 		}
 	}
@@ -577,7 +599,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				if(GetAsyncKeyState('A') & 0x8000)  //좌측 이동
 					CM_move_dir = 0;
 
-				if(GetAsyncKeyState('D') & 0x8000)  //우측 이동
+				else if(GetAsyncKeyState('D') & 0x8000)  //우측 이동
 					CM_move_dir = 1;
 
 				if(GetAsyncKeyState('R') & 0x8000)  //재장전
@@ -603,26 +625,65 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				update_monster_direction(CM_x);
 				update_monster_position();
 
-				//spawn_timer의 수치가 0이 되면 몬스터가 한 마리씩 스폰
-				//일반 몬스터
-				spawn_timer_r--;
-				if(spawn_timer_r == 0) {
-					if(mdx_r < 99) {
-						spawn_monster_regular(mdx_r, BG_scanner, rt);
-						mdx_r++;
+				//스폰 타이머
+				{
+					//spawn_timer의 수치가 0이 되면 몬스터가 한 마리씩 스폰
+					//일반 몬스터
+					spawn_timer_r--;
+					if (spawn_timer_r == 0) {
+						spawn_timer_r = 500;
+						if (mdx_r < 99) {
+							spawn_monster_regular(mdx_r, BG_scanner, rt);
+							mdx_r++;
+						}
 					}
-					spawn_timer_r = 300;
+
+					//대형 몬스터
+					spawn_timer_big--;
+					if (spawn_timer_big == 0) {
+						spawn_timer_big = 1000;
+						if (mdx_big < 99) {
+							spawn_monster_big(mdx_big, BG_scanner, rt);
+							mdx_big++;
+						}
+					}
+
+					//공중 몬스터
+					spawn_timer_air--;
+					if (spawn_timer_air == 0) {
+						spawn_timer_air = 500;
+						if (mdx_air < 99) {
+							spawn_monster_air(mdx_air, BG_scanner, rt);
+							mdx_air++;
+						}
+					}
 				}
 
-				//대형 몬스터
-				spawn_timer_big--;
-				if(spawn_timer_big == 0) {
-					if(mdx_big < 99) {
-						spawn_monster_big(mdx_big, BG_scanner, rt);
-						mdx_big++;
+				// 몬스터 애니메이션
+				{
+					if (up_down == 1) {  //공중 몬스터 애니메이션 인덱스
+						Fdelay_air++;
+						if (Fdelay_air == 7) {
+							air++;
+							Fdelay_air = 0;
+							if (air == 2) 
+								up_down = 0;
+							
+						}
 					}
-					spawn_timer_big = 300;
+					else if (up_down == 0) {
+						Fdelay_air++;
+						if (Fdelay_air == 7) {
+							air--;
+							Fdelay_air = 0;
+							if (air == 0)
+								up_down = 1;
+						}
+					}
 				}
+
+
+
 			}
 			break;
 		}
@@ -644,15 +705,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				BackGround.Draw(mdc, rt.left + ss_x, rt.top - 30 + landing_shake + ss_y, rt.right, rt.bottom + 30, BG_scanner, 0, BG_w, BG_h);
 				//BG_scanner가 클수록 배경은 오른쪽으로 이동하게 됨
 
+				//몬스터 이미지 출력
+				show_monster(mdc, ss_x, ss_y, landing_shake);
+
 				//총알 궤적 그리기
-				if(is_draw == TRUE)
+				if (is_draw == TRUE)
 					draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2);
 
 				//플레이어 이미지 출력
 				show_player(mdc);
 
-				//몬스터 이미지 출력
-				show_monster(mdc, ss_x, ss_y, landing_shake);
+				//히트 포인트 그리기
+				if(draw_hit == TRUE)
+					show_hit(mdc, ammo_x2, ammo_y2);
 
 				//인터페이스 출력
 				show_interface(mdc, rt);

@@ -4,7 +4,11 @@ static int ammo;							      //장탄 수
 static int draw_timer;							  //궤적이 그려지는 시간을 정한다. 수치가 높을수록 더 오랫동안 그려진다.
 static double angle;							  //총알 궤적의 각도
 static double ammo_x1, ammo_y1, ammo_x2, ammo_y2; //총알 궤적이 그려지는 좌표
+static double dist;//플레이어와 히트 판정점 사이의 거리
 
+static BOOL draw_hit = FALSE;
+static int hit_timer;
+static int hit;
 static double hit_x, hit_y;   //조준점 내부에서 생성되는 실제 x,y 좌표
 static double var;            //총을 오래 사격할 수록 반동으로 인해 정확도가 떨어짐, 수치가 증가할 수록 분산도가 커짐
 
@@ -18,8 +22,12 @@ static int r_pressed;      //재장전 중복 입력 방지를 위한 변수
 static int reload;      //0이면 재장전 안함, 1이면 재장전 중
 static int reload_x;    //재장전 표시기 x2 좌표
 
+static int empty;   //총알 모두 소모 시 1로 변경
+
+int cal_dist(double x1, double y1, double x2, double y2);
 void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2);
 void ammo_indicator(HDC mdc, int apx, int GUN_number, int size, int ind_x, int ind_y);
 void reload_indicator(HDC mdc, int x, int y, int x2, int y2, int x3, int y3, int x4, int y4);
+int cal_damage(int monster_hp, int GUN_number);
 
-static int empty;   //총알 모두 소모 시 1로 변경
+

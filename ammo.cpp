@@ -9,7 +9,8 @@ enum gun_name_ammo {
 	null, scar_h, m16, mp_44, mg_42, awp
 };
 
-void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2) { //총알 궤적 그리기
+//총알 궤적 그리기
+void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2) { 
 	HPEN hpen, oldpen;
 	hpen = CreatePen(PS_SOLID, 7, RGB(255, 212, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
@@ -21,7 +22,8 @@ void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2) { //총알 궤�
 	DeleteObject(hpen);
 }
 
-void ammo_indicator(HDC mdc, int ammo, int GUN_number, int ind_size, int ind_x, int ind_y) { //장탄수 표시기
+//장탄수 표시
+void ammo_indicator(HDC mdc, int ammo, int GUN_number, int ind_size, int ind_x, int ind_y) {
 	int ammo_empty = 0;
 	TCHAR lpout[50];
 	HFONT hfont, oldfont;
@@ -32,16 +34,16 @@ void ammo_indicator(HDC mdc, int ammo, int GUN_number, int ind_size, int ind_x, 
 
 	switch (GUN_number) { //최대 장탄수에서 사용한 탄약 수를 뺀 값이 현재 장탄수
 	case scar_h:
-		if ((25 - ammo) / 10 > 0 && 25 - ammo > 0) {       //총알이 두 자릿수 남았을 때
-			wsprintf(lpout, L"%d", 25 - ammo);
+		if ((30 - ammo) / 10 > 0 && 30 - ammo > 0) {       //총알이 두 자릿수 남았을 때
+			wsprintf(lpout, L"%d", 30 - ammo);
 			TextOut(mdc, ind_x, ind_y, lpout, lstrlen(lpout));
 		}
-		else if ((25 - ammo) / 10 == 0 && 25 - ammo > 0) { //총알이 한 자릿수 남았을 때
-			wsprintf(lpout, L" %d", 25 - ammo);
+		else if ((30 - ammo) / 10 == 0 && 30 - ammo > 0) { //총알이 한 자릿수 남았을 때
+			wsprintf(lpout, L" %d", 30 - ammo);
 			TextOut(mdc, ind_x, ind_y, lpout, lstrlen(lpout));
 		}
 
-		if (25 - ammo == 0)                                //총알 모두 소모 시 재장전 표시 
+		if (30 - ammo == 0)                                //총알 모두 소모 시 재장전 표시 
 			ammo_empty = 1;
 
 		break;
@@ -61,7 +63,8 @@ void ammo_indicator(HDC mdc, int ammo, int GUN_number, int ind_size, int ind_x, 
 	DeleteObject(hfont);
 }
 
-void reload_indicator(HDC mdc, int x, int y, int x2, int y2, int x3, int y3, int x4, int y4) { //재장전 표시기
+//재장전 게이지 표시
+void reload_indicator(HDC mdc, int x, int y, int x2, int y2, int x3, int y3, int x4, int y4) {
 	HBRUSH hbrush, oldbrush;
 	HPEN hpen, oldpen;
 
@@ -92,4 +95,23 @@ void reload_indicator(HDC mdc, int x, int y, int x2, int y2, int x3, int y3, int
 	DeleteObject(hbrush);
 	SelectObject(mdc, oldpen);
 	DeleteObject(hpen);
+}
+
+//플레이어와 히트 포인트의 거리 계산
+int cal_dist(double x1, double y1, double x2, double y2) {
+	double distance = 0;
+	distance = sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)));
+
+	return distance;
+}
+
+//총마다 다른 대미지 계산
+int cal_damage(int monster_hp, int GUN_number) {
+	switch (GUN_number) {
+	case scar_h:
+		monster_hp -= 8; 
+		break;
+	}
+
+	return monster_hp;
 }

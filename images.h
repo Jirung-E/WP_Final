@@ -3,6 +3,7 @@ static CImage BackGround, indicator_back, ammo_icon;
 static CImage commando_right, commando_left, commando_jump_right, commando_jump_left;
 static CImage SCAR_H_right, SCAR_H_left, M16_right, M16_left, MP44_right, MP44_left, MG42_right, MG42_left, AWP_right, AWP_left;
 static CImage monster_right, monster_left, monster_big_right, monster_big_left;
+static CImage monster_air_right[3], monster_air_left[3];
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지
@@ -17,6 +18,11 @@ static int CM_w, CM_h;   //플레이어 캐릭터 이미지의 가로, 세로 사이즈
 //몬스터 관련
 static int MST_w, MST_h; //몬스터 이미지의 사이즈
 static int MST_big_w, MST_big_h; //대형 몬스터 이미지의 사이즈
+static int MST_air_w, MST_air_h; //공중 몬스터 이미지의 사이즈
+
+static int Fdelay_air; // 타이머 속도가 빨라 프레임 속도를 늧추는 수단이 필요
+static int air; //공중 몬스터 애니메이션 인덱스
+static int up_down = 1; //공중 몬스터 애니메이션의 인덱스 감소 및 증가 결정, 기본값 1, 증가
 
 //무기 이미지 관련 (gun)
 enum gun_name_images {
