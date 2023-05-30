@@ -122,7 +122,8 @@ void show_interface(HDC mdc, RECT rt) {
 	case scar_h:
 		GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetWidth();
 		SCAR_H_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
-		ammo_indicator(mdc, 30, ammo, scar_h, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
+		//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
+		ammo_indicator(mdc, 30, ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
 		break;
 	}
 

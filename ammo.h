@@ -27,7 +27,7 @@ static int empty;   //총알 모두 소모 시 1로 변경
 
 int cal_dist(double x1, double y1, double x2, double y2);
 void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2);
-void ammo_indicator(HDC mdc, int max_ammo, int ammo, int GUN_number, int ind_size, int ind_x, int ind_y);
+void ammo_indicator(HDC mdc, int max_ammo, int ammo, int ind_size, int ind_x, int ind_y);
 void reload_indicator(HDC mdc, int x, int y, int x2, int y2, int x3, int y3, int x4, int y4);
 int cal_damage(int monster_hp, int GUN_number);
 
