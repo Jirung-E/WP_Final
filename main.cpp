@@ -108,28 +108,21 @@ void show_hit(HDC mdc, int hit_x, int hit_y) {
 //인터페이스 출력
 void show_interface(HDC mdc, RECT rt) {
 	//장탄수 표시기 배경
-	IND_w = indicator_back.GetWidth();
-	IND_h = indicator_back.GetHeight();
+	IND_w = indicator_back.GetWidth(); IND_h = indicator_back.GetHeight();
 	indicator_back.Draw(mdc, rt.right - 600 + ss_x, rt.bottom - 110 + landing_shake + ss_y, 600, 110, 0, 0, IND_w, IND_h);
 
-	//총 아이콘
-	switch (GUN_number) {
-	case scar_h:
-		GUN_w = SCAR_H_right.GetWidth();
-		GUN_h = SCAR_H_right.GetWidth();
-		SCAR_H_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
-		break;
+	//총알 아이콘
+	if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
+		AMO_w = ammo_icon.GetWidth(); AMO_h = ammo_icon.GetHeight();
+		ammo_icon.Draw(mdc, rt.right - 260 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
 	}
 
-	//총알 아이콘
-	AMO_w = ammo_icon.GetWidth();
-	AMO_h = ammo_icon.GetHeight();
-	ammo_icon.Draw(mdc, rt.right - 260 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
-
-	//장탄 수 출력
-	switch (GUN_number) { //ammo.h에 선언
+	//총 아이콘 및 장탄수 출력
+	switch (GUN_number) {
 	case scar_h:
-		ammo_indicator(mdc, ammo, scar_h, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y); //ammo.h에 선언
+		GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetWidth();
+		SCAR_H_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
+		ammo_indicator(mdc, 30, ammo, scar_h, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
 		break;
 	}
 
@@ -145,7 +138,6 @@ void show_interface(HDC mdc, RECT rt) {
 	for (int i = 0; i < mdx_big; i++)
 		monster_hp_ind(mdc, mst_big[i].x + ss_x, mst_big[i].y - 30 + landing_shake + ss_y, mst_big[i].x + mst_big[i].hp * 2 + ss_x, mst_big[i].y - 15 + landing_shake + ss_y,
 			mst_big[i].x + ss_x, mst_big[i].y - 30 + landing_shake + ss_y, mst_big[i].x + 200 + ss_x, mst_big[i].y - 15 + landing_shake + ss_y);
-
 	//공중 몬스터
 	for (int i = 0; i < mdx_air; i++)
 		monster_hp_ind(mdc, mst_air[i].x + ss_x, mst_air[i].y - 30 + landing_shake + ss_y, mst_air[i].x + mst_air[i].hp * 5 + ss_x, mst_air[i].y - 15 + landing_shake + ss_y,
@@ -157,20 +149,17 @@ void show_player(HDC mdc) {
 	switch (CM_img_dir) { //플레이어, 총 이미지 출력
 	case 0:
 		if (CM_jump == 0) {
-			CM_w = commando_left.GetWidth();
-			CM_h = commando_left.GetHeight();
+			CM_w = commando_left.GetWidth(); CM_h = commando_left.GetHeight();
 			commando_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
 		}
 		else if (CM_jump == 1 || CM_jump == 2) {
-			CM_w = commando_jump_left.GetWidth();
-			CM_h = commando_jump_left.GetHeight();
+			CM_w = commando_jump_left.GetWidth(); CM_h = commando_jump_left.GetHeight();
 			commando_jump_left.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
 		}
 
 		switch (GUN_number) {
 		case scar_h:
-			GUN_w = SCAR_H_left.GetWidth();
-			GUN_h = SCAR_H_left.GetWidth();
+			GUN_w = SCAR_H_left.GetWidth(); GUN_h = SCAR_H_left.GetWidth();
 			SCAR_H_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
 			break;
 		}
@@ -179,20 +168,17 @@ void show_player(HDC mdc) {
 		//////////////////////
 	case 1:
 		if (CM_jump == 0) {
-			CM_w = commando_right.GetWidth();
-			CM_h = commando_right.GetHeight();
+			CM_w = commando_right.GetWidth(); CM_h = commando_right.GetHeight();
 			commando_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
 		}
 		else if (CM_jump == 1 || CM_jump == 2) {
-			CM_w = commando_jump_right.GetWidth();
-			CM_h = commando_jump_right.GetHeight();
+			CM_w = commando_jump_right.GetWidth(); CM_h = commando_jump_right.GetHeight();
 			commando_jump_right.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
 		}
 
 		switch (GUN_number) {
 		case scar_h:
-			GUN_w = SCAR_H_right.GetWidth();
-			GUN_h = SCAR_H_right.GetWidth();
+			GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetWidth();
 			SCAR_H_right.Draw(mdc, CM_x + 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h);
 			break;
 		}
@@ -459,31 +445,9 @@ void check_hit() {
 	}
 }
 
-//총알 발사 시 수행되는 작업 모음
-void make_rand_ammo() {
-	std::random_device rd_ammo;
-	std::mt19937 gen(rd_ammo());
-	std::uniform_int_distribution<int> x(mx - (10 + var), mx + (10 + var)); //분산도가 넓어질수록 정확도가 떨어지게됨
-	std::uniform_int_distribution<int> y(my - (10 + var), my + (10 + var));
-	hit_x = x(gen); hit_y = y(gen);									//이 좌표가 몬스터의 이미지 안쪽에 위치해야 대미지 판정을 받는다.
-	angle = atan2(y(gen) - (CM_y + 60), x(gen) - (CM_x + 50));      //atan2 함수로 총알이 그려지는 각도를 계산한다.
-	ammo_x1 = CM_x + 50; ammo_y1 = CM_y + 60;
-	ammo_x2 = ammo_x1 + (1500 * cos(angle));
-	ammo_y2 = ammo_y1 + (1500 * sin(angle));
-
-	//히트 판정
-	check_hit();
-
-	is_draw = TRUE; draw_hit = TRUE; //그리기 시작
-	ammo++; ind_effect = 1; shake_effect = 1; //각각 인터페이스 이펙트, 흔들림 이펙트
-	shoot_delay = 0;	//딜레이는 0이되어 다시 딜레이가 증가하기 시작
-
-	if (ammo == 30) empty = 1;							//총알 소모가 정히진 값에 도달하면 더 이상 발사되지 않는다
-}
-
 //사격 시 화면 흔들림 생성
 void make_shake(int shake_acc, int shake_end) {
-	std::random_device rd_shake; 
+	std::random_device rd_shake;
 	std::mt19937 gen(rd_shake());
 	std::uniform_int_distribution<int> shake_x(-shake_acc, shake_acc); //숫자가 클 수록 반동이 커 화면 흔들림이 격해짐
 	std::uniform_int_distribution<int> shake_y(-shake_acc, shake_acc); //짧은 순간에 ss_x, ss_y에 랜덤한 값을 넣어 흔들림 표현
@@ -498,21 +462,45 @@ void make_shake(int shake_acc, int shake_end) {
 	}
 }
 
-//사격 애니메이션 업데이트
-void update_shoot_animation(RECT rt, int mouse_x, int mouse_y, BOOL is_click) {
-	//사격
+//총알 발사 시 수행되는 작업 모음
+void make_rand_ammo(int ammo, int max_ammo) {
+	if (ammo + 1 == max_ammo) empty = 1;							//총알 소모가 정히진 값에 도달하면 더 이상 발사되지 않는다
+
+	std::random_device rd_ammo;
+	std::mt19937 gen(rd_ammo());
+	std::uniform_int_distribution<int> x(mx - (10 + var), mx + (10 + var)); //분산도가 넓어질수록 정확도가 떨어지게됨
+	std::uniform_int_distribution<int> y(my - (10 + var), my + (10 + var));
+	hit_x = x(gen); hit_y = y(gen);									//이 좌표가 몬스터의 이미지 안쪽에 위치해야 대미지 판정을 받는다.
+	angle = atan2(y(gen) - (CM_y + 60), x(gen) - (CM_x + 50));      //atan2 함수로 총알이 그려지는 각도를 계산한다.
+	ammo_x1 = CM_x + 50; ammo_y1 = CM_y + 60;
+	ammo_x2 = ammo_x1 + (1500 * cos(angle));
+	ammo_y2 = ammo_y1 + (1500 * sin(angle));
+
+	//히트 판정
+	check_hit();
+
+	is_draw = TRUE; draw_hit = TRUE; //그리기 시작
+	ind_effect = 1; shake_effect = 1; //각각 인터페이스 이펙트, 흔들림 이펙트
+	shoot_delay = 0;	//딜레이는 0이되어 다시 딜레이가 증가하기 시작
+}
+
+//사격
+void shoot() {
 	if (is_click == TRUE && reload == 0 && empty == 0) {
 		switch (GUN_number) {
-		case scar_h:	
-			shoot_delay++;                                       
-			if (shoot_delay == 6) {					          
-				make_rand_ammo();
-				var += 4;
+		case scar_h:
+			shoot_delay++;
+			if (shoot_delay == 6) {
+				make_rand_ammo(ammo, 30); //최대 장탄수를 오른쪽 인수에 적는다
+				var += 4; ammo++;
 			}
 			break;
 		}
 	}
+}
 
+//사격 애니메이션 업데이트
+void update_shoot_animation() {
 	 //사격 시 발생하는 애니매이션
 	{
 		//사격 시 화면 흔들림
@@ -630,8 +618,7 @@ void monster_animation() {
 //그리기 파트
 void wm_paint(HDC mdc, RECT rt) {
 	//////////////////////// 버퍼
-	BG_w = 1500;
-	BG_h = BackGround.GetHeight();
+	BG_w = 1500; BG_h = BackGround.GetHeight();
 	BackGround.Draw(mdc, rt.left + ss_x, rt.top - 30 + landing_shake + ss_y, rt.right, rt.bottom + 30, BG_scanner, 0, BG_w, BG_h);
 	//BG_scanner가 클수록 배경은 오른쪽으로 이동하게 됨
 
@@ -713,12 +700,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 			if(manager.getCurrentSceneID() == Game && !manager.isPaused()) {
 				update_player_position(rt);
-				update_shoot_animation(rt, mx, my, is_click);
+				shoot();
+				update_shoot_animation();
 				update_monster_direction(CM_x);
-				update_monster_position();
-				//몬스터 생성        
+				update_monster_position();     
 				make_monster(rt);  
-				// 몬스터 애니메이션
 				monster_animation();
 			}
 			break;

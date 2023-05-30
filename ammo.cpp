@@ -23,7 +23,7 @@ void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2) {
 }
 
 //장탄수 표시
-void ammo_indicator(HDC mdc, int ammo, int GUN_number, int ind_size, int ind_x, int ind_y) {
+void ammo_indicator(HDC mdc, int max_ammo, int ammo, int GUN_number, int ind_size, int ind_x, int ind_y) {
 	int ammo_empty = 0;
 	TCHAR lpout[50];
 	HFONT hfont, oldfont;
@@ -34,16 +34,16 @@ void ammo_indicator(HDC mdc, int ammo, int GUN_number, int ind_size, int ind_x, 
 
 	switch (GUN_number) { //최대 장탄수에서 사용한 탄약 수를 뺀 값이 현재 장탄수
 	case scar_h:
-		if ((30 - ammo) / 10 > 0 && 30 - ammo > 0) {       //총알이 두 자릿수 남았을 때
+		if ((max_ammo - ammo) / 10 > 0 && 30 - ammo > 0) {       //총알이 두 자릿수 남았을 때
 			wsprintf(lpout, L"%d", 30 - ammo);
 			TextOut(mdc, ind_x, ind_y, lpout, lstrlen(lpout));
 		}
-		else if ((30 - ammo) / 10 == 0 && 30 - ammo > 0) { //총알이 한 자릿수 남았을 때
+		else if ((max_ammo - ammo) / 10 == 0 && 30 - ammo > 0) { //총알이 한 자릿수 남았을 때
 			wsprintf(lpout, L" %d", 30 - ammo);
 			TextOut(mdc, ind_x, ind_y, lpout, lstrlen(lpout));
 		}
 
-		if (30 - ammo == 0)                                //총알 모두 소모 시 재장전 표시 
+		if (max_ammo - ammo == 0)                                //총알 모두 소모 시 재장전 표시 
 			ammo_empty = 1;
 
 		break;

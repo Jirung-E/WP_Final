@@ -118,3 +118,11 @@ void wm_lbuttondown()
 void wm_keydown()
 void wm_paint(HDC mdc, RECT rt)
 void monster_animation()
+
+//2023.05.30 업데이트(2)
+-총 아이콘과 장탄수 숫자 출력 파트를 하나의 switch-case문으로 통합
+-ammo_indicator 함수에 최대 장탄수와 현재 장탄수만 인수로 넣을 수 있도록 수정
+-update_shoot_animation 함수에서 사격 파트를 shoot()함수로 분리
+-사격 파트에 최대 장탄수와 현재 장탄수를 입력할 수 있도록 수정
+-void shoot() 함수 추가
+-일부 함수 순서 변경
