@@ -8,8 +8,8 @@
 #include "monster_info.h"//몬스터 정보 헤더
 #include "ammo.h"        //총알 정보 헤더
 #include "player_info.h" //플레이어 정보 헤더
-#include "images.h"      //이미지 정보 헤더. 배경, 일부 몬스터, 일부 무기를 제외한 나머지 이미지의 크기는 
-                         //모두 100 x 100 px로 하도록 함. 이는 작업 시 좀 더 직관적으로 작업하기 위한 것임.
+#include "images.h"      //이미지 정보 헤더
+
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"NON STOP";
@@ -27,7 +27,9 @@ enum Timer {
 };
 
 //마우스 좌표
-static double mx, my;   
+static double mx, my;
+//마우스 클릭 여부
+static BOOL is_click = FALSE; 
 
 //이미지 파일 로드
 void IMG_FILE_LOAD() {
@@ -334,7 +336,7 @@ void update_player_position(RECT rt) {
 				mst_air[i].x += 15;
 		}
 
-		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2900 && CM_x >= 700)) //배경 인식 좌표가 10이되고 플레이어가 다시 가운데로 이동할 때까지
+		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) //배경 인식 좌표가 10이되고 플레이어가 다시 가운데로 이동할 때까지
 			CM_x -= 15;                       //플레이어만 움직인다
 
 		if (CM_x <= rt.left)  //벽에 닿으면
@@ -352,7 +354,7 @@ void update_player_position(RECT rt) {
 				mst_air[i].x -= 15;
 		}
 
-		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2900 && CM_x >= 700))
+		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700))
 			CM_x += 15;
 
 		if (CM_x + 100 >= rt.right) 
@@ -511,7 +513,7 @@ void update_shoot_animation(RECT rt, int mouse_x, int mouse_y, BOOL is_click) {
 		}
 	}
 
-	 //애니매이션
+	 //사격 시 발생하는 애니매이션
 	{
 		//사격 시 화면 흔들림
 		//좌측 값: 흔들리는 정도, 오른쪽 값: 흔들리는 시간
@@ -571,9 +573,89 @@ void update_shoot_animation(RECT rt, int mouse_x, int mouse_y, BOOL is_click) {
 	}
 }
 
+
+
+//WM_KEYDOWN
+void wm_keydown() {
+	//좌측 이동
+	if (GetAsyncKeyState('A') & 0x8000)  CM_move_dir = 0;
+
+	//우측 이동
+	else if (GetAsyncKeyState('D') & 0x8000)   CM_move_dir = 1;
+
+	//재장전
+	if (GetAsyncKeyState('R') & 0x8000)
+		if (r_pressed == 0) {
+			reload = 1; r_pressed = 1;
+		}
+
+	//점프
+	if (GetAsyncKeyState(VK_SPACE) & 0x8000 && space_pressed == 0)
+		if (space_pressed == 0) {
+			CM_jump = 1; space_pressed = 1;
+		}
+}
+
+//LBUTTONDOWN
+void wm_lbuttondown() {
+	is_click = TRUE;
+	if (empty == 1) reload = 1;
+
+	//연사력이 높을수록 딜레이 수치는 낮음
+	//타이머에서 검사하는 딜레이 수치보다 1 적게 초기화
+	switch (GUN_number) {
+	case scar_h:
+		shoot_delay = 5;  break;
+	}
+}
+
+//몬스터 애니메이션
+void monster_animation() {
+	if (up_down == 1) {
+		Fdelay_air++;
+		if (Fdelay_air == 7) {
+			air++; Fdelay_air = 0;
+			if (air == 2)  up_down = 0;
+		}
+	}
+	else if (up_down == 0) {
+		Fdelay_air++;
+		if (Fdelay_air == 7) {
+			air--; Fdelay_air = 0;
+			if (air == 0) up_down = 1;
+		}
+	}
+}
+
+//그리기 파트
+void wm_paint(HDC mdc, RECT rt) {
+	//////////////////////// 버퍼
+	BG_w = 1500;
+	BG_h = BackGround.GetHeight();
+	BackGround.Draw(mdc, rt.left + ss_x, rt.top - 30 + landing_shake + ss_y, rt.right, rt.bottom + 30, BG_scanner, 0, BG_w, BG_h);
+	//BG_scanner가 클수록 배경은 오른쪽으로 이동하게 됨
+
+	//몬스터 이미지 출력
+	show_monster(mdc, ss_x, ss_y, landing_shake);
+
+	//총알 궤적 그리기
+	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2);
+
+	//플레이어 이미지 출력
+	show_player(mdc);
+
+	//히트 포인트 그리기
+	if (draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2);
+
+	//인터페이스 출력
+	show_interface(mdc, rt);
+
+	//조준점 출력
+	if (!manager.isPaused()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hdc, mdc;  PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt;
-	static BOOL is_click = FALSE; //마우스 클릭 여부
 
 	switch(uMsg) {
 	case WM_CREATE:
@@ -586,35 +668,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_ACTIVATE:
 		switch(LOWORD(wParam)) {
 		case WA_INACTIVE:
-			manager.interrupt();
-			break;
+			manager.interrupt(); break;
 		}
 		break;
 
 	case WM_KEYDOWN:
-		manager.keyboardInput(hWnd, wParam);
-		break;
+		manager.keyboardInput(hWnd, wParam); break;
 
 		//정지상태로 변경
 	case WM_KEYUP:
-		CM_move_dir = -1; 
-		break;
+		CM_move_dir = -1; break;
 
 	case WM_LBUTTONDOWN:
-		if(manager.getCurrentSceneID() == Game && !manager.isPaused()) {
-			is_click = TRUE;
-
-			if (empty == 1) {
-				reload = 1; break;
-			}
-
-			//연사력이 높을수록 딜레이 수치는 낮음
-			//타이머에서 검사하는 딜레이 수치보다 1 적게 초기화
-			switch(GUN_number) { 
-			case scar_h:
-				shoot_delay = 5;  break; 
-			}
-		}
+		if (manager.getCurrentSceneID() == Game && !manager.isPaused()) wm_lbuttondown();
 		manager.clickScene(hWnd, { LOWORD(lParam), HIWORD(lParam) }, Left);
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;
@@ -638,26 +704,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_TIMER:
 		switch(wParam) {
 		case KEYDOWN: //키보드 입력 전용 타이머. 이동과 점프를 동시에 할 수 있음.
-			if(manager.getCurrentSceneID() == Game && !manager.isPaused()) {
-				//좌측 이동
-				if(GetAsyncKeyState('A') & 0x8000)  CM_move_dir = 0; 
-
-				//우측 이동
-				else if(GetAsyncKeyState('D') & 0x8000)   CM_move_dir = 1;
-
-				//재장전
-				if(GetAsyncKeyState('R') & 0x8000)  
-					if(r_pressed == 0) {
-						reload = 1; r_pressed = 1;
-					}
-
-				//점프
-				if(GetAsyncKeyState(VK_SPACE) & 0x8000 && space_pressed == 0)
-					if(space_pressed == 0) { 
-						CM_jump = 1; space_pressed = 1;
-					}
-			}
-		break;
+			if (manager.getCurrentSceneID() == Game && !manager.isPaused()) wm_keydown();
+			break;
 
 		case UPDATE: //게임 전체 타이머
 			GetClientRect(hWnd, &rt);
@@ -668,26 +716,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				update_shoot_animation(rt, mx, my, is_click);
 				update_monster_direction(CM_x);
 				update_monster_position();
-
-				//몬스터 생성
-				make_monster(rt);
-
+				//몬스터 생성        
+				make_monster(rt);  
 				// 몬스터 애니메이션
-				//공중 몬스터 애니메이션
-				if (up_down == 1) { 
-					Fdelay_air++;
-					if (Fdelay_air == 7) {
-						air++; Fdelay_air = 0;
-						if (air == 2)  up_down = 0;
-					}
-				}
-				else if (up_down == 0) {
-					Fdelay_air++;
-					if (Fdelay_air == 7) {
-						air--; Fdelay_air = 0;
-						if (air == 0) up_down = 1;
-					}
-				}
+				monster_animation();
 			}
 			break;
 		}
@@ -695,55 +727,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_PAINT:
-		{
 			GetClientRect(hWnd, &rt);
 			hdc = BeginPaint(hWnd, &ps);
 			mdc = CreateCompatibleDC(hdc);
 			hbitmap = CreateCompatibleBitmap(hdc, rt.right, rt.bottom);
 			(HBITMAP)SelectObject(mdc, hbitmap); 
 
-			if(manager.getCurrentSceneID() == Game) {
-				//////////////////////// 버퍼
-				BG_w = 1500;
-				BG_h = BackGround.GetHeight();
-				BackGround.Draw(mdc, rt.left + ss_x, rt.top - 30 + landing_shake + ss_y, rt.right, rt.bottom + 30, BG_scanner, 0, BG_w, BG_h);
-				//BG_scanner가 클수록 배경은 오른쪽으로 이동하게 됨
+			if (manager.getCurrentSceneID() == Game) wm_paint(mdc, rt);
 
-				//몬스터 이미지 출력
-				show_monster(mdc, ss_x, ss_y, landing_shake);
-
-				//총알 궤적 그리기
-				if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2);
-
-				//플레이어 이미지 출력
-				show_player(mdc);
-
-				//히트 포인트 그리기
-				if(draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2);
-
-				//인터페이스 출력
-				show_interface(mdc, rt);
-
-				//조준점 출력
-				if (!manager.isPaused()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
-			}
+			manager.syncSize(hWnd); manager.show(mdc);
 			
-			////////////////////////
-			manager.syncSize(hWnd);
-			manager.show(mdc);
-			////////////////////////
-
 			BitBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, SRCCOPY);
 		
-			DeleteDC(mdc);
-			DeleteObject(hbitmap);
-			EndPaint(hWnd, &ps);
-		}
+			DeleteDC(mdc); DeleteObject(hbitmap); EndPaint(hWnd, &ps);
 		break;
 
 	case WM_DESTROY:
-		DestroyWindow(hWnd);
-		PostQuitMessage(0);
+		DestroyWindow(hWnd); PostQuitMessage(0);
 		break;
 	}
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);

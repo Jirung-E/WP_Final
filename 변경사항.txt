@@ -109,3 +109,12 @@ void update_monster_dir_air(double monster_x, double CM_x, int mdx_air)
 void monster_array_push_r(int hit, int idx)
 void monster_array_push_big(int hit, int idx)
 void monster_array_push_air(int hit, int idx)
+
+//2023.05.30 업데이트
+-콜백 함수 내부 코드 길이 최적화, 일부 코드들을 함수로 이전
+-맵 우측에서 플레이어 움직임이 잠기는 버그 수정
+-함수 추가
+void wm_lbuttondown()
+void wm_keydown()
+void wm_paint(HDC mdc, RECT rt)
+void monster_animation()
