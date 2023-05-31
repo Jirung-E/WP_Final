@@ -135,6 +135,7 @@
     <ClCompile Include="ammo.cpp" />
     <ClCompile Include="ArmoryScene.cpp" />
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="exp.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="main.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="ammo.h" />
     <ClInclude Include="ArmoryScene.h" />
     <ClInclude Include="Button.h" />
+    <ClInclude Include="exp.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameScene.h" />
     <ClInclude Include="images.h" />

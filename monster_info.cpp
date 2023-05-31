@@ -140,7 +140,7 @@ void monster_array_push_r(int hit, int idx) {
 	mst_r[idx].img_dir = -1; //현재 인덱스의 바로 전 인덱스까지 모두 한 칸씩 앞으로 당긴 후 남는 인덱스의 몬스터는 화면 밖으로 이동(나중에 몬스터 스폰 시 다시 값이 생성되므로 문제 없음)
 }
 
-//대형 몬스터 배열 빌어내기
+//대형 몬스터 배열 밀어내기
 void monster_array_push_big(int hit, int idx) {
 	for (int i = hit; i < idx; i++) {
 		mst_big[i].x = mst_big[i + 1].x;

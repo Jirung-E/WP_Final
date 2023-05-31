@@ -9,6 +9,7 @@
 #include "ammo.h"        //총알 정보 헤더
 #include "player_info.h" //플레이어 정보 헤더
 #include "images.h"      //이미지 정보 헤더
+#include "exp.h"         //경험치 정보 헤더, 경험치로 총기를 구입하고, 소비한다.
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -65,6 +66,7 @@ void IMG_FILE_LOAD() {
 
 	indicator_back.Load(L".\\res\\indicator_back.png");
 	ammo_icon.Load(L".\\res\\ammo_icon.png");
+	exp_icon.Load(L".\\res\\exp.png");
 } 
 
 //조준점 출력
@@ -126,6 +128,10 @@ void show_interface(HDC mdc, RECT rt) {
 		ammo_indicator(mdc, 30, ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
 		break;
 	}
+	//경험치 수치 출력
+	show_exp(mdc, experience, rt.left + 150 + ss_x, rt.top + 80 + ss_y + landing_shake);
+	exp_icon.Draw(mdc, rt.left + 20 + ss_x, rt.top + 110 + ss_y + landing_shake, 100, 50, 0, 0, 100, 50);
+	show_exp_add(mdc, prev_up, exp_x + ss_x, rt.top + 170 + ss_y + landing_shake);
 
 	//재장전 게이지 출력
 	if (reload == 1)
@@ -407,10 +413,14 @@ void check_hit() {
 
 			if (mst_r[hit].hp <= 0) {  
 				//중간 인덱스를 가진 몬스터를 처치할 경우 나머지 몬스터들의 인덱스가 한 칸씩 앞당겨지고 인덱스 1 감소시킨다.
-				if (hit < mdx_r - 1) monster_array_push_r(hit, mdx_r);
+				if (hit < mdx_r - 1) {
+					monster_array_push_r(hit, mdx_r); experience += 5; prev_up = 5; exp_up = TRUE;
+				}
 
 				//최신 인덱스를 가진 몬스터의 경우 그냥 인덱스를 감소시킨다.
-				else if (hit == mdx_r - 1) mdx_r--;
+				else if (hit == mdx_r - 1) {
+					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
+				}
 			}
 		}
 	}
@@ -424,8 +434,12 @@ void check_hit() {
 			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
 			mst_big[hit].hp = cal_damage(mst_big[hit].hp, GUN_number);
 			if (mst_big[hit].hp <= 0) {
-				if (hit < mdx_big - 1)  monster_array_push_big(hit, mdx_big);
-				if (hit == mdx_big - 1) mdx_big--;
+				if (hit < mdx_big - 1) {
+					monster_array_push_big(hit, mdx_big); experience += 7; prev_up = 7; exp_up = TRUE;
+				}
+				if (hit == mdx_big - 1) {
+					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
+				}
 			}
 		}
 	}
@@ -439,8 +453,12 @@ void check_hit() {
 			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
 			mst_air[hit].hp = cal_damage(mst_air[hit].hp, GUN_number);
 			if (mst_air[hit].hp <= 0) {
-				if (hit < mdx_air - 1) monster_array_push_air(hit, mdx_air);
-				if (hit == mdx_air - 1) mdx_air--;
+				if (hit < mdx_air - 1) {
+					monster_array_push_air(hit, mdx_air); experience += 3; prev_up = 3; exp_up = TRUE;
+				}
+				if (hit == mdx_air - 1) {
+					mdx_air--; experience += 3; prev_up = 3; exp_up = TRUE;
+				}
 			}
 		}
 	}
@@ -557,6 +575,32 @@ void update_shoot_animation() {
 					ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
 				}
 				break;
+			}
+		}
+
+		//경험치 증가 애니메이션
+		if (exp_up == TRUE) {
+			if (out == 1) {
+				if(exp_acc > 0)
+					exp_x += exp_acc--;
+				if (exp_acc == 0) {
+					exp_out_delay++;
+					if (exp_out_delay == 20) {
+						exp_out_delay = 0;
+						out = 0;
+						exp_acc = 20;
+					}
+				}
+			}
+
+			else if (out == 0) {
+				if(exp_acc > 0)
+					exp_x -= exp_acc--;
+				if (exp_acc == 0) {
+					exp_up = FALSE;
+					out = 1;
+					exp_acc = 20;
+				}
 			}
 		}
 	}
