@@ -154,11 +154,11 @@ RECT rectToSquare(const RECT& rect, const Direction& bias) {
 	return r;
 }
 
-RECT ratio(const RECT& rect, double width, double height, const Direction& bias) {
+RECT convertRatio(const RECT& rect, double width, double height, const Direction& bias) {
 	int w = rect.right - rect.left;
 	int h = rect.bottom - rect.top;
 	RECT r = rect;
-	if(width*h > height*w) {   // °¡·Î°¡ ´õ ±è
+	if(width*h > height*w) {
 		int n = h - height * w / width;
 		switch(bias) {
 		case Up:
@@ -173,7 +173,7 @@ RECT ratio(const RECT& rect, double width, double height, const Direction& bias)
 			break;
 		}
 	}
-	else {      // ¼¼·Î°¡ ´õ ±è
+	else {
 		int n = w - width * h / height;
 		switch(bias) {
 		case Left:
@@ -185,6 +185,44 @@ RECT ratio(const RECT& rect, double width, double height, const Direction& bias)
 		case None:
 			r.left += n/2;
 			r.right -= n/2;
+			break;
+		}
+	}
+
+	return r;
+}
+
+RECT expandRatio(const RECT& rect, double width, double height, const Direction& bias) {
+	int w = rect.right - rect.left;
+	int h = rect.bottom - rect.top;
+	RECT r = rect;
+	if(width*h > height*w) {
+		int n = width * h / height - w;
+		switch(bias) {
+		case Left:
+			r.right += n;
+			break;
+		case Right:
+			r.left -= n;
+			break;
+		case None:
+			r.left -= n/2;
+			r.right += n/2;
+			break;
+		}
+	}
+	else {
+		int n = height * w / width - h;
+		switch(bias) {
+		case Up:
+			r.bottom += n;
+			break;
+		case Down:
+			r.top -= n;
+			break;
+		case None:
+			r.top -= n/2;
+			r.bottom += n/2;
 			break;
 		}
 	}

@@ -15,7 +15,7 @@ flip_x { true }, flip_y { false }, fix_ratio { false } {
 void Sprite::draw(const HDC& hdc, const RECT& draw_area) const {
 	RECT rect = draw_area;
 	if(fix_ratio) {
-		rect = ratio(rect, source.GetWidth(), source.GetHeight());
+		rect = convertRatio(rect, source.GetWidth(), source.GetHeight());
 	}
 	source.Draw(hdc, rect);
 }

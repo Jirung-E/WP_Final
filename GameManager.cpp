@@ -43,6 +43,13 @@ void GameManager::keyboardInput(const HWND& hWnd, int keycode) {
 			break;
 		}
 		break;
+	case Armory:
+		switch(keycode) {
+		case VK_ESCAPE:
+			quit(hWnd);
+			break;
+		}
+		break;
 	}
 }
 
@@ -108,8 +115,9 @@ void GameManager::update(const HWND& hWnd) {
 void GameManager::quit(const HWND& hWnd) {
 	switch(current_scene->getID()) {
 	case Game:
-		current_scene = &main_scene;
 		releaseCursor();
+	case Armory:
+		current_scene = &main_scene;
 		break;
 	case Main:
 		PostQuitMessage(0);

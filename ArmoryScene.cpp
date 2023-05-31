@@ -1,8 +1,7 @@
 #include "ArmoryScene.h"
 
-enum gun_name_amory {
-    null, scar_h, m16, mp44, mg42, awp
-};
+#include "images.h"
+
 
 ArmoryScene::ArmoryScene() : Scene { Armory }, 
 quit_button { Quit, L"Quit", { 15, 15 }, 80, 40 },
@@ -60,7 +59,31 @@ void ArmoryScene::draw(const HDC& hdc) const {
     int w = percentOf(area.right-area.left, 40);
     area.left += w;
     area.right += w;
-    Sprite { L"./res/scar_h_right.png" }.draw(hdc, area);
+
+    Sprite* current_gun = nullptr;
+    switch(GUN_number) {
+    case scar_h:
+        current_gun = new Sprite { L"./res/scar_h_right.png" };
+        break;
+    case m16:
+        current_gun = new Sprite { L"./res/m16_right.png" };
+        break;
+    case mp_44:
+        current_gun = new Sprite { L"./res/mp44_right.png" };
+        break;
+    case mg_42:
+        current_gun = new Sprite { L"./res/mg42_right.png" };
+        break;
+    case awp:
+        current_gun = new Sprite { L"./res/awp_right.png" };
+        break;
+    }
+
+    if(current_gun != nullptr) {
+        current_gun->fix_ratio = true;
+        current_gun->draw(hdc, expandRatio(area, current_gun->source.GetWidth(), current_gun->source.GetHeight(), Left));
+        delete current_gun;
+    }
 
     TextBox weapon_info { L"무기 정보를 출력합니다.", { 0, 70 },
         100, 30 };
@@ -103,5 +126,14 @@ int ArmoryScene::clickL(const POINT& point) const {
     if(PtInRect(&r, point)) {
         return quit_button.getID();
     }
+
+    for(int i=0; i<weapon_buttons.size(); ++i) {
+        r = weapon_buttons[i].absoluteArea(valid_area);
+        if(PtInRect(&r, point)) {
+            GUN_number = i+1;
+            return weapon_buttons[i].getID();
+        }
+    }
+
     return None;
 }

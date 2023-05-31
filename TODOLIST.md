@@ -44,8 +44,8 @@
 
  ### ArmoryScene
  - [x] 배경이미지 (출처: https://store.steampowered.com/app/578080/PUBG_BATTLEGROUNDS/)
- - [ ] 좌상단 뒤로가기 버튼
+ - [x] 좌상단 뒤로가기 버튼
  - [ ] 좌측에 장착중인 무기
  - [ ] 우측에 보유중인 무기 보여줌
-	- [ ] 이미지
+	- [x] 이미지
 	- [ ] 무기정보
