@@ -1,4 +1,8 @@
 #pragma once
+
+#include <atlImage.h>
+
+
 static CImage BackGround, indicator_back, ammo_icon;
 static CImage commando_right, commando_left, commando_jump_right, commando_jump_left;
 static CImage SCAR_H_right, SCAR_H_left, M16_right, M16_left, MP44_right, MP44_left, MG42_right, MG42_left, AWP_right, AWP_left;
@@ -31,6 +35,8 @@ enum gun_name_images {
 };
 
 static int GUN_number = 1;    //무기 번호
+void set_GUN_number(int number);
+int get_GUN_number();
 static int GUN_w, GUN_h;      //무기(총) 이미지의 가로, 세로 사이즈
 //무기의 위치 및 방향은 플레이어를 기준으로 하기 때문에 별도의 좌표 변수는 없음
 
