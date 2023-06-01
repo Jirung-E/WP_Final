@@ -164,7 +164,7 @@ void show_player(HDC mdc) {
 			commando_jump_left.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
 		}
 
-		switch (get_GUN_number()) {
+		switch (GUN_number) {
 		case scar_h:
 			GUN_w = SCAR_H_left.GetWidth(); GUN_h = SCAR_H_left.GetWidth();
 			SCAR_H_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
@@ -183,7 +183,7 @@ void show_player(HDC mdc) {
 			commando_jump_right.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
 		}
 
-		switch (get_GUN_number()) {
+		switch (GUN_number) {
 		case scar_h:
 			GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetWidth();
 			SCAR_H_right.Draw(mdc, CM_x + 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h);

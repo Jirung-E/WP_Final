@@ -61,7 +61,7 @@ void ArmoryScene::draw(const HDC& hdc) const {
     area.right += w;
 
     Sprite* current_gun = nullptr;
-    switch(get_GUN_number()) {
+    switch(GUN_number) {
     case scar_h:
         current_gun = new Sprite { L"./res/scar_h_right.png" };
         break;
@@ -130,7 +130,7 @@ int ArmoryScene::clickL(const POINT& point) const {
     for(int i=0; i<weapon_buttons.size(); ++i) {
         r = weapon_buttons[i].absoluteArea(valid_area);
         if(PtInRect(&r, point)) {
-            set_GUN_number(i+1);
+            GUN_number = i+1;
             return weapon_buttons[i].getID();
         }
     }
