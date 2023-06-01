@@ -1,11 +1,12 @@
 #pragma once
 
-extern CImage BackGround, indicator_back, ammo_icon;
+extern CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon;
 extern CImage commando_right, commando_left, commando_jump_right, commando_jump_left;
+extern CImage commando_fire_right, commando_fire_left, commando_jump_fire_right, commando_jump_fire_left;
 extern CImage SCAR_H_right, SCAR_H_left, M16_right, M16_left, MP44_right, MP44_left, MG42_right, MG42_left, AWP_right, AWP_left;
 extern CImage monster_right, monster_left, monster_big_right, monster_big_left;
 extern CImage monster_air_right[3], monster_air_left[3];
-extern CImage exp_icon;
+extern CImage exp_icon, flame_right, flame_left;
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지

@@ -10,10 +10,44 @@
 #include "player_info.h" //플레이어 정보 헤더
 #include "images.h"      //이미지 정보 헤더
 #include "exp.h"         //경험치 정보 헤더, 경험치로 총기를 구입하고, 소비한다.
+#include "fmod.hpp"
+#include "fmod_errors.h"
+
+#pragma comment (lib, "fmod_vc.lib")
+
+FMOD::System* ssystem;
+FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot;
+FMOD::Sound* rifle_reload, * lmg_reload, * walk, * hit_sound, * jump, * exp_get, *land_sound;
+
+//gun sound
+FMOD::Channel* ch_gun = 0;
+//reload_sound
+FMOD::Channel* ch_reload = 0;
+//hit_sound
+FMOD::Channel* ch_hit = 0;
+//walk 
+FMOD::Channel* ch_walk = 0;
+//jump
+FMOD::Channel* ch_jump = 0;
+//land
+FMOD::Channel* ch_land = 0;
+//exp_get
+FMOD::Channel* ch_exp = 0;
+
+FMOD_RESULT result;
+void* extradriverdata = 0;
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"NON STOP";
+
+static int walk_sound_delay; //발소리가 너무 빠르게 들리면 안되므로 딜레이를 줘 가며 재생
+
+//연사 속도
+#define scar_speed 7
+#define m16_speed 4
+#define mp44_speed 10
+#define mg42_speed 2
 
 std::random_device rd_main;
 std::mt19937 gen(rd_main());
@@ -40,6 +74,10 @@ void IMG_FILE_LOAD() {
 	commando_left.Load(L".\\res\\commando_left.png");
 	commando_jump_right.Load(L".\\res\\commando_jump_right.png");
 	commando_jump_left.Load(L".\\res\\commando_jump_left.png");
+	commando_fire_right.Load(L".\\res\\commando_fire_right.png");
+	commando_fire_left.Load(L".\\res\\commando_fire_left.png");
+	commando_jump_fire_right.Load(L".\\res\\commando_jump_fire_right.png");
+	commando_jump_fire_left.Load(L".\\res\\commando_jump_fire_left.png");
 
 	monster_right.Load(L".\\res\\monster_right.png");
 	monster_left.Load(L".\\res\\monster_left.png");
@@ -67,25 +105,99 @@ void IMG_FILE_LOAD() {
 	indicator_back.Load(L".\\res\\indicator_back.png");
 	ammo_icon.Load(L".\\res\\ammo_icon.png");
 	exp_icon.Load(L".\\res\\exp.png");
+	flame_right.Load(L".\\res\\flame_right.png");
+	flame_left.Load(L".\\res\\flame_left.png");
+	ammo_lmg_icon.Load(L".\\res\\ammo_lmg_icon.png");
 } 
+
+//FMOD 세팅
+void set_FMOD() {
+	result = FMOD::System_Create(&ssystem); //--- 사운드 시스템 생성
+	if (result != FMOD_OK) exit(0);
+	ssystem->init(32, FMOD_INIT_NORMAL, extradriverdata); //--- 사운드 시스템 초기화
+	ssystem->createSound(".\\res\\sounds\\scar_h.wav", FMOD_DEFAULT, 0, &scar_shoot);
+	ssystem->createSound(".\\res\\sounds\\m16.wav", FMOD_DEFAULT, 0, &m16_shoot);
+	ssystem->createSound(".\\res\\sounds\\mp44.wav", FMOD_DEFAULT, 0, &mp44_shoot);
+	ssystem->createSound(".\\res\\sounds\\hit.wav", FMOD_DEFAULT, 0, &hit_sound);
+	ssystem->createSound(".\\res\\sounds\\walk.ogg", FMOD_DEFAULT, 0, &walk);
+	ssystem->createSound(".\\res\\sounds\\rifle_reload.wav", FMOD_DEFAULT, 0, &rifle_reload);
+	ssystem->createSound(".\\res\\sounds\\jump.wav", FMOD_DEFAULT, 0, &jump);
+	ssystem->createSound(".\\res\\sounds\\exp_get.ogg", FMOD_DEFAULT, 0, &exp_get);
+	ssystem->createSound(".\\res\\sounds\\mg42.wav", FMOD_DEFAULT, 0, &mg42_shoot);
+	ssystem->createSound(".\\res\\sounds\\lmg_reload.ogg", FMOD_DEFAULT, 0, &lmg_reload);
+	ssystem->createSound(".\\res\\sounds\\land.mp3", FMOD_DEFAULT, 0, &land_sound);
+}
+
+//광클 방지
+void mouse_fastClick_prevention() {
+	switch (GUN_number) {
+	case scar_h:
+		if (after_delay < scar_speed)
+			after_delay++;
+		if (after_delay == scar_speed) {
+			can_shoot = TRUE; after_delay = 0;
+		}
+		break;
+
+	case m16:
+		if (after_delay < m16_speed)
+			after_delay++;
+		if (after_delay == m16_speed) {
+			can_shoot = TRUE; after_delay = 0;
+		}
+		break;
+
+	case mp_44:
+		if (after_delay < mp44_speed)
+			after_delay++;
+		if (after_delay == mp44_speed) {
+			can_shoot = TRUE; after_delay = 0;
+		}
+		break;
+
+	case mg_42:
+		if (after_delay < mg42_speed)
+			after_delay++;
+		if (after_delay == mg42_speed) {
+			can_shoot = TRUE; after_delay = 0;
+		}
+		break;
+	}
+}
 
 //조준점 출력
 void show_target(HDC mdc, int mouse_x, int mouse_y, double var) {
 	HPEN hpen, oldpen;
+	hpen = CreatePen(PS_SOLID, 12, RGB(0, 0, 0));
+	oldpen = (HPEN)SelectObject(mdc, hpen);
+
+	MoveToEx(mdc, mouse_x + 12 + var, mouse_y, NULL);
+	LineTo(mdc, mouse_x + 41 + var, mouse_y);
+	MoveToEx(mdc, mouse_x - 12 - var, mouse_y, NULL);
+	LineTo(mdc, mouse_x - 41 - var, mouse_y);
+	MoveToEx(mdc, mouse_x, mouse_y - 12 - var, NULL);
+	LineTo(mdc, mouse_x, mouse_y - 41 - var);
+	MoveToEx(mdc, mouse_x, mouse_y + 12 + var, NULL);
+	LineTo(mdc, mouse_x, mouse_y + 41 + var);
+
+	SelectObject(mdc, oldpen);
+	DeleteObject(hpen);
+
 	hpen = CreatePen(PS_SOLID, 5, RGB(0, 255, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
-	MoveToEx(mdc, mouse_x + 10 + var, mouse_y, NULL);
+	MoveToEx(mdc, mouse_x + 13 + var, mouse_y, NULL);
 	LineTo(mdc, mouse_x + 40 + var, mouse_y);
-	MoveToEx(mdc, mouse_x - 10 - var, mouse_y, NULL);
+	MoveToEx(mdc, mouse_x - 13 - var, mouse_y, NULL);
 	LineTo(mdc, mouse_x - 40 - var, mouse_y);
-	MoveToEx(mdc, mouse_x, mouse_y - 10 - var, NULL);
+	MoveToEx(mdc, mouse_x, mouse_y - 13 - var, NULL);
 	LineTo(mdc, mouse_x, mouse_y - 40 - var);
-	MoveToEx(mdc, mouse_x, mouse_y + 10 + var, NULL);
+	MoveToEx(mdc, mouse_x, mouse_y + 13 + var, NULL);
 	LineTo(mdc, mouse_x, mouse_y + 40 + var);
 
 	SelectObject(mdc, oldpen);
 	DeleteObject(hpen);
+
 }
 
 //히트 포인트 표시
@@ -107,6 +219,11 @@ void show_hit(HDC mdc, int hit_x, int hit_y) {
 	DeleteObject(hpen);
 }
 
+//경험치 획득 애니메이션 초기화
+void init_exp_animation() {
+	exp_x = -150, exp_acc = 20; out = 1; exp_out_delay = 0;
+}
+
 //인터페이스 출력
 void show_interface(HDC mdc, RECT rt) {
 	//장탄수 표시기 배경
@@ -119,6 +236,12 @@ void show_interface(HDC mdc, RECT rt) {
 		ammo_icon.Draw(mdc, rt.right - 260 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
 	}
 
+	if (GUN_number == mg_42) {
+		AMO_w = ammo_lmg_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
+		ammo_lmg_icon.Draw(mdc, rt.right - 230 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
+	}
+
+
 	//총 아이콘 및 장탄수 출력
 	switch (GUN_number) {
 	case scar_h:
@@ -127,15 +250,42 @@ void show_interface(HDC mdc, RECT rt) {
 		//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
 		ammo_indicator(mdc, 30, ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
 		break;
+
+	case m16:
+		GUN_w = M16_right.GetWidth(); GUN_h = M16_right.GetWidth();
+		M16_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
+		//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
+		ammo_indicator(mdc, 40, ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
+		break;
+
+	case mp_44:
+		GUN_w = MP44_right.GetWidth(); GUN_h = MP44_right.GetWidth();
+		MP44_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
+		//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
+		ammo_indicator(mdc, 20, ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
+		break;
+
+	case mg_42:
+		GUN_w = MG42_right.GetWidth(); GUN_h = MG42_right.GetHeight();
+		MG42_right.Draw(mdc, rt.right - 500 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 250, 150, 0, 0, GUN_w, GUN_h);
+		ammo_indicator(mdc, 300, ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
+		break;
 	}
+
+
+
+
 	//경험치 수치 출력
 	show_exp(mdc, experience, rt.left + 150 + ss_x, rt.top + 80 + ss_y + landing_shake);
 	exp_icon.Draw(mdc, rt.left + 20 + ss_x, rt.top + 110 + ss_y + landing_shake, 100, 50, 0, 0, 100, 50);
 	show_exp_add(mdc, prev_up, exp_x + ss_x, rt.top + 170 + ss_y + landing_shake);
 
+
 	//재장전 게이지 출력
 	if (reload == 1)
 		reload_indicator(mdc, CM_x, CM_y - 30 + landing_shake, CM_x + reload_x, CM_y - 10 + landing_shake, CM_x, CM_y - 30 + landing_shake, CM_x + 100, CM_y - 10 + landing_shake);
+
+
 
 	//몬스터 체력 게이지 출력
 	for (int i = 0; i < mdx_r; i++)
@@ -156,39 +306,103 @@ void show_player(HDC mdc) {
 	switch (CM_img_dir) { //플레이어, 총 이미지 출력
 	case 0:
 		if (CM_jump == 0) {
-			CM_w = commando_left.GetWidth(); CM_h = commando_left.GetHeight();
-			commando_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+			if (is_draw == TRUE) {
+				CM_w = commando_fire_left.GetWidth(); CM_h = commando_fire_left.GetHeight();
+				commando_fire_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+			}
+			else if (is_draw == FALSE) {
+				CM_w = commando_left.GetWidth(); CM_h = commando_left.GetHeight();
+				commando_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+			}
 		}
+
 		else if (CM_jump == 1 || CM_jump == 2) {
-			CM_w = commando_jump_left.GetWidth(); CM_h = commando_jump_left.GetHeight();
-			commando_jump_left.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+			if (is_draw == TRUE) {
+				CM_w = commando_jump_fire_left.GetWidth(); CM_h = commando_jump_fire_left.GetHeight();
+				commando_jump_fire_left.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+			}
+			else if (is_draw == FALSE) {
+				CM_w = commando_jump_left.GetWidth(); CM_h = commando_jump_left.GetHeight();
+				commando_jump_left.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+			}
 		}
 
 		switch (GUN_number) {
 		case scar_h:
-			GUN_w = SCAR_H_left.GetWidth(); GUN_h = SCAR_H_left.GetWidth();
+			GUN_w = SCAR_H_left.GetWidth(); GUN_h = SCAR_H_left.GetHeight();
 			SCAR_H_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
 			break;
+
+		case m16:
+			GUN_w = M16_left.GetWidth(); GUN_h = M16_left.GetHeight();
+			M16_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			break;
+
+		case mp_44:
+			GUN_w = MP44_left.GetWidth(); GUN_h = MP44_left.GetHeight();
+			MP44_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			break;
+
+		case mg_42:
+			GUN_w = MG42_left.GetWidth(); GUN_h = MG42_left.GetHeight();
+			MG42_left.Draw(mdc, CM_x - 120 + ss_x, CM_y + landing_shake + ss_y, 200, 100, 0, 0, GUN_w, GUN_h);
+			break;
 		}
+
+		if (is_draw == TRUE && GUN_number != mg_42)
+			flame_left.Draw(mdc, CM_x - 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
+
+		if (is_draw == TRUE && GUN_number == mg_42)
+			flame_left.Draw(mdc, CM_x - 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
 
 		break;
 		//////////////////////
 	case 1:
 		if (CM_jump == 0) {
-			CM_w = commando_right.GetWidth(); CM_h = commando_right.GetHeight();
-			commando_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+			if (is_draw == TRUE) {
+				CM_w = commando_fire_right.GetWidth(); CM_h = commando_fire_right.GetHeight();
+				commando_fire_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+			}
+			else if (is_draw == FALSE) {
+				CM_w = commando_right.GetWidth(); CM_h = commando_right.GetHeight();
+				commando_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+			}
 		}
 		else if (CM_jump == 1 || CM_jump == 2) {
-			CM_w = commando_jump_right.GetWidth(); CM_h = commando_jump_right.GetHeight();
-			commando_jump_right.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+			if (is_draw == TRUE) {
+				CM_w = commando_jump_fire_right.GetWidth(); CM_h = commando_jump_fire_right.GetHeight();
+				commando_jump_fire_right.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+			}
+			else if (is_draw == FALSE) {
+				CM_w = commando_jump_right.GetWidth(); CM_h = commando_jump_right.GetHeight();
+				commando_jump_right.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+			}
 		}
 
 		switch (GUN_number) {
 		case scar_h:
-			GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetWidth();
+			GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetHeight();
 			SCAR_H_right.Draw(mdc, CM_x + 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h);
 			break;
+		case m16:
+			GUN_w = M16_right.GetWidth(); GUN_h = M16_right.GetHeight();
+			M16_right.Draw(mdc, CM_x + 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			break;
+		case mp_44:
+			GUN_w = MP44_right.GetWidth(); GUN_h = MP44_right.GetHeight();
+			MP44_right.Draw(mdc, CM_x + 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			break;
+		case mg_42:
+			GUN_w = MG42_right.GetWidth();  GUN_h = MG42_left.GetHeight();
+			MG42_right.Draw(mdc, CM_x + 20 + ss_x, CM_y + landing_shake + ss_y, 200, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			break;
 		}
+
+		if (is_draw == TRUE && GUN_number != mg_42)
+			flame_right.Draw(mdc, CM_x + 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
+
+		if(is_draw == TRUE && GUN_number == mg_42)
+			flame_right.Draw(mdc, CM_x + 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
 
 		break;
 	}
@@ -301,6 +515,8 @@ void update_player_position(RECT rt) {
 		if (CM_jump_acc == 29) { //땅에 닿으면
 			CM_jump_acc = 28; CM_jump = 0; space_pressed = 0; //플레이어는 땅에 착지하고 VK_SPACE 입력을 받을 준비를 함
 			is_land = 1;
+			ch_land->stop(); //사운드 정지
+			ssystem->playSound(land_sound, 0, false, &ch_land); //사운드 재생
 		}
 	}
 
@@ -410,16 +626,24 @@ void check_hit() {
 
 			//총마다 대미지를 다르게 줌
 			mst_r[hit].hp = cal_damage(mst_r[hit].hp, GUN_number);
+			ch_hit->stop(); //사운드 정지
+			ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
 
 			if (mst_r[hit].hp <= 0) {  
 				//중간 인덱스를 가진 몬스터를 처치할 경우 나머지 몬스터들의 인덱스가 한 칸씩 앞당겨지고 인덱스 1 감소시킨다.
 				if (hit < mdx_r - 1) {
 					monster_array_push_r(hit, mdx_r); experience += 5; prev_up = 5; exp_up = TRUE;
+					init_exp_animation();
+					ch_exp->stop(); //사운드 정지
+					ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
 				}
 
 				//최신 인덱스를 가진 몬스터의 경우 그냥 인덱스를 감소시킨다.
 				else if (hit == mdx_r - 1) {
 					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
+					init_exp_animation();
+					ch_exp->stop(); //사운드 정지
+					ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
 				}
 			}
 		}
@@ -433,12 +657,21 @@ void check_hit() {
 			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
 			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
 			mst_big[hit].hp = cal_damage(mst_big[hit].hp, GUN_number);
+			ch_hit->stop(); //사운드 정지
+			ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
+
 			if (mst_big[hit].hp <= 0) {
 				if (hit < mdx_big - 1) {
 					monster_array_push_big(hit, mdx_big); experience += 7; prev_up = 7; exp_up = TRUE;
+					init_exp_animation();
+					ch_exp->stop(); //사운드 정지
+					ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
 				}
 				if (hit == mdx_big - 1) {
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
+					init_exp_animation();
+					ch_exp->stop(); //사운드 정지
+					ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
 				}
 			}
 		}
@@ -446,18 +679,27 @@ void check_hit() {
 
 	//공중 몬스터 히트 판정
 	for (int i = 0; i < mdx_air; i++) {
-		if (hit_x >= mst_air[i].x && hit_x <= mst_air[i].x + 150 && hit_y >= mst_air[i].y && hit_y <= mst_air[i].y + 200) {
+		if (hit_x >= mst_air[i].x && hit_x <= mst_air[i].x + 150 && hit_y >= mst_air[i].y && hit_y <= mst_air[i].y + 60) {
 			hit = i; 
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
 			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
 			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
 			mst_air[hit].hp = cal_damage(mst_air[hit].hp, GUN_number);
+			ch_hit->stop(); //사운드 정지
+			ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
+
 			if (mst_air[hit].hp <= 0) {
 				if (hit < mdx_air - 1) {
 					monster_array_push_air(hit, mdx_air); experience += 3; prev_up = 3; exp_up = TRUE;
+					init_exp_animation();
+					ch_exp->stop(); //사운드 정지
+					ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
 				}
 				if (hit == mdx_air - 1) {
 					mdx_air--; experience += 3; prev_up = 3; exp_up = TRUE;
+					init_exp_animation();
+					ch_exp->stop(); //사운드 정지
+					ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
 				}
 			}
 		}
@@ -501,6 +743,8 @@ void make_rand_ammo(int ammo, int max_ammo) {
 	is_draw = TRUE; draw_hit = TRUE; //그리기 시작
 	ind_effect = 1; shake_effect = 1; //각각 인터페이스 이펙트, 흔들림 이펙트
 	shoot_delay = 0;	//딜레이는 0이되어 다시 딜레이가 증가하기 시작
+
+	can_shoot = FALSE;
 }
 
 //사격
@@ -508,10 +752,46 @@ void shoot() {
 	if (is_click == TRUE && reload == 0 && empty == 0) {
 		switch (GUN_number) {
 		case scar_h:
-			shoot_delay++;
-			if (shoot_delay == 6) {
+			if(shoot_delay < scar_speed)
+				shoot_delay++;
+			if (shoot_delay == scar_speed) {
 				make_rand_ammo(ammo, 30); //최대 장탄수를 오른쪽 인수에 적는다
 				var += 4; ammo++;
+				ch_gun->stop(); //사운드 정지
+				ssystem->playSound(scar_shoot, 0, false, &ch_gun); //사운드 재생
+			}
+			break;
+
+		case m16:
+			if (shoot_delay < m16_speed)
+				shoot_delay++;
+			if (shoot_delay == m16_speed) {
+				make_rand_ammo(ammo, 40);
+				var += 2; ammo++;
+				ch_gun->stop(); //사운드 정지
+				ssystem->playSound(m16_shoot, 0, false, &ch_gun); //사운드 재생
+			}
+			break;
+
+		case mp_44:
+			if (shoot_delay < mp44_speed)
+				shoot_delay++;
+			if (shoot_delay == mp44_speed) {
+				make_rand_ammo(ammo, 20);
+				var += 6; ammo++;
+				ch_gun->stop(); //사운드 정지
+				ssystem->playSound(mp44_shoot, 0, false, &ch_gun); //사운드 재생
+			}
+			break;
+
+		case mg_42:
+			if (shoot_delay < mg42_speed)
+				shoot_delay++;
+			if (shoot_delay == mg42_speed) {
+				make_rand_ammo(ammo, 300);
+				var += 2; ammo++;
+				ch_gun->stop();
+				ssystem->playSound(mg42_shoot, 0, false, &ch_gun);
 			}
 			break;
 		}
@@ -527,8 +807,13 @@ void update_shoot_animation() {
 		if (shake_effect == 1) {
 			switch (GUN_number) {
 			case scar_h:
-				make_shake(10, 5);
-				break;
+				make_shake(10, 5); break;
+			case m16:
+				make_shake(8, 5); break;
+			case mp_44:
+				make_shake(15, 5); break;
+			case mg_42:
+				make_shake(10, 5); break;
 			}
 		}
 
@@ -575,6 +860,32 @@ void update_shoot_animation() {
 					ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
 				}
 				break;
+
+			case m16:
+				reload_x += 4;
+				if (reload_x + CM_x >= CM_x + 100) {
+					ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
+				}
+				break;
+
+			case mp_44:
+				reload_x += 2;
+				if (reload_x + CM_x >= CM_x + 100) {
+					ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
+				}
+				break;
+
+			case mg_42:
+				if (reload_delay < 5)
+					reload_delay++;
+				if (reload_delay == 5) {
+					reload_delay = 0;
+					reload_x += 2;
+					if (reload_x + CM_x >= CM_x + 100) {
+						ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
+						reload_delay = 0;
+					}
+				}
 			}
 		}
 
@@ -592,7 +903,6 @@ void update_shoot_animation() {
 					}
 				}
 			}
-
 			else if (out == 0) {
 				if(exp_acc > 0)
 					exp_x -= exp_acc--;
@@ -618,27 +928,52 @@ void wm_keydown() {
 
 	//재장전
 	if (GetAsyncKeyState('R') & 0x8000)
-		if (r_pressed == 0) {
+		if (r_pressed == 0 && reload == 0) {
 			reload = 1; r_pressed = 1;
+			if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
+				ch_reload->stop(); //사운드 정지
+				ssystem->playSound(rifle_reload, 0, false, &ch_reload); //사운드 재생
+			}
+			if (GUN_number == mg_42) {
+				ch_reload->stop(); //사운드 정지
+				ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생
+			}
 		}
 
 	//점프
 	if (GetAsyncKeyState(VK_SPACE) & 0x8000 && space_pressed == 0)
 		if (space_pressed == 0) {
 			CM_jump = 1; space_pressed = 1;
+			ch_jump->stop();
+			ssystem->playSound(jump, 0, false, &ch_jump); //사운드 재생
 		}
 }
 
 //LBUTTONDOWN
 void wm_lbuttondown() {
 	is_click = TRUE;
-	if (empty == 1) reload = 1;
+	if (empty == 1 && reload == 0) {
+		reload = 1;
+		if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
+			ch_reload->stop(); //사운드 정지
+			ssystem->playSound(rifle_reload, 0, false, &ch_reload); //사운드 재생
+		}
+		if (GUN_number == mg_42) {
+			ch_reload->stop(); //사운드 정지
+			ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생
+		}
+	}
 
 	//연사력이 높을수록 딜레이 수치는 낮음
-	//타이머에서 검사하는 딜레이 수치보다 1 적게 초기화
 	switch (GUN_number) {
 	case scar_h:
-		shoot_delay = 5;  break;
+		shoot_delay = scar_speed;  break;
+	case m16:
+		shoot_delay = m16_speed; break;
+	case mp_44:
+		shoot_delay = mp44_speed; break;
+	case mg_42:
+		shoot_delay = mg42_speed; break;
 	}
 }
 
@@ -691,6 +1026,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	switch(uMsg) {
 	case WM_CREATE:
+		set_FMOD();						  //FMOD 초기 세팅
 		IMG_FILE_LOAD();                  //이미지 로드 함수
 		CM_x = 700, CM_y = 600;           //초기 플레이어 위치
 		SetTimer(hWnd, KEYDOWN, 0, NULL); //KEYDOWN 전용 타이머, 이 타이머에 키보드 입력을 제외한 어떠한 다른것도 작성하지 말 것!
@@ -712,15 +1048,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		CM_move_dir = -1; break;
 
 	case WM_LBUTTONDOWN:
-		if (manager.getCurrentSceneID() == Game && !manager.isPaused()) wm_lbuttondown();
+		if (manager.getCurrentSceneID() == Game && !manager.isPaused() && can_shoot == TRUE) wm_lbuttondown();
 		manager.clickScene(hWnd, { LOWORD(lParam), HIWORD(lParam) }, Left);
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 
 	case WM_LBUTTONUP:
 		is_click = FALSE;
-		//딜레이 수치가 0으로 초기화
-		shoot_delay = 0;  
 		break;
 
 	case WM_RBUTTONDOWN:
@@ -740,8 +1074,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			break;
 
 		case UPDATE: //게임 전체 타이머
-			GetClientRect(hWnd, &rt);
-			manager.update(hWnd);
+			GetClientRect(hWnd, &rt); manager.update(hWnd);
 
 			if(manager.getCurrentSceneID() == Game && !manager.isPaused()) {
 				update_player_position(rt);
@@ -752,6 +1085,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				make_monster(rt);  
 				monster_animation();
 			}
+
+			//연사 속도가 느린 총을 마우스 광클로 빨리 쏘는 꼼수 방지
+			if (can_shoot == FALSE) mouse_fastClick_prevention();
+
+			//걷는 소리
+			if ((CM_move_dir == 1 || CM_move_dir == 0) && CM_jump == 0) {
+				if (walk_sound_delay < 20) walk_sound_delay++;
+				if (walk_sound_delay == 20) {
+					walk_sound_delay = 0;
+					ch_walk->stop(); //사운드 정지
+					ssystem->playSound(walk, 0, false, &ch_walk); //사운드 재생
+				}
+			}
+
 			break;
 		}
 		InvalidateRect(hWnd, NULL, FALSE);
@@ -775,6 +1122,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_DESTROY:
 		DestroyWindow(hWnd); PostQuitMessage(0);
+		ssystem->close(); ssystem->release();
 		break;
 	}
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);

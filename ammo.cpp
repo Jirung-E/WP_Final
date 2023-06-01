@@ -32,7 +32,11 @@ void ammo_indicator(HDC mdc, int max_ammo, int ammo, int ind_size, int ind_x, in
 	SetBkMode(mdc, TRANSPARENT);
 	SetTextColor(mdc, RGB(255, 212, 0));
 
-	if ((max_ammo - ammo) / 10 > 0 && max_ammo - ammo > 0) {       //총알이 두 자릿수 남았을 때
+	if ((max_ammo - ammo) / 100 > 0 && max_ammo - ammo > 0) {        //총알이 세 자릿수 남았을 때
+		wsprintf(lpout, L"%d", max_ammo - ammo);
+		TextOut(mdc, ind_x - 30, ind_y, lpout, lstrlen(lpout));
+	}
+	else if ((max_ammo - ammo) / 10 > 0 && max_ammo - ammo > 0) {       //총알이 두 자릿수 남았을 때
 		wsprintf(lpout, L"%d", max_ammo - ammo);
 		TextOut(mdc, ind_x, ind_y, lpout, lstrlen(lpout));
 	}
@@ -104,8 +108,13 @@ int cal_dist(double x1, double y1, double x2, double y2) {
 int cal_damage(int monster_hp, int GUN_number) {
 	switch (GUN_number) {
 	case scar_h:
-		monster_hp -= 8; 
-		break;
+		monster_hp -= 8;  break;
+	case m16:
+		monster_hp -= 5; break;
+	case mp_44:
+		monster_hp -= 12; break;
+	case mg_42:
+		monster_hp -= 3; break;
 	}
 
 	return monster_hp;

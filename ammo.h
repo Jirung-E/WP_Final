@@ -25,6 +25,11 @@ static int reload_x;    //재장전 표시기 x2 좌표
 
 static int empty;   //총알 모두 소모 시 1로 변경
 
+static BOOL can_shoot = TRUE; //연사 속도가 느린 총을 마우스 연타하여 더 빠르게 쏘는 부정 행위 방지
+static int after_delay;       //이 변수가 연사 속도 수치와 다르면 마우스를 아무리 빨리 눌러도 발사가 되지 않는다.
+
+static int reload_delay; //mg_42 재장전 속도 조정 변수
+
 int cal_dist(double x1, double y1, double x2, double y2);
 void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2);
 void ammo_indicator(HDC mdc, int max_ammo, int ammo, int ind_size, int ind_x, int ind_y);
