@@ -85,8 +85,7 @@ void ArmoryScene::draw(const HDC& hdc) const {
         delete current_gun;
     }
 
-    TextBox weapon_info { L"무기 정보를 출력합니다.", { 0, 70 },
-        100, 30 };
+    TextBox weapon_info { L"무기 정보를 출력합니다.", { 0, 70 }, 100, 30 };
 
     weapon_info.show(hdc, preview_area);
 

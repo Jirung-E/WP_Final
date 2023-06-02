@@ -3,6 +3,7 @@
 #include "GameScene.h"
 #include "MainScene.h"
 #include "ArmoryScene.h"
+#include "ShopScene.h"
 
 
 // 장면전환, 버튼이 눌렸는지 등 관리
@@ -11,6 +12,7 @@ private:
     MainScene main_scene;
     GameScene game_scene;
     ArmoryScene armory_scene;
+    ShopScene shop_scene;
     Scene* current_scene;
     POINT mouse_position;
 
