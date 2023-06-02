@@ -67,10 +67,8 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 				PostQuitMessage(0);
 				break;
 			case MainScene::Armory:
+				armory_scene.selected_weapon_button_index = -1;
 				current_scene = &armory_scene;
-				break;
-			case MainScene::Shop:
-				current_scene = &shop_scene;
 				break;
 			}
 			break;
@@ -88,13 +86,6 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 		case Armory:
 			switch(buttonClicked(point)) {
 			case ArmoryScene::Quit:
-				current_scene = &main_scene;
-				break;
-			}
-			break;
-		case Shop:
-			switch(buttonClicked(point)) {
-			case ShopScene::Quit:
 				current_scene = &main_scene;
 				break;
 			}
@@ -221,8 +212,6 @@ int GameManager::buttonClicked(const POINT& point) {
 		return game_scene.clickL(point);
 	case SceneID::Armory:
 		return armory_scene.clickL(point);
-	case SceneID::Shop:
-		return shop_scene.clickL(point);
 	default:
 		return 0;
 	}

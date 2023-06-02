@@ -10,16 +10,18 @@
 class ArmoryScene : public Scene {
 public:
     enum ButtonID {
-        None, Quit, 
+        None, Quit, Equip,
         Weapon0,
         Weapon1,
         Weapon2,
         Weapon3,
         Weapon4,
     };
+    int selected_weapon_button_index;
 
 private:
     Button quit_button;
+    Button equip_button;
     std::vector<Button> weapon_buttons;
     Sprite background_image;
     Sprite player_preview;
@@ -34,5 +36,5 @@ protected:
 
 public:
     void syncSize(const HWND& hWnd);
-    int clickL(const POINT& point) const;
+    int clickL(const POINT& point);
 };

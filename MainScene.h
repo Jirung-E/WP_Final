@@ -8,14 +8,13 @@
 class MainScene : public Scene {
 public:
     enum ButtonID {
-        None, Start, Quit, Armory, Shop
+        None, Start, Quit, Armory
     };
 
 private:
     Button start_button;
     Button quit_button;
     Button armory_button;
-    Button shop_button;
     Sprite background_image;
 
 public:
@@ -25,6 +24,7 @@ protected:
     void draw(const HDC& hdc) const;
 
 public:
+    void syncSize(const HWND& hWnd);
     int clickL(const POINT& point) const;
     //int clickR(const POINT& point) const;
 };

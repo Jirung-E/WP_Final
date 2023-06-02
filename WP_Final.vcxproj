@@ -151,7 +151,6 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Point.cpp" />
     <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="ShopScene.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="Util.cpp" />
@@ -173,7 +172,6 @@
     <ClInclude Include="player_info.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="ShopScene.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="TextBox.h" />
     <ClInclude Include="Util.h" />
