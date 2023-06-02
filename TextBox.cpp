@@ -64,7 +64,7 @@ void TextBox::drawText(const HDC& hdc, const RECT& valid_area, const Direction& 
     SIZE size;
     GetTextExtentPoint32(hdc, text.c_str(), text.length(), &size);
 
-    rect = convertRatio(rect, size.cx, size.cy, bias);
+    //rect = convertRatio(rect, size.cx, size.cy, bias);
 
     if(font_size == 0) {
         if(size.cx*height > size.cy*width) {   // °¡·Î°¡ ´õ ±è
