@@ -142,6 +142,7 @@
     <ClCompile Include="exp.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="GameScene.cpp" />
+    <ClCompile Include="gun_info.cpp" />
     <ClCompile Include="images.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainScene.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="exp.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="GameScene.h" />
+    <ClInclude Include="gun_info.h" />
     <ClInclude Include="images.h" />
     <ClInclude Include="MainScene.h" />
     <ClInclude Include="Map.h" />

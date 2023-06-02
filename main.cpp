@@ -10,6 +10,7 @@
 #include "player_info.h" //플레이어 정보 헤더
 #include "images.h"      //이미지 정보 헤더
 #include "exp.h"         //경험치 정보 헤더, 경험치로 총기를 구입하고, 소비한다.
+#include "gun_info.h"
 #include "fmod.hpp"
 #include "fmod_errors.h"
 
@@ -42,12 +43,6 @@ LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"NON STOP";
 
 static int walk_sound_delay; //발소리가 너무 빠르게 들리면 안되므로 딜레이를 줘 가며 재생
-
-//연사 속도
-#define scar_speed 7
-#define m16_speed 4
-#define mp44_speed 10
-#define mg42_speed 2
 
 std::random_device rd_main;
 std::mt19937 gen(rd_main());
@@ -130,38 +125,10 @@ void set_FMOD() {
 
 //광클 방지
 void mouse_fastClick_prevention() {
-	switch (GUN_number) {
-	case scar_h:
-		if (after_delay < scar_speed)
-			after_delay++;
-		if (after_delay == scar_speed) {
-			can_shoot = TRUE; after_delay = 0;
-		}
-		break;
-
-	case m16:
-		if (after_delay < m16_speed)
-			after_delay++;
-		if (after_delay == m16_speed) {
-			can_shoot = TRUE; after_delay = 0;
-		}
-		break;
-
-	case mp_44:
-		if (after_delay < mp44_speed)
-			after_delay++;
-		if (after_delay == mp44_speed) {
-			can_shoot = TRUE; after_delay = 0;
-		}
-		break;
-
-	case mg_42:
-		if (after_delay < mg42_speed)
-			after_delay++;
-		if (after_delay == mg42_speed) {
-			can_shoot = TRUE; after_delay = 0;
-		}
-		break;
+	if (after_delay < Gun::shoot_speed(GUN_number))
+		after_delay++;
+	if (after_delay == Gun::shoot_speed(GUN_number)) {
+		can_shoot = TRUE; after_delay = 0;
 	}
 }
 
@@ -247,30 +214,25 @@ void show_interface(HDC mdc, RECT rt) {
 	case scar_h:
 		GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetWidth();
 		SCAR_H_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
-		//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
-		ammo_indicator(mdc, 30, ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
 		break;
 
 	case m16:
 		GUN_w = M16_right.GetWidth(); GUN_h = M16_right.GetWidth();
 		M16_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
-		//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
-		ammo_indicator(mdc, 40, ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
 		break;
 
 	case mp_44:
 		GUN_w = MP44_right.GetWidth(); GUN_h = MP44_right.GetWidth();
 		MP44_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
-		//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
-		ammo_indicator(mdc, 20, ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
 		break;
 
 	case mg_42:
 		GUN_w = MG42_right.GetWidth(); GUN_h = MG42_right.GetHeight();
 		MG42_right.Draw(mdc, rt.right - 500 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 250, 150, 0, 0, GUN_w, GUN_h);
-		ammo_indicator(mdc, 300, ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
 		break;
 	}
+	//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
+	ammo_indicator(mdc, Gun::max_ammo(GUN_number), ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
 
 
 
@@ -750,50 +712,26 @@ void make_rand_ammo(int ammo, int max_ammo) {
 //사격
 void shoot() {
 	if (is_click == TRUE && reload == 0 && empty == 0) {
-		switch (GUN_number) {
-		case scar_h:
-			if(shoot_delay < scar_speed)
-				shoot_delay++;
-			if (shoot_delay == scar_speed) {
-				make_rand_ammo(ammo, 30); //최대 장탄수를 오른쪽 인수에 적는다
-				var += 4; ammo++;
-				ch_gun->stop(); //사운드 정지
+		if(shoot_delay < Gun::shoot_speed(GUN_number))
+			shoot_delay++;
+		if(shoot_delay == Gun::shoot_speed(GUN_number)) {
+			make_rand_ammo(ammo, Gun::max_ammo(GUN_number)); //최대 장탄수를 오른쪽 인수에 적는다
+			var += Gun::recoil(GUN_number); ammo++;
+			ch_gun->stop(); //사운드 정지
+			switch(GUN_number) {
+			case scar_h:
 				ssystem->playSound(scar_shoot, 0, false, &ch_gun); //사운드 재생
-			}
-			break;
-
-		case m16:
-			if (shoot_delay < m16_speed)
-				shoot_delay++;
-			if (shoot_delay == m16_speed) {
-				make_rand_ammo(ammo, 40);
-				var += 2; ammo++;
-				ch_gun->stop(); //사운드 정지
+				break;
+			case m16:
 				ssystem->playSound(m16_shoot, 0, false, &ch_gun); //사운드 재생
-			}
-			break;
-
-		case mp_44:
-			if (shoot_delay < mp44_speed)
-				shoot_delay++;
-			if (shoot_delay == mp44_speed) {
-				make_rand_ammo(ammo, 20);
-				var += 6; ammo++;
-				ch_gun->stop(); //사운드 정지
+				break;
+			case mp_44:
 				ssystem->playSound(mp44_shoot, 0, false, &ch_gun); //사운드 재생
-			}
-			break;
-
-		case mg_42:
-			if (shoot_delay < mg42_speed)
-				shoot_delay++;
-			if (shoot_delay == mg42_speed) {
-				make_rand_ammo(ammo, 300);
-				var += 2; ammo++;
-				ch_gun->stop();
+				break;
+			case mg_42:
 				ssystem->playSound(mg42_shoot, 0, false, &ch_gun);
+				break;
 			}
-			break;
 		}
 	}
 }
@@ -805,16 +743,7 @@ void update_shoot_animation() {
 		//사격 시 화면 흔들림
 		//좌측 값: 흔들리는 정도, 오른쪽 값: 흔들리는 시간
 		if (shake_effect == 1) {
-			switch (GUN_number) {
-			case scar_h:
-				make_shake(10, 5); break;
-			case m16:
-				make_shake(8, 5); break;
-			case mp_44:
-				make_shake(15, 5); break;
-			case mg_42:
-				make_shake(10, 5); break;
-			}
+			make_shake(Gun::shake(GUN_number), Gun::shake_time(GUN_number));
 		}
 
 		//아주 짧은 시간동안 총알의 궤적을 그린다.
@@ -853,38 +782,37 @@ void update_shoot_animation() {
 
 		//재장전 인디케이터
 		if (reload == 1) { 
-			switch (GUN_number) {
-			case scar_h:
-				reload_x += 3;
-				if (reload_x + CM_x >= CM_x + 100) {
-					ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
-				}
-				break;
+			//switch (GUN_number) {
+			//case scar_h:
+			//case m16:
+			//case mp_44:
+			//	reload_x += Gun::reload_speed(GUN_number);
+			//	if (reload_x + CM_x >= CM_x + 100) {
+			//		ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
+			//	}
+			//	break;
 
-			case m16:
-				reload_x += 4;
-				if (reload_x + CM_x >= CM_x + 100) {
+			//case mg_42:
+			//	if (reload_delay < Gun::reload_delay(GUN_number))
+			//		reload_delay++;
+			//	if (reload_delay == Gun::reload_delay(GUN_number)) {
+			//		reload_delay = 0;
+			//		reload_x += Gun::reload_speed(GUN_number);
+			//		if (reload_x + CM_x >= CM_x + 100) {
+			//			ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
+			//			reload_delay = 0;
+			//		}
+			//	}
+			//}
+			// 밑에 코드로 대체 가능해보임
+			if(reload_delay < Gun::reload_delay(GUN_number))
+				reload_delay++;
+			if(reload_delay == Gun::reload_delay(GUN_number)) {
+				reload_delay = 0;
+				reload_x += Gun::reload_speed(GUN_number);
+				if(reload_x + CM_x >= CM_x + 100) {
 					ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
-				}
-				break;
-
-			case mp_44:
-				reload_x += 2;
-				if (reload_x + CM_x >= CM_x + 100) {
-					ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
-				}
-				break;
-
-			case mg_42:
-				if (reload_delay < 5)
-					reload_delay++;
-				if (reload_delay == 5) {
 					reload_delay = 0;
-					reload_x += 2;
-					if (reload_x + CM_x >= CM_x + 100) {
-						ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
-						reload_delay = 0;
-					}
 				}
 			}
 		}
@@ -965,16 +893,7 @@ void wm_lbuttondown() {
 	}
 
 	//연사력이 높을수록 딜레이 수치는 낮음
-	switch (GUN_number) {
-	case scar_h:
-		shoot_delay = scar_speed;  break;
-	case m16:
-		shoot_delay = m16_speed; break;
-	case mp_44:
-		shoot_delay = mp44_speed; break;
-	case mg_42:
-		shoot_delay = mg42_speed; break;
-	}
+	shoot_delay = Gun::shoot_speed(GUN_number);
 }
 
 //몬스터 애니메이션

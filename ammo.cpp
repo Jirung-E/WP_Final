@@ -4,6 +4,7 @@
 #include <iostream>
 #include <random>
 #include "ammo.h"
+#include "gun_info.h"
 
 enum gun_name_ammo {
 	null, scar_h, m16, mp_44, mg_42, awp
@@ -106,16 +107,5 @@ int cal_dist(double x1, double y1, double x2, double y2) {
 
 //총마다 다른 대미지 계산
 int cal_damage(int monster_hp, int GUN_number) {
-	switch (GUN_number) {
-	case scar_h:
-		monster_hp -= 8;  break;
-	case m16:
-		monster_hp -= 5; break;
-	case mp_44:
-		monster_hp -= 12; break;
-	case mg_42:
-		monster_hp -= 3; break;
-	}
-
-	return monster_hp;
+	return monster_hp - Gun::damage(GUN_number);
 }

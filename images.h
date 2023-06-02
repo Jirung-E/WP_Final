@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atlimage.h>
+
 extern CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon;
 extern CImage commando_right, commando_left, commando_jump_right, commando_jump_left;
 extern CImage commando_fire_right, commando_fire_left, commando_jump_fire_right, commando_jump_fire_left;
