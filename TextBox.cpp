@@ -11,7 +11,7 @@ border_color { White }, border_width { 1 }, align { DT_CENTER }, absolute { fals
 }
 
 
-void TextBox::show(const HDC& hdc, const RECT& valid_area) const {
+void TextBox::show(const HDC& hdc, const RECT& valid_area, const Direction& bias) const {
     drawBase(hdc, valid_area);
     drawText(hdc, valid_area);
 }
@@ -55,27 +55,30 @@ void TextBox::drawBase(const HDC& hdc, const RECT& valid_area) const {
     DeleteObject(bg_br);
 }
 
-void TextBox::drawText(const HDC& hdc, const RECT& valid_area) const {
+void TextBox::drawText(const HDC& hdc, const RECT& valid_area, const Direction& bias) const {
     LOGFONT logfont;
     GetObject((HFONT)GetStockObject(DEFAULT_GUI_FONT), sizeof(LOGFONT), &logfont);
 
     RECT rect = percentOf(absoluteArea(valid_area), 90);
 
+    SIZE size;
+    GetTextExtentPoint32(hdc, text.c_str(), text.length(), &size);
+
+    rect = convertRatio(rect, size.cx, size.cy, bias);
+
     if(font_size == 0) {
-        SIZE size;
-        GetTextExtentPoint32(hdc, text.c_str(), text.length(), &size);
         if(size.cx*height > size.cy*width) {   // °¡·Î°¡ ´õ ±è
-            logfont.lfHeight *= (rect.right - rect.left) * 90.0 / 100 / size.cx;
-            //rect.top += ((rect.bottom - rect.top) * 90 / 100 - logfont.lfHeight) / 2.0;
-            //rect.bottom -= ((rect.bottom - rect.top) * 90.0 / 100 - logfont.lfHeight) / 2;
+            logfont.lfHeight = size.cy * (rect.right-rect.left) / size.cx * 90.0 / 100;
         }
         else {      // ¼¼·Î°¡ ´õ ±è
-            logfont.lfHeight = (rect.bottom - rect.top) * 90 / 100;
+            logfont.lfHeight = (rect.bottom - rect.top) * 90.0 / 100;
         }
     }
     else {
         logfont.lfHeight = font_size;
     }
+
+    rect = convertRatio(rect, rect.right-rect.left, logfont.lfHeight, bias);
 
     switch(bold) {
     case 1:

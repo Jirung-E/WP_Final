@@ -173,7 +173,7 @@ RECT convertRatio(const RECT& rect, double width, double height, const Direction
 			break;
 		}
 	}
-	else {      // ������?�Ƣ� ��? ��?
+	else {
 		int n = w - width * h / height;
 		switch(bias) {
 		case Left:
@@ -286,6 +286,12 @@ RectSize& RectSize::operator-=(const RectSize& rs) {
 	return *this;
 }
 
+//RectSize& RectSize::operator=(const RectSize& other) {
+//	this->width = other.width;
+//	this->height = other.height;
+//	return *this;
+//}
+
 RectSize RectSize::expand(int percentage) const {
 	RectSize r;
 	r.width = width + width*percentage/100;
@@ -339,7 +345,11 @@ RECT& operator%=(RECT& rect, double per) {
 
 
 Range::Range(double min, double max) : min { min }, max { max } {
-	
+
+}
+
+Range::Range(int min, int max) : Range { double(min), double(max) } {
+
 }
 
 bool Range::isContain(double num) const {

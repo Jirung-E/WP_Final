@@ -14,8 +14,8 @@ RECT percentOf(const RECT& rect, double per);
 
 enum Color {
 	White = 0xffffff, LightGray = 0xcccccc, Gray = 0x888888, DarkGray = 0x444444, Black = 0x000000,
-	Red = 0x0000ff, Green = 0x00ff00, Blue = 0xff0000, 
-	Yellow = 0x00ffff, Cyan = 0xffff00, Magenta = 0xff00ff, 
+	Red = 0x0000ff, Green = 0x00ff00, Blue = 0xff0000,
+	Yellow = 0x00ffff, Cyan = 0xffff00, Magenta = 0xff00ff,
 };
 
 COLORREF mixColor(const COLORREF& color1, const COLORREF& color2);
@@ -27,9 +27,10 @@ class Range {
 public:
 	double min;
 	double max;
-	
+
 public:
 	Range(double min, double max);
+	Range(int min, int max);
 
 public:
 	bool isContain(double num) const;

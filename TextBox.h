@@ -28,10 +28,10 @@ public:
     TextBox(const tstring& text = L"", const Point& position = { 0, 0 }, double width = 1, double height = 1);
 
 public:
-    void show(const HDC& hdc, const RECT& valid_area) const;
+    void show(const HDC& hdc, const RECT& valid_area, const Direction& bias = None) const;
     RECT absoluteArea(const RECT& valid_area) const;
 
 protected:
     void drawBase(const HDC& hdc, const RECT& valid_area) const;
-    void drawText(const HDC& hdc, const RECT& valid_area) const;
+    void drawText(const HDC& hdc, const RECT& valid_area, const Direction& bias = None) const;
 };

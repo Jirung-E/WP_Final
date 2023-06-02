@@ -12,12 +12,12 @@ Button::Button(int id, Sprite* sprite, const Point& position, double width, doub
 }
 
 
-void Button::show(const HDC& hdc, const RECT& valid_area) const {
+void Button::show(const HDC& hdc, const RECT& valid_area, const Direction& bias) const {
     drawBase(hdc, valid_area);
     if(sprite != nullptr) {
         sprite->draw(hdc, percentOf(absoluteArea(valid_area), 100-padding));
     }
-    drawText(hdc, valid_area);
+    drawText(hdc, valid_area, bias);
 }
 
 int Button::getID() const {

@@ -172,6 +172,7 @@
     <ClInclude Include="player_info.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="ShopScene.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="TextBox.h" />
     <ClInclude Include="Util.h" />

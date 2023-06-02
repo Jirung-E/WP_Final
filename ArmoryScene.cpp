@@ -95,7 +95,7 @@ void ArmoryScene::draw(const HDC& hdc) const {
     //    weapon_list_view_area.right, weapon_list_view_area.bottom);
 
     for(auto& e : weapon_buttons) {
-        e.show(hdc, weapon_list_view_area);
+        e.show(hdc, weapon_list_view_area, Up);
     }
     
     quit_button.show(hdc, valid_area);

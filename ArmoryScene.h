@@ -20,7 +20,7 @@ public:
 
 private:
     Button quit_button;
-    std::vector<Button> weapon_buttons;     // 이미지로 교체 예정
+    std::vector<Button> weapon_buttons;
     Sprite background_image;
     Sprite player_preview;
     RECT preview_area;

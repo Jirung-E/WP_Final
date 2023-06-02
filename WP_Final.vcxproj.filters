@@ -164,6 +164,9 @@
     <ClInclude Include="exp.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="ShopScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="변경사항.txt" />
