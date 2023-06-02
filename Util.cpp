@@ -173,7 +173,7 @@ RECT convertRatio(const RECT& rect, double width, double height, const Direction
 			break;
 		}
 	}
-	else {
+	else {      // ������?�Ƣ� ��? ��?
 		int n = w - width * h / height;
 		switch(bias) {
 		case Left:
