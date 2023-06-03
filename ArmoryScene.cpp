@@ -2,6 +2,7 @@
 
 #include "images.h"
 #include "gun_info.h"
+#include "exp.h"
 
 
 ArmoryScene::ArmoryScene() : Scene { Armory }, 
@@ -121,42 +122,62 @@ void ArmoryScene::draw(const HDC& hdc) const {
         delete current_gun;
     }
 
-    //Sprite back { L"./res/indicator_back.png" };
-    //back.draw(hdc, area);
+    RECT info_area = rectToSquare(preview_area);
+    int font_size = percentOf(info_area.right - info_area.left, 5);
 
-    TextBox damage_text { L"Damage", { 0, 70 }, 25, 15 };
-    TextBox damage_value { std::to_wstring(Gun::damage(idx)), { 25, 70 }, 25, 15 };
+    TextBox current_exp_text { L"EXP", { 0, 0 }, 25, 10 };
+    TextBox current_exp_value { std::to_wstring(experience), { 25, 0 }, 25, 10 };
+    current_exp_text.font_size = font_size;
+    current_exp_value.font_size = font_size;
+    current_exp_text.background_color = LightGray;
+    current_exp_value.background_color = brighter(LightGray, 20);
+    current_exp_text.show(hdc, preview_area);
+    current_exp_value.show(hdc, preview_area);
+
+    TextBox damage_text { L"Damage", { 0, 80 }, 25, 10 };
+    TextBox damage_value { std::to_wstring(Gun::damage(idx)), { 25, 80 }, 25, 10 };
+    damage_text.font_size = font_size;
+    damage_value.font_size = font_size;
     damage_text.background_color = LightGray;
     damage_value.background_color = brighter(LightGray, 20);
     damage_text.show(hdc, preview_area);
     damage_value.show(hdc, preview_area);
-    TextBox speed_text { L"Speed", { 50, 70 }, 25, 15 };
-    TextBox speed_value { std::to_wstring(100-Gun::shoot_speed(idx)), { 75, 70 }, 25, 15 };
+
+    TextBox speed_text { L"Speed", { 50, 80 }, 25, 10 };
+    TextBox speed_value { std::to_wstring(100-Gun::shoot_speed(idx)), { 75, 80 }, 25, 10 };
+    speed_text.font_size = font_size;
+    speed_value.font_size = font_size;
     speed_text.background_color = LightGray;
     speed_value.background_color = brighter(LightGray, 20);
     speed_text.show(hdc, preview_area);
     speed_value.show(hdc, preview_area);
-    TextBox ammo_text { L"Ammo", { 0, 85 }, 25, 15 };
-    TextBox ammo_value { std::to_wstring(Gun::max_ammo(idx)), { 25, 85 }, 25, 15 };
+
+    TextBox ammo_text { L"Ammo", { 0, 90 }, 25, 10 };
+    TextBox ammo_value { std::to_wstring(Gun::max_ammo(idx)), { 25, 90 }, 25, 10 };
+    ammo_text.font_size = font_size;
+    ammo_value.font_size = font_size;
     ammo_text.background_color = LightGray;
     ammo_value.background_color = brighter(LightGray, 20);
     ammo_text.show(hdc, preview_area);
     ammo_value.show(hdc, preview_area);
 
-    TextBox price_text { L"Price", { 50, 85 }, 25, 15 };
-    TextBox price_value { std::to_wstring(Gun::price(idx)), { 75, 85 }, 25, 15 };
+    TextBox price_text { L"Price", { 50, 90 }, 25, 10 };
+    TextBox price_value { std::to_wstring(Gun::price(idx)), { 75, 90 }, 25, 10 };
+    price_text.font_size = font_size;
+    price_value.font_size = font_size;
     if(unlocked[idx-1]) {
         price_text.text = L"-";
         price_value.text = L"-";
+    }
+    else {
+        if(experience < Gun::price(idx)) {
+            price_value.text_color = Red;
+        }
     }
     price_text.background_color = LightGray;
     price_value.background_color = brighter(LightGray, 20);
     price_text.show(hdc, preview_area);
     price_value.show(hdc, preview_area);
-
-    //  Damage | xx     |    Speed | xx
-    //  Ammo   | xx     |    Price | xx exp             -> 총 8개의 텍스트박스
-
 
     //// armory layout
     //Rectangle(hdc, weapon_list_view_area.left, weapon_list_view_area.top,
@@ -247,8 +268,11 @@ int ArmoryScene::clickL(const POINT& point) {
         r = unlock_button.absoluteArea(valid_area);
         if(PtInRect(&r, point)) {
             if(selected_weapon_button_index >= 0) {
-                GUN_number = selected_weapon_button_index+1;
-                unlocked[selected_weapon_button_index] = true;
+                if(experience >= Gun::price(selected_weapon_button_index+1)) {
+                    experience -= Gun::price(selected_weapon_button_index+1);
+                    GUN_number = selected_weapon_button_index+1;
+                    unlocked[selected_weapon_button_index] = true;
+                }
             }
             return unlock_button.getID();
         }

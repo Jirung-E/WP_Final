@@ -1,7 +1,17 @@
 #include <windows.h>
 #include "exp.h"
 
-//경험치 수치 표시 함수
+//경험치. exp로 변수 이름을 하려 했으나 충돌로 인해 이렇게 함
+int experience;
+//경험치가 증가하는 정도를 저장하는 변수. 경험치 증가 효과를 출력할 때 사용한다.
+int prev_up;
+//경험치가 증가할 때 경험치 증가 이벤트를 발생시킨다.
+BOOL exp_up = FALSE;
+int exp_x = -150;
+int exp_acc = 20;
+int out = 1;
+int exp_out_delay;
+
 //경험치 수치 표시 함수
 void show_exp(HDC mdc, int experience, int x, int y) {
 	HFONT hfont, oldfont;
