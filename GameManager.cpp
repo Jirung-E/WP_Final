@@ -1,12 +1,49 @@
 #include "GameManager.h"
 
+#include <fstream>
 
-GameManager::GameManager() : main_scene { }, game_scene { }, current_scene { &main_scene }, mouse_position { 0, 0 } {
+#include "exp.h"
+#include "images.h"
 
+using namespace std;
+
+
+GameManager::GameManager() : main_scene { }, game_scene { }, armory_scene { },
+current_scene { &main_scene }, mouse_position { 0, 0 } {
+	ifstream ifs { "userdata.txt" };
+	if(!ifs.fail()) {
+		// 열렸으면 일단 예외 처리 없이 쭉 받기
+		ifs >> experience;
+		ifs >> GUN_number;
+		armory_scene.unlocked[GUN_number-1] = true;
+		while(!ifs.eof()) {
+			int id;
+			ifs >> id;
+			armory_scene.unlocked[id-1] = true;
+		}
+	}
+
+	// 파일 포맷:
+	// 경험치
+	// 현재 총(enum값 그대로 저장)
+	// 보유한 총1
+	// 보유한 총2
+	// ...
 }
 
 GameManager::~GameManager() {
-
+	ofstream ofs { "userdata.txt" };
+	if(!ofs.fail()) {
+		ofs << experience << endl;
+		ofs << GUN_number << endl;
+		int i=0;
+		for(auto e : armory_scene.unlocked) {
+			i++;
+			if(e == true) {
+				ofs << i << endl;
+			}
+		}
+	}
 }
 
 
