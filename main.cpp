@@ -17,8 +17,8 @@
 #pragma comment (lib, "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Windows/api/core/lib/x64/fmod_vc.lib")
 
 FMOD::System* ssystem;
-FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot;
-FMOD::Sound* rifle_reload, * lmg_reload, * walk, * hit_sound, * jump, * exp_get, *land_sound;
+FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot;
+FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -103,6 +103,7 @@ void IMG_FILE_LOAD() {
 	flame_right.Load(L".\\res\\flame_right.png");
 	flame_left.Load(L".\\res\\flame_left.png");
 	ammo_lmg_icon.Load(L".\\res\\ammo_lmg_icon.png");
+	ammo_sniper_icon.Load(L".\\res\\ammo_sniper_icon.png");
 } 
 
 //FMOD 세팅
@@ -113,14 +114,18 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\scar_h.wav", FMOD_DEFAULT, 0, &scar_shoot);
 	ssystem->createSound(".\\res\\sounds\\m16.wav", FMOD_DEFAULT, 0, &m16_shoot);
 	ssystem->createSound(".\\res\\sounds\\mp44.wav", FMOD_DEFAULT, 0, &mp44_shoot);
+	ssystem->createSound(".\\res\\sounds\\mg42.wav", FMOD_DEFAULT, 0, &mg42_shoot);
+	ssystem->createSound(".\\res\\sounds\\awp.wav", FMOD_DEFAULT, 0, &awp_shoot);
+	ssystem->createSound(".\\res\\sounds\\rifle_reload.wav", FMOD_DEFAULT, 0, &rifle_reload);
+	ssystem->createSound(".\\res\\sounds\\lmg_reload.ogg", FMOD_DEFAULT, 0, &lmg_reload);
+	ssystem->createSound(".\\res\\sounds\\sniper_reload.ogg", FMOD_DEFAULT, 0, &sniper_reload);
+	ssystem->createSound(".\\res\\sounds\\sniper_bolt.mp3", FMOD_DEFAULT, 0, &sniper_bolt);
+
 	ssystem->createSound(".\\res\\sounds\\hit.wav", FMOD_DEFAULT, 0, &hit_sound);
 	ssystem->createSound(".\\res\\sounds\\walk.ogg", FMOD_DEFAULT, 0, &walk);
-	ssystem->createSound(".\\res\\sounds\\rifle_reload.wav", FMOD_DEFAULT, 0, &rifle_reload);
 	ssystem->createSound(".\\res\\sounds\\jump.wav", FMOD_DEFAULT, 0, &jump);
-	ssystem->createSound(".\\res\\sounds\\exp_get.ogg", FMOD_DEFAULT, 0, &exp_get);
-	ssystem->createSound(".\\res\\sounds\\mg42.wav", FMOD_DEFAULT, 0, &mg42_shoot);
-	ssystem->createSound(".\\res\\sounds\\lmg_reload.ogg", FMOD_DEFAULT, 0, &lmg_reload);
 	ssystem->createSound(".\\res\\sounds\\land.mp3", FMOD_DEFAULT, 0, &land_sound);
+	ssystem->createSound(".\\res\\sounds\\exp_get.ogg", FMOD_DEFAULT, 0, &exp_get);
 }
 
 //광클 방지
@@ -208,6 +213,11 @@ void show_interface(HDC mdc, RECT rt) {
 		ammo_lmg_icon.Draw(mdc, rt.right - 230 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
 	}
 
+	if (GUN_number == awp) {
+		AMO_w = ammo_sniper_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
+		ammo_sniper_icon.Draw(mdc, rt.right - 230 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
+	}
+
 
 	//총 아이콘 및 장탄수 출력
 	switch (GUN_number) {
@@ -229,6 +239,11 @@ void show_interface(HDC mdc, RECT rt) {
 	case mg_42:
 		GUN_w = MG42_right.GetWidth(); GUN_h = MG42_right.GetHeight();
 		MG42_right.Draw(mdc, rt.right - 500 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 250, 150, 0, 0, GUN_w, GUN_h);
+		break;
+
+	case awp:
+		GUN_w = AWP_right.GetWidth(); GUN_h = AWP_right.GetHeight();
+		AWP_right.Draw(mdc, rt.right - 450 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 200, 150, 0, 0, GUN_w, GUN_h);
 		break;
 	}
 	//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
@@ -267,6 +282,7 @@ void show_interface(HDC mdc, RECT rt) {
 void show_player(HDC mdc) {
 	switch (CM_img_dir) { //플레이어, 총 이미지 출력
 	case 0:
+		//플레이어 이미지 좌픅
 		if (CM_jump == 0) {
 			if (is_draw == TRUE) {
 				CM_w = commando_fire_left.GetWidth(); CM_h = commando_fire_left.GetHeight();
@@ -289,6 +305,7 @@ void show_player(HDC mdc) {
 			}
 		}
 
+		//총 좌측
 		switch (GUN_number) {
 		case scar_h:
 			GUN_w = SCAR_H_left.GetWidth(); GUN_h = SCAR_H_left.GetHeight();
@@ -309,17 +326,27 @@ void show_player(HDC mdc) {
 			GUN_w = MG42_left.GetWidth(); GUN_h = MG42_left.GetHeight();
 			MG42_left.Draw(mdc, CM_x - 120 + ss_x, CM_y + landing_shake + ss_y, 200, 100, 0, 0, GUN_w, GUN_h);
 			break;
+
+		case awp:
+			GUN_w = AWP_left.GetWidth(); GUN_h = AWP_left.GetHeight();
+			AWP_left.Draw(mdc, CM_x - 80 +ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
+			break;
 		}
 
-		if (is_draw == TRUE && GUN_number != mg_42)
+		//불꽃 좌측
+		if (is_draw == TRUE && GUN_number != mg_42 && GUN_number != awp)
 			flame_left.Draw(mdc, CM_x - 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
 
 		if (is_draw == TRUE && GUN_number == mg_42)
 			flame_left.Draw(mdc, CM_x - 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
 
+		if (is_draw == TRUE && GUN_number == awp)
+			flame_left.Draw(mdc, CM_x - 170 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
+
 		break;
 		//////////////////////
 	case 1:
+		//플레이어 우측
 		if (CM_jump == 0) {
 			if (is_draw == TRUE) {
 				CM_w = commando_fire_right.GetWidth(); CM_h = commando_fire_right.GetHeight();
@@ -341,6 +368,7 @@ void show_player(HDC mdc) {
 			}
 		}
 
+		//총 우측
 		switch (GUN_number) {
 		case scar_h:
 			GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetHeight();
@@ -358,13 +386,21 @@ void show_player(HDC mdc) {
 			GUN_w = MG42_right.GetWidth();  GUN_h = MG42_left.GetHeight();
 			MG42_right.Draw(mdc, CM_x + 20 + ss_x, CM_y + landing_shake + ss_y, 200, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
 			break;
+		case awp:
+			GUN_w = AWP_right.GetWidth(); GUN_h = AWP_right.GetHeight();
+			AWP_right.Draw(mdc, CM_x + 30 + ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
+			break;
 		}
 
-		if (is_draw == TRUE && GUN_number != mg_42)
+		//불꽃 우측
+		if (is_draw == TRUE && GUN_number != mg_42 && GUN_number != awp)
 			flame_right.Draw(mdc, CM_x + 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
 
 		if(is_draw == TRUE && GUN_number == mg_42)
 			flame_right.Draw(mdc, CM_x + 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
+
+		if (is_draw == TRUE && GUN_number == awp)
+			flame_right.Draw(mdc, CM_x + 170 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
 
 		break;
 	}
@@ -717,6 +753,7 @@ void shoot() {
 		if(shoot_delay == Gun::shoot_speed(GUN_number)) {
 			make_rand_ammo(ammo, Gun::max_ammo(GUN_number)); //최대 장탄수를 오른쪽 인수에 적는다
 			var += Gun::recoil(GUN_number); ammo++;
+			is_zoom = FALSE; avail_awp = FALSE;
 			ch_gun->stop(); //사운드 정지
 			switch(GUN_number) {
 			case scar_h:
@@ -731,114 +768,114 @@ void shoot() {
 			case mg_42:
 				ssystem->playSound(mg42_shoot, 0, false, &ch_gun);
 				break;
+			case awp:
+				ssystem->playSound(awp_shoot, 0, false, &ch_gun);
+				ch_reload->stop();
+				//볼트 작동 소리도 같이 출력
+				ssystem->playSound(sniper_bolt, 0, false, &ch_reload);
+				break;
 			}
 		}
 	}
 }
 
-//사격 애니메이션 업데이트
+//사격 관련 애니메이션 업데이트
 void update_shoot_animation() {
-	 //사격 시 발생하는 애니매이션
-	{
-		//사격 시 화면 흔들림
-		//좌측 값: 흔들리는 정도, 오른쪽 값: 흔들리는 시간
-		if (shake_effect == 1) {
-			make_shake(Gun::shake(GUN_number), Gun::shake_time(GUN_number));
+	//awp 정조준
+	if (GUN_number == awp) {
+		//정조준 시 정확도가 점차 향상된다.
+		if (is_zoom == TRUE) { 
+			if (var > 0) var -= 2;
+			if (var == 0) avail_awp = TRUE; //정조준을 완전히 해야 발사 가능
 		}
 
-		//아주 짧은 시간동안 총알의 궤적을 그린다.
-		if (is_draw == TRUE) { 
-			draw_timer++;
-			if (draw_timer == 3) {
-				draw_timer = 0; is_draw = FALSE;
-			}
+		//정조준을 하지 않거나 정조준을 중단하면 정확도가 점차 떨어진다.
+		if (is_zoom == FALSE) {
+			if (var < 120)	var += 12;
+
 		}
 
-		//몬스터가 총알에 맞은 부분을 보여준다.
-		if (draw_hit == TRUE) {
-			hit_timer++;
-			if (hit_timer == 10) {
-				hit_timer = 0; draw_hit = FALSE;
-			}
-		}
+		//항상 정해진 넓이로 조준점이 유지되도록 한다.
+		if (is_zoom == FALSE && var > 120) var -= 2;
+	}
 
+	//사격 시 화면 흔들림
+	//좌측 값: 흔들리는 정도, 오른쪽 값: 흔들리는 시간
+	if (shake_effect == 1) {
+		make_shake(Gun::shake(GUN_number), Gun::shake_time(GUN_number));
+	}
+
+	//아주 짧은 시간동안 총알의 궤적을 그린다.
+	if (is_draw == TRUE) { 
+		draw_timer++;
+		if (draw_timer == 3) {
+			draw_timer = 0; is_draw = FALSE;
+		}
+	}
+
+	//몬스터가 총알에 맞은 부분을 보여준다.
+	if (draw_hit == TRUE) {
+		hit_timer++;
+		if (hit_timer == 10) {
+			hit_timer = 0; draw_hit = FALSE;
+		}
+	}
+
+	if (GUN_number != awp) {
 		//사격 중지 시 조준점이 다시 회복됨
 		if (is_click == FALSE || reload == 1 || empty == 1) {
 			if (var >= 0) var -= 2;
 		}
 
 		//인터페이스 애니메이션 활성화
-		if (ind_effect == 1) { 
+		if (ind_effect == 1) {
 			ind_ani = 1; ind_size = 150; ind_x = 1335; ind_y = 625;
 			ind_effect = 0;
 		}
+	}
 
-		//장탄수, 재장전 인디케이터 애니메이션
-		if (ind_ani == 1) {
-			ind_size -= 10; ind_x += 5; ind_y += 5;
+	//장탄수, 재장전 인디케이터 애니메이션
+	if (ind_ani == 1) {
+		ind_size -= 10; ind_x += 5; ind_y += 5;
 
-			if (ind_size == 100) ind_ani = 0;
-		}
+		if (ind_size == 100) ind_ani = 0;
+	}
 
-		//재장전 인디케이터
-		if (reload == 1) { 
-			//switch (GUN_number) {
-			//case scar_h:
-			//case m16:
-			//case mp_44:
-			//	reload_x += Gun::reload_speed(GUN_number);
-			//	if (reload_x + CM_x >= CM_x + 100) {
-			//		ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
-			//	}
-			//	break;
-
-			//case mg_42:
-			//	if (reload_delay < Gun::reload_delay(GUN_number))
-			//		reload_delay++;
-			//	if (reload_delay == Gun::reload_delay(GUN_number)) {
-			//		reload_delay = 0;
-			//		reload_x += Gun::reload_speed(GUN_number);
-			//		if (reload_x + CM_x >= CM_x + 100) {
-			//			ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
-			//			reload_delay = 0;
-			//		}
-			//	}
-			//}
-			// 밑에 코드로 대체 가능해보임
-			if(reload_delay < Gun::reload_delay(GUN_number))
-				reload_delay++;
-			if(reload_delay == Gun::reload_delay(GUN_number)) {
+	//재장전 인디케이터
+	if (reload == 1) { 
+		if(reload_delay < Gun::reload_delay(GUN_number))
+			reload_delay++;
+		if(reload_delay == Gun::reload_delay(GUN_number)) {
+			reload_delay = 0;
+			reload_x += Gun::reload_speed(GUN_number);
+			if(reload_x + CM_x >= CM_x + 100) {
+				ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
 				reload_delay = 0;
-				reload_x += Gun::reload_speed(GUN_number);
-				if(reload_x + CM_x >= CM_x + 100) {
-					ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
-					reload_delay = 0;
-				}
 			}
 		}
+	}
 
-		//경험치 증가 애니메이션
-		if (exp_up == TRUE) {
-			if (out == 1) {
-				if(exp_acc > 0)
-					exp_x += exp_acc--;
-				if (exp_acc == 0) {
-					exp_out_delay++;
-					if (exp_out_delay == 20) {
-						exp_out_delay = 0;
-						out = 0;
-						exp_acc = 20;
-					}
-				}
-			}
-			else if (out == 0) {
-				if(exp_acc > 0)
-					exp_x -= exp_acc--;
-				if (exp_acc == 0) {
-					exp_up = FALSE;
-					out = 1;
+	//경험치 증가 애니메이션
+	if (exp_up == TRUE) {
+		if (out == 1) {
+			if(exp_acc > 0)
+				exp_x += exp_acc--;
+			if (exp_acc == 0) {
+				exp_out_delay++;
+				if (exp_out_delay == 20) {
+					exp_out_delay = 0;
+					out = 0;
 					exp_acc = 20;
 				}
+			}
+		}
+		else if (out == 0) {
+			if(exp_acc > 0)
+				exp_x -= exp_acc--;
+			if (exp_acc == 0) {
+				exp_up = FALSE;
+				out = 1;
+				exp_acc = 20;
 			}
 		}
 	}
@@ -866,20 +903,28 @@ void wm_keydown() {
 				ch_reload->stop(); //사운드 정지
 				ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생
 			}
+			if (GUN_number == awp) {
+				ch_reload->stop();
+				ssystem->playSound(sniper_reload, 0, false, &ch_reload);
+			}
 		}
 
 	//점프
-	if (GetAsyncKeyState(VK_SPACE) & 0x8000 && space_pressed == 0)
-		if (space_pressed == 0) {
+	if (GetAsyncKeyState(VK_SPACE) & 0x8000 && space_pressed == 0) {
+		if (space_pressed == 0 && is_zoom == FALSE) {
 			CM_jump = 1; space_pressed = 1;
+			is_zoom = FALSE;
 			ch_jump->stop();
 			ssystem->playSound(jump, 0, false, &ch_jump); //사운드 재생
 		}
+	}
 }
 
 //LBUTTONDOWN
 void wm_lbuttondown() {
-	is_click = TRUE;
+	if(GUN_number != awp) is_click = TRUE;
+	if (GUN_number == awp && avail_awp == TRUE)	is_click = TRUE;
+
 	if (empty == 1 && reload == 0) {
 		reload = 1;
 		if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
@@ -890,10 +935,23 @@ void wm_lbuttondown() {
 			ch_reload->stop(); //사운드 정지
 			ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생
 		}
+		if (GUN_number == awp) {
+			ch_reload->stop();
+			ssystem->playSound(sniper_reload, 0, false, &ch_reload);
+		}
 	}
 
 	//연사력이 높을수록 딜레이 수치는 낮음
-	shoot_delay = Gun::shoot_speed(GUN_number);
+	if(GUN_number != awp)
+		shoot_delay = Gun::shoot_speed(GUN_number);
+
+	if(GUN_number == awp && avail_awp == TRUE)
+		shoot_delay = Gun::shoot_speed(GUN_number);
+}
+
+//WM_RBUTTONDOWN
+void wm_rbuttondown() {
+	is_zoom = TRUE;
 }
 
 //몬스터 애니메이션
@@ -976,8 +1034,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		is_click = FALSE;
 		break;
 
+	case WM_RBUTTONUP:
+		is_zoom = FALSE;
+		avail_awp = FALSE;
+		break;
+
+
 	case WM_RBUTTONDOWN:
 		manager.clickScene(hWnd, { LOWORD(lParam), HIWORD(lParam) }, Right);
+		if(GUN_number == awp) wm_rbuttondown();
+			
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 
@@ -1010,8 +1076,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 			//걷는 소리
 			if ((CM_move_dir == 1 || CM_move_dir == 0) && CM_jump == 0) {
-				if (walk_sound_delay < 20) walk_sound_delay++;
-				if (walk_sound_delay == 20) {
+				if (walk_sound_delay < 25) walk_sound_delay++;
+				if (walk_sound_delay == 25) {
 					walk_sound_delay = 0;
 					ch_walk->stop(); //사운드 정지
 					ssystem->playSound(walk, 0, false, &ch_walk); //사운드 재생

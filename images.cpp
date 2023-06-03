@@ -1,7 +1,7 @@
 #include <atlImage.h>
 
 
-CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon;
+CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon, ammo_sniper_icon;
 CImage commando_right, commando_left, commando_jump_right, commando_jump_left;
 CImage commando_fire_right, commando_fire_left, commando_jump_fire_right, commando_jump_fire_left;
 CImage SCAR_H_right, SCAR_H_left, M16_right, M16_left, MP44_right, MP44_left, MG42_right, MG42_left, AWP_right, AWP_left;

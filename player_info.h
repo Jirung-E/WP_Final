@@ -5,3 +5,6 @@ static int CM_jump_acc = 28; //점프 시 가속도
 static int CM_jump;          //0: 점프 안 함, 1: 점프 함 2: 착지 중
 
 static double CM_x, CM_y;    //플레이어 캐릭터의 위치
+
+BOOL is_zoom = FALSE;
+BOOL avail_awp = FALSE;

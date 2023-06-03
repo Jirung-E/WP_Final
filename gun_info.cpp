@@ -14,7 +14,7 @@ int Gun::damage(int gun_id) {
     case mg_42:
         return 3;
     case awp:
-        return 0;
+        return 100;
     }
     return 0;
 }
@@ -30,7 +30,7 @@ int Gun::shoot_speed(int gun_id) {
     case mg_42:
         return 2;
     case awp:
-        return 0;
+        return 120;
     }
     return 0;
 }
@@ -46,7 +46,7 @@ int Gun::max_ammo(int gun_id) {
     case mg_42:
         return 300;
     case awp:
-        return 0;
+        return 5;
     }
     return 0;
 }
@@ -55,6 +55,11 @@ int Gun::reload_delay(int gun_id) {
     switch(gun_id) {
     case mg_42:
         return 5;
+        break;
+
+    case awp:
+        return 2;
+        break;
     }
     return 0;
 }
@@ -70,7 +75,7 @@ int Gun::reload_speed(int gun_id) {
     case mg_42:
         return 2;
     case awp:
-        return 0;
+        return 2;
     }
     return 0;
 }
@@ -86,7 +91,7 @@ int Gun::recoil(int gun_id) {
     case mg_42:
         return 2;
     case awp:
-        return 0;
+        return 30;
     }
     return 0;
 }
@@ -102,13 +107,25 @@ int Gun::shake(int gun_id) {
     case mg_42:
         return 10;
     case awp:
-        return 0;
+        return 30;
     }
     return 0;
 }
 
 int Gun::shake_time(int gun_id) {
-    return 5;
+    switch (gun_id) {
+    case scar_h:
+        return 5;
+    case m16:
+        return 5;
+    case mp_44:
+        return 5;
+    case mg_42:
+        return 5;
+    case awp:
+        return 50;
+    }
+    return 0;
 }
 
 int Gun::price(int gun_id) {
