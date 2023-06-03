@@ -1,11 +1,13 @@
 #include "ArmoryScene.h"
 
 #include "images.h"
+#include "gun_info.h"
 
 
 ArmoryScene::ArmoryScene() : Scene { Armory }, 
 quit_button { Quit, L"Quit", { 15, 15 }, 80, 40 },
 equip_button { Equip, L"Equip", { 0, 0 }, 0, 0 },
+unlock_button { Unlock, L"Unlock", { 0, 0 }, 0, 0 },
 selected_weapon_button_index { -1 },
 background_image { L"./res/Armory_background(temp).jpg" },
 player_preview { L"./res/commando_right.png" },
@@ -19,6 +21,11 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
     equip_button.border_width = 2;
     equip_button.background_color = LightGray;
     equip_button.absolute = true;
+
+    unlock_button.border_color = Gray;
+    unlock_button.border_width = 2;
+    unlock_button.background_color = LightGray;
+    unlock_button.absolute = true;
 
     weapon_buttons.reserve(5);              // 장비가 추가될때마다 이 숫자 증가
     weapon_buttons.push_back(Button { Weapon0, L"SCAR-H", { }, 0, 0 });
@@ -48,6 +55,11 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
         e.absolute = true;
         e.padding = 5; 
     }
+
+    for(auto& e : unlocked) {
+        e = false;
+    }
+    unlocked[scar_h-1] = true;
 }
 
 
@@ -76,6 +88,9 @@ void ArmoryScene::draw(const HDC& hdc) const {
         idx = GUN_number;
     }
 
+    int pos_x_add = 0;
+    int pos_y_add = 0;
+
     switch(idx) {
     case scar_h:
         current_gun = new Sprite { L"./res/scar_h_right.png" };
@@ -88,6 +103,7 @@ void ArmoryScene::draw(const HDC& hdc) const {
         break;
     case mg_42:
         current_gun = new Sprite { L"./res/mg42_right.png" };
+        pos_x_add = -round(percentOf(area.right-area.left, 20));
         break;
     case awp:
         current_gun = new Sprite { L"./res/awp_right.png" };
@@ -95,14 +111,52 @@ void ArmoryScene::draw(const HDC& hdc) const {
     }
 
     if(current_gun != nullptr) {
+        RECT gun_draw_rect = expandRatio(area, current_gun->source.GetWidth(), current_gun->source.GetHeight(), Left);
+        gun_draw_rect.left += pos_x_add;
+        gun_draw_rect.right += pos_x_add;
+        gun_draw_rect.top += pos_y_add;
+        gun_draw_rect.bottom += pos_y_add;
         current_gun->fix_ratio = true;
-        current_gun->draw(hdc, expandRatio(area, current_gun->source.GetWidth(), current_gun->source.GetHeight(), Left));
+        current_gun->draw(hdc, gun_draw_rect);
         delete current_gun;
     }
 
-    TextBox weapon_info { L"무기 정보를 출력합니다.", { 0, 70 }, 100, 30 };
+    //Sprite back { L"./res/indicator_back.png" };
+    //back.draw(hdc, area);
 
-    weapon_info.show(hdc, preview_area);
+    TextBox damage_text { L"Damage", { 0, 70 }, 25, 15 };
+    TextBox damage_value { std::to_wstring(Gun::damage(idx)), { 25, 70 }, 25, 15 };
+    damage_text.background_color = LightGray;
+    damage_value.background_color = brighter(LightGray, 20);
+    damage_text.show(hdc, preview_area);
+    damage_value.show(hdc, preview_area);
+    TextBox speed_text { L"Speed", { 50, 70 }, 25, 15 };
+    TextBox speed_value { std::to_wstring(100-Gun::shoot_speed(idx)), { 75, 70 }, 25, 15 };
+    speed_text.background_color = LightGray;
+    speed_value.background_color = brighter(LightGray, 20);
+    speed_text.show(hdc, preview_area);
+    speed_value.show(hdc, preview_area);
+    TextBox ammo_text { L"Ammo", { 0, 85 }, 25, 15 };
+    TextBox ammo_value { std::to_wstring(Gun::max_ammo(idx)), { 25, 85 }, 25, 15 };
+    ammo_text.background_color = LightGray;
+    ammo_value.background_color = brighter(LightGray, 20);
+    ammo_text.show(hdc, preview_area);
+    ammo_value.show(hdc, preview_area);
+
+    TextBox price_text { L"Price", { 50, 85 }, 25, 15 };
+    TextBox price_value { std::to_wstring(Gun::price(idx)), { 75, 85 }, 25, 15 };
+    if(unlocked[idx-1]) {
+        price_text.text = L"-";
+        price_value.text = L"-";
+    }
+    price_text.background_color = LightGray;
+    price_value.background_color = brighter(LightGray, 20);
+    price_text.show(hdc, preview_area);
+    price_value.show(hdc, preview_area);
+
+    //  Damage | xx     |    Speed | xx
+    //  Ammo   | xx     |    Price | xx exp             -> 총 8개의 텍스트박스
+
 
     //// armory layout
     //Rectangle(hdc, weapon_list_view_area.left, weapon_list_view_area.top,
@@ -135,7 +189,12 @@ void ArmoryScene::draw(const HDC& hdc) const {
         DeleteObject(br);
     }
     
-    equip_button.show(hdc, valid_area);
+    if(unlocked[idx-1]) {
+        equip_button.show(hdc, valid_area);
+    }
+    else {
+        unlock_button.show(hdc, valid_area);
+    }
     quit_button.show(hdc, valid_area);
 }
 
@@ -154,6 +213,10 @@ void ArmoryScene::syncSize(const HWND& hWnd) {
     equip_button.height = percentOf(r.bottom - r.top, 10);
     equip_button.position = { (double)r.left + percentOf(r.right - r.left, 20), (double)r.bottom - equip_button.height };
 
+    unlock_button.width = percentOf(r.right - r.left, 60);
+    unlock_button.height = percentOf(r.bottom - r.top, 10);
+    unlock_button.position = { (double)r.left + percentOf(r.right - r.left, 20), (double)r.bottom - unlock_button.height };
+
     w -= 5*(3+1);       // 한 줄에 3개, margin 5
     w /= 3;
     for(int i=0; i<weapon_buttons.size(); ++i) {
@@ -170,12 +233,25 @@ int ArmoryScene::clickL(const POINT& point) {
     if(PtInRect(&r, point)) {
         return quit_button.getID();
     }
-    r = equip_button.absoluteArea(valid_area);
-    if(PtInRect(&r, point)) {
-        if(selected_weapon_button_index >= 0) {
-            GUN_number = selected_weapon_button_index+1;
+
+    if(unlocked[selected_weapon_button_index]) {
+        r = equip_button.absoluteArea(valid_area);
+        if(PtInRect(&r, point)) {
+            if(selected_weapon_button_index >= 0) {
+                GUN_number = selected_weapon_button_index+1;
+            }
+            return equip_button.getID();
         }
-        return equip_button.getID();
+    }
+    else {
+        r = unlock_button.absoluteArea(valid_area);
+        if(PtInRect(&r, point)) {
+            if(selected_weapon_button_index >= 0) {
+                GUN_number = selected_weapon_button_index+1;
+                unlocked[selected_weapon_button_index] = true;
+            }
+            return unlock_button.getID();
+        }
     }
 
     for(int i=0; i<weapon_buttons.size(); ++i) {

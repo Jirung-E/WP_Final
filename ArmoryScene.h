@@ -10,7 +10,7 @@
 class ArmoryScene : public Scene {
 public:
     enum ButtonID {
-        None, Quit, Equip,
+        None, Quit, Equip, Unlock,
         Weapon0,
         Weapon1,
         Weapon2,
@@ -18,10 +18,12 @@ public:
         Weapon4,
     };
     int selected_weapon_button_index;
+    bool unlocked[5];
 
 private:
     Button quit_button;
     Button equip_button;
+    Button unlock_button;
     std::vector<Button> weapon_buttons;
     Sprite background_image;
     Sprite player_preview;

@@ -110,3 +110,19 @@ int Gun::shake(int gun_id) {
 int Gun::shake_time(int gun_id) {
     return 5;
 }
+
+int Gun::price(int gun_id) {
+    switch(gun_id) {
+    case scar_h:
+        return 0;
+    case m16:
+        return 300;
+    case mp_44:
+        return 500;
+    case mg_42:
+        return 1000;
+    case awp:
+        return 0;
+    }
+    return 0;
+}
