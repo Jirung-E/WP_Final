@@ -1,10 +1,5 @@
 #pragma once
 
-#include "fmod.hpp"
-#include "fmod_errors.h"
-
-#pragma comment (lib, "fmod_vc.lib")
-
 namespace Gun {
     int damage(int gun_id);         // 공격력
     int shoot_speed(int gun_id);    // 발사 속도
