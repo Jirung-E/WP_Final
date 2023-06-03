@@ -14,7 +14,7 @@
 #include "fmod.hpp"
 #include "fmod_errors.h"
 
-#pragma comment (lib, "fmod_vc.lib")
+#pragma comment (lib, "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Windows/api/core/lib/x64/fmod_vc.lib")
 
 FMOD::System* ssystem;
 FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot;
