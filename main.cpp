@@ -17,8 +17,8 @@
 #pragma comment (lib, "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Windows/api/core/lib/x64/fmod_vc.lib")
 
 FMOD::System* ssystem;
-FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot;
-FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound;
+FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot, *dry_fire;
+FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -34,6 +34,9 @@ FMOD::Channel* ch_jump = 0;
 FMOD::Channel* ch_land = 0;
 //exp_get
 FMOD::Channel* ch_exp = 0;
+//awp_zoom
+FMOD::Channel* ch_zoom = 0;
+FMOD::Channel* ch_dry = 0;
 
 FMOD_RESULT result;
 void* extradriverdata = 0;
@@ -73,6 +76,8 @@ void IMG_FILE_LOAD() {
 	commando_fire_left.Load(L".\\res\\commando_fire_left.png");
 	commando_jump_fire_right.Load(L".\\res\\commando_jump_fire_right.png");
 	commando_jump_fire_left.Load(L".\\res\\commando_jump_fire_left.png");
+	commando_zoom_right.Load(L".\\res\\commando_zoom_right.png");
+	commando_zoom_left.Load(L".\\res\\commando_zoom_left.png");
 
 	monster_right.Load(L".\\res\\monster_right.png");
 	monster_left.Load(L".\\res\\monster_left.png");
@@ -104,6 +109,7 @@ void IMG_FILE_LOAD() {
 	flame_left.Load(L".\\res\\flame_left.png");
 	ammo_lmg_icon.Load(L".\\res\\ammo_lmg_icon.png");
 	ammo_sniper_icon.Load(L".\\res\\ammo_sniper_icon.png");
+	zoom_complited.Load(L".\\res\\zoom_complited.png");
 } 
 
 //FMOD 세팅
@@ -120,12 +126,16 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\lmg_reload.ogg", FMOD_DEFAULT, 0, &lmg_reload);
 	ssystem->createSound(".\\res\\sounds\\sniper_reload.ogg", FMOD_DEFAULT, 0, &sniper_reload);
 	ssystem->createSound(".\\res\\sounds\\sniper_bolt.mp3", FMOD_DEFAULT, 0, &sniper_bolt);
+	ssystem->createSound(".\\res\\sounds\\zoom.wav", FMOD_DEFAULT, 0, &zoom_sound);
+	ssystem->createSound(".\\res\\sounds\\unzoom.wav", FMOD_DEFAULT, 0, &unzoom_sound);
+	ssystem->createSound(".\\res\\sounds\\dry_fire.wav", FMOD_DEFAULT, 0, &dry_fire);
 
 	ssystem->createSound(".\\res\\sounds\\hit.wav", FMOD_DEFAULT, 0, &hit_sound);
-	ssystem->createSound(".\\res\\sounds\\walk.ogg", FMOD_DEFAULT, 0, &walk);
+	ssystem->createSound(".\\res\\sounds\\walk.wav", FMOD_DEFAULT, 0, &walk);
 	ssystem->createSound(".\\res\\sounds\\jump.wav", FMOD_DEFAULT, 0, &jump);
-	ssystem->createSound(".\\res\\sounds\\land.mp3", FMOD_DEFAULT, 0, &land_sound);
+	ssystem->createSound(".\\res\\sounds\\land.wav", FMOD_DEFAULT, 0, &land_sound);
 	ssystem->createSound(".\\res\\sounds\\exp_get.ogg", FMOD_DEFAULT, 0, &exp_get);
+
 }
 
 //광클 방지
@@ -196,6 +206,11 @@ void init_exp_animation() {
 	exp_x = -150, exp_acc = 20; out = 1; exp_out_delay = 0;
 }
 
+//정조준 완료 표시
+void show_zoom_complited(HDC mdc) {
+	zoom_complited.Draw(mdc, CM_x - 25 + ss_x, CM_y - ypos_zc + ss_y + landing_shake, 150, 150, 0, 0, 100, 100);
+}
+
 //인터페이스 출력
 void show_interface(HDC mdc, RECT rt) {
 	//장탄수 표시기 배경
@@ -251,7 +266,6 @@ void show_interface(HDC mdc, RECT rt) {
 
 
 
-
 	//경험치 수치 출력
 	show_exp(mdc, experience, rt.left + 150 + ss_x, rt.top + 80 + ss_y + landing_shake);
 	exp_icon.Draw(mdc, rt.left + 20 + ss_x, rt.top + 110 + ss_y + landing_shake, 100, 50, 0, 0, 100, 50);
@@ -284,13 +298,21 @@ void show_player(HDC mdc) {
 	case 0:
 		//플레이어 이미지 좌픅
 		if (CM_jump == 0) {
-			if (is_draw == TRUE) {
-				CM_w = commando_fire_left.GetWidth(); CM_h = commando_fire_left.GetHeight();
-				commando_fire_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+			//awp 정조준 시 스코프를 바라보는 모습을 취함
+			if (is_zoom == TRUE) {
+				CM_w = commando_zoom_left.GetWidth(); CM_h = commando_zoom_left.GetHeight();
+				commando_zoom_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h);
 			}
-			else if (is_draw == FALSE) {
-				CM_w = commando_left.GetWidth(); CM_h = commando_left.GetHeight();
-				commando_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+
+			else {
+				if (is_draw == TRUE) {
+					CM_w = commando_fire_left.GetWidth(); CM_h = commando_fire_left.GetHeight();
+					commando_fire_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+				}
+				else if (is_draw == FALSE) {
+					CM_w = commando_left.GetWidth(); CM_h = commando_left.GetHeight();
+					commando_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+				}
 			}
 		}
 
@@ -348,13 +370,19 @@ void show_player(HDC mdc) {
 	case 1:
 		//플레이어 우측
 		if (CM_jump == 0) {
-			if (is_draw == TRUE) {
-				CM_w = commando_fire_right.GetWidth(); CM_h = commando_fire_right.GetHeight();
-				commando_fire_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+			if (is_zoom == TRUE) {
+				CM_w = commando_zoom_right.GetWidth(); CM_h = commando_zoom_right.GetHeight();
+				commando_zoom_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h);
 			}
-			else if (is_draw == FALSE) {
-				CM_w = commando_right.GetWidth(); CM_h = commando_right.GetHeight();
-				commando_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+			else {
+				if (is_draw == TRUE) {
+					CM_w = commando_fire_right.GetWidth(); CM_h = commando_fire_right.GetHeight();
+					commando_fire_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+				}
+				else if (is_draw == FALSE) {
+					CM_w = commando_right.GetWidth(); CM_h = commando_right.GetHeight();
+					commando_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+				}
 			}
 		}
 		else if (CM_jump == 1 || CM_jump == 2) {
@@ -792,11 +820,21 @@ void update_shoot_animation() {
 		//정조준을 하지 않거나 정조준을 중단하면 정확도가 점차 떨어진다.
 		if (is_zoom == FALSE) {
 			if (var < 120)	var += 12;
-
 		}
 
 		//항상 정해진 넓이로 조준점이 유지되도록 한다.
 		if (is_zoom == FALSE && var > 120) var -= 2;
+	}
+
+	//awp 정조준 완료 시 플레이어 머리 위로 사격 가능 표시가 올라온다
+	if (avail_awp == TRUE) {
+		if (ypos_zc_acc > 0) ypos_zc += ypos_zc_acc--;
+	}
+
+	//awp 정조준을 해제하면 다시 아이콘이 내려간다
+	else if (avail_awp == FALSE) {
+		ypos_zc_acc = 15;
+		if (ypos_zc > 0) ypos_zc -= ypos_zc_acc--;
 	}
 
 	//사격 시 화면 흔들림
@@ -924,7 +962,16 @@ void wm_keydown() {
 
 //LBUTTONDOWN
 void wm_lbuttondown() {
+	//awp가 아닌 다른 총은 즉시 발사 가능
 	if(GUN_number != awp) is_click = TRUE;
+
+	//awp 정조준 안할 시 총이 나가지 않고 빈 총 소리만 남
+	if (GUN_number == awp && ((avail_awp == FALSE && is_zoom == TRUE) || (avail_awp == FALSE && is_zoom == FALSE))) {
+		ch_dry->stop();
+		ssystem->playSound(dry_fire, 0, false, &ch_dry);
+	}
+
+	//awp는 정조준이 완료되어야 발사 가능
 	if (GUN_number == awp && avail_awp == TRUE)	is_click = TRUE;
 
 	if (empty == 1 && reload == 0) {
@@ -955,6 +1002,8 @@ void wm_lbuttondown() {
 void wm_rbuttondown() {
 	is_zoom = TRUE;
 	CM_move_dir = -1;
+	ch_zoom->stop();
+	ssystem->playSound(zoom_sound, 0, false, &ch_zoom);
 }
 
 //몬스터 애니메이션
@@ -987,6 +1036,9 @@ void wm_paint(HDC mdc, RECT rt) {
 
 	//총알 궤적 그리기
 	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2);
+
+	//awp 정조준 완료 표시
+	show_zoom_complited(mdc);
 
 	//플레이어 이미지 출력
 	show_player(mdc);
@@ -1037,18 +1089,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		is_click = FALSE;
 		break;
 
+	case WM_RBUTTONDOWN:
+		manager.clickScene(hWnd, { LOWORD(lParam), HIWORD(lParam) }, Right);
+		if (GUN_number == awp) wm_rbuttondown();
+
+		InvalidateRect(hWnd, NULL, FALSE);
+		break;
+
 	case WM_RBUTTONUP:
 		is_zoom = FALSE;
 		avail_awp = FALSE;
+		if (GUN_number == awp) {
+			ch_zoom->stop();
+			ssystem->playSound(unzoom_sound, 0, false, &ch_zoom);
+		}
 		break;
 
 
-	case WM_RBUTTONDOWN:
-		manager.clickScene(hWnd, { LOWORD(lParam), HIWORD(lParam) }, Right);
-		if(GUN_number == awp) wm_rbuttondown();
-			
-		InvalidateRect(hWnd, NULL, FALSE);
-		break;
+	
 
 	case WM_MOUSEMOVE:
 		mx = LOWORD(lParam); my = HIWORD(lParam);

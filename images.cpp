@@ -3,11 +3,12 @@
 
 CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon, ammo_sniper_icon;
 CImage commando_right, commando_left, commando_jump_right, commando_jump_left;
-CImage commando_fire_right, commando_fire_left, commando_jump_fire_right, commando_jump_fire_left;
+CImage commando_fire_right, commando_fire_left, commando_jump_fire_right, commando_jump_fire_left, commando_zoom_right, commando_zoom_left;
 CImage SCAR_H_right, SCAR_H_left, M16_right, M16_left, MP44_right, MP44_left, MG42_right, MG42_left, AWP_right, AWP_left;
 CImage monster_right, monster_left, monster_big_right, monster_big_left;
 CImage monster_air_right[3], monster_air_left[3];
 CImage exp_icon, flame_right, flame_left;
+CImage zoom_complited;
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지
@@ -47,3 +48,6 @@ int shake_count;		  //흔들리는 횟수를 센다
 int ind_effect;		  //1이면 활성화, 0이면 비활성화
 int shake_effect;	  //''
 int shake_acc;		  //부드러운 흔들림 효과를 위해 감속 적용
+
+int ypos_zc = 0; //사격 가능 표시의 y좌표, 수치가 커질수록 플레이어 머리 위로 더 높이 올라간다.
+int ypos_zc_acc = 15; //사격 가능 표시의 애니메이션 가속도
