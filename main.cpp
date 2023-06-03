@@ -215,7 +215,7 @@ void show_interface(HDC mdc, RECT rt) {
 
 	if (GUN_number == awp) {
 		AMO_w = ammo_sniper_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
-		ammo_sniper_icon.Draw(mdc, rt.right - 230 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
+		ammo_sniper_icon.Draw(mdc, rt.right - 200 + ss_x, rt.bottom - 105 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
 	}
 
 
@@ -783,8 +783,8 @@ void shoot() {
 void update_shoot_animation() {
 	//awp 정조준
 	if (GUN_number == awp) {
-		//정조준 시 정확도가 점차 향상된다.
-		if (is_zoom == TRUE) { 
+		//정조준 시 정확도가 점차 향상된다. 공중에 떠 있는 상태에서는 정조준이 되지 않는다.
+		if (is_zoom == TRUE && CM_jump == 0) { 
 			if (var > 0) var -= 2;
 			if (var == 0) avail_awp = TRUE; //정조준을 완전히 해야 발사 가능
 		}
@@ -886,10 +886,12 @@ void update_shoot_animation() {
 //WM_KEYDOWN
 void wm_keydown() {
 	//좌측 이동
-	if (GetAsyncKeyState('A') & 0x8000)  CM_move_dir = 0;
+	if (is_zoom == FALSE) {
+		if (GetAsyncKeyState('A') & 0x8000)  CM_move_dir = 0;
 
-	//우측 이동
-	else if (GetAsyncKeyState('D') & 0x8000)   CM_move_dir = 1;
+		//우측 이동
+		else if (GetAsyncKeyState('D') & 0x8000)   CM_move_dir = 1;
+	}
 
 	//재장전
 	if (GetAsyncKeyState('R') & 0x8000)
@@ -952,6 +954,7 @@ void wm_lbuttondown() {
 //WM_RBUTTONDOWN
 void wm_rbuttondown() {
 	is_zoom = TRUE;
+	CM_move_dir = -1;
 }
 
 //몬스터 애니메이션
