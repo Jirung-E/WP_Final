@@ -440,7 +440,7 @@ void make_monster(RECT rt) {
 	//일반 몬스터
 	spawn_timer_r--;
 	if (spawn_timer_r == 0) {
-		spawn_timer_r = 500;
+		spawn_timer_r = 10;		// 원래값 500
 		if (mdx_r < 99) {
 			spawn_monster_regular(mdx_r, BG_scanner, rt); mdx_r++;
 		}
@@ -449,7 +449,7 @@ void make_monster(RECT rt) {
 	//대형 몬스터
 	spawn_timer_big--;
 	if (spawn_timer_big == 0) {
-		spawn_timer_big = 1000;
+		spawn_timer_big = 10;	// 원래값 1000
 		if (mdx_big < 99) {
 			spawn_monster_big(mdx_big, BG_scanner, rt); mdx_big++;
 		}
@@ -458,7 +458,7 @@ void make_monster(RECT rt) {
 	//공중 몬스터
 	spawn_timer_air--;
 	if (spawn_timer_air == 0) {
-		spawn_timer_air = 600;
+		spawn_timer_air = 10;	// 원래값 600
 		if (mdx_air < 99) {
 			spawn_monster_air(mdx_air, BG_scanner, rt); mdx_air++;
 		}
@@ -643,7 +643,7 @@ void update_monster_position() {
 //몬스터 명중 판정
 void check_hit() {
 	//일반 몬스터 히트 판정
-	for (int i = 0; i < mdx_r; i++) {  
+	for (int i = mdx_r-1; i >= 0; i--) {	// 중간 몬스터가 삭제될시 인덱스가 하나 줄어서 마지막 몬스터를 검사하지 못하므로 반대로 돌립니다.
 		if (hit_x >= mst_r[i].x && hit_x <= mst_r[i].x + 100 && hit_y >= mst_r[i].y && hit_y <= mst_r[i].y + 100) { 
 			hit = i;    //조준점 내부의 좌표가 몬스터 이미지 내부에 위치하면 히트로 판정되어 총알은 해당 몬스터에 가로막힌다.
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
@@ -658,7 +658,7 @@ void check_hit() {
 			if (mst_r[hit].hp <= 0) {  
 				//중간 인덱스를 가진 몬스터를 처치할 경우 나머지 몬스터들의 인덱스가 한 칸씩 앞당겨지고 인덱스 1 감소시킨다.
 				if (hit < mdx_r - 1) {
-					monster_array_push_r(hit, mdx_r); experience += 5; prev_up = 5; exp_up = TRUE;
+					monster_array_push_r(hit, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;	// 인덱스값이 감소되도록 수정
 					init_exp_animation();
 					ch_exp->stop(); //사운드 정지
 					ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
@@ -676,7 +676,7 @@ void check_hit() {
 	}
 
 	//대형 몬스터 히트 판정
-	for (int i = 0; i < mdx_big; i++) {
+	for (int i = mdx_big-1; i >= 0; i--) {
 		if (hit_x >= mst_big[i].x && hit_x <= mst_big[i].x + 200 && hit_y >= mst_big[i].y && hit_y <= mst_big[i].y + 200) {
 			hit = i;
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
@@ -688,7 +688,7 @@ void check_hit() {
 
 			if (mst_big[hit].hp <= 0) {
 				if (hit < mdx_big - 1) {
-					monster_array_push_big(hit, mdx_big); experience += 7; prev_up = 7; exp_up = TRUE;
+					monster_array_push_big(hit, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation();
 					ch_exp->stop(); //사운드 정지
 					ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
@@ -704,7 +704,7 @@ void check_hit() {
 	}
 
 	//공중 몬스터 히트 판정
-	for (int i = 0; i < mdx_air; i++) {
+	for (int i = mdx_air-1; i >= 0; i--) {
 		if (hit_x >= mst_air[i].x && hit_x <= mst_air[i].x + 150 && hit_y >= mst_air[i].y && hit_y <= mst_air[i].y + 60) {
 			hit = i; 
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
@@ -716,7 +716,7 @@ void check_hit() {
 
 			if (mst_air[hit].hp <= 0) {
 				if (hit < mdx_air - 1) {
-					monster_array_push_air(hit, mdx_air); experience += 3; prev_up = 3; exp_up = TRUE;
+					monster_array_push_air(hit, mdx_air--); experience += 3; prev_up = 3; exp_up = TRUE;
 					init_exp_animation();
 					ch_exp->stop(); //사운드 정지
 					ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
