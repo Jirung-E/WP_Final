@@ -4,6 +4,7 @@ struct monster_info_regular { //몬스터의 보는 방향, 이동 방향, 위치를 저장하는 �
 	int move_dir;
 	int img_dir;
 	int hp;
+	int targeted;
 }; 
 
 struct monster_info_big { //대형 몬스터
@@ -11,6 +12,7 @@ struct monster_info_big { //대형 몬스터
 	int move_dir;
 	int img_dir;
 	int hp;
+	int targeted;
 };
 
 struct monster_info_air { //공중 몬스터
@@ -33,6 +35,9 @@ extern const int spawn_timer_big_max;
 extern int mdx_air;				  //공중 몬스터 수
 extern int spawn_timer_air;
 extern const int spawn_timer_air_max;
+
+//awp 관통의 조건: 최소 1마리 이상의 몬스터가 총알에 맞아야하고, 이후 is_hit이 TRUE가 되어 관통 효과 발동
+extern BOOL is_hit;
 
 int calc_spawn_timer(int spawn_timer_max);
 

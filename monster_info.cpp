@@ -22,6 +22,8 @@ int mdx_air = 0;				  //공중 몬스터 수
 int spawn_timer_air = 10;		// 600
 const int spawn_timer_air_max = 600;
 
+BOOL is_hit = FALSE;
+
 int calc_spawn_timer(int spawn_timer_max) {
 	if(game_round < 100) {
 		return spawn_timer_max * (100.0 - (game_round-1)) / 100;
@@ -45,6 +47,7 @@ void spawn_monster_regular(int mdx_r, int BG_scanner, RECT rt) {
 		mst_r[mdx_r].y = 600;
 	}
 	mst_r[mdx_r].hp = 50;
+	mst_r[mdx_r].targeted = 0;
 }
 
 //대형 몬스터 생성
@@ -63,6 +66,7 @@ void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt) {
 		mst_big[mdx_big].y = 500;
 	}
 	mst_big[mdx_big].hp = 100;
+	mst_big[mdx_big].targeted = 0;
 }
 
 //공중 몬스터 생성
@@ -152,6 +156,7 @@ void monster_array_push_r(int hit, int idx) {
 		mst_r[i].hp = mst_r[i + 1].hp;
 		mst_r[i].img_dir = mst_r[i + 1].img_dir;
 		mst_r[i].move_dir = mst_r[i + 1].move_dir;
+		mst_r[i].targeted = mst_r[i + 1].targeted;
 	}
 	idx--;
 	mst_r[idx].x = -400;
@@ -159,6 +164,7 @@ void monster_array_push_r(int hit, int idx) {
 	mst_r[idx].hp = 0;
 	mst_r[idx].move_dir = -1;
 	mst_r[idx].img_dir = -1; //현재 인덱스의 바로 전 인덱스까지 모두 한 칸씩 앞으로 당긴 후 남는 인덱스의 몬스터는 화면 밖으로 이동(나중에 몬스터 스폰 시 다시 값이 생성되므로 문제 없음)
+	mst_r[idx].targeted = 0;
 }
 
 //대형 몬스터 배열 밀어내기
@@ -169,6 +175,7 @@ void monster_array_push_big(int hit, int idx) {
 		mst_big[i].hp = mst_big[i + 1].hp;
 		mst_big[i].img_dir = mst_big[i + 1].img_dir;
 		mst_big[i].move_dir = mst_big[i + 1].move_dir;
+		mst_big[i].targeted = mst_big[i + 1].targeted;
 	}
 	idx--;
 	mst_big[idx].x = -400;
@@ -176,6 +183,7 @@ void monster_array_push_big(int hit, int idx) {
 	mst_big[idx].hp = 0;
 	mst_big[idx].move_dir = -1;
 	mst_big[idx].img_dir = -1;
+	mst_big[idx].targeted = 0;
 }
 
 //공중 몬스터 배열 밀어내기
