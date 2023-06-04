@@ -14,7 +14,7 @@ int Gun::damage(int gun_id) {
     case mg_42:
         return 3;
     case awp:
-        return 100;
+        return 80;
     }
     return 0;
 }

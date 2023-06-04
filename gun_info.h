@@ -9,5 +9,5 @@ namespace Gun {
     int recoil(int gun_id);         // 탄퍼짐
     int shake(int gun_id);          // 화면 흔들림 정도
     int shake_time(int gun_id);     // 화면 흔들림 시간
-    int price(int gun_id);     // 가격
+    int price(int gun_id);          // 가격
 }

@@ -36,6 +36,7 @@ FMOD::Channel* ch_land = 0;
 FMOD::Channel* ch_exp = 0;
 //awp_zoom
 FMOD::Channel* ch_zoom = 0;
+//awp_no_zoom
 FMOD::Channel* ch_dry = 0;
 
 FMOD_RESULT result;
@@ -110,6 +111,7 @@ void IMG_FILE_LOAD() {
 	ammo_lmg_icon.Load(L".\\res\\ammo_lmg_icon.png");
 	ammo_sniper_icon.Load(L".\\res\\ammo_sniper_icon.png");
 	zoom_complited.Load(L".\\res\\zoom_complited.png");
+	zoom_targeted.Load(L".\\res\\zoom_targeted.png");
 } 
 
 //FMOD 세팅
@@ -122,10 +124,13 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\mp44.wav", FMOD_DEFAULT, 0, &mp44_shoot);
 	ssystem->createSound(".\\res\\sounds\\mg42.wav", FMOD_DEFAULT, 0, &mg42_shoot);
 	ssystem->createSound(".\\res\\sounds\\awp.wav", FMOD_DEFAULT, 0, &awp_shoot);
+
 	ssystem->createSound(".\\res\\sounds\\rifle_reload.wav", FMOD_DEFAULT, 0, &rifle_reload);
 	ssystem->createSound(".\\res\\sounds\\lmg_reload.ogg", FMOD_DEFAULT, 0, &lmg_reload);
 	ssystem->createSound(".\\res\\sounds\\sniper_reload.ogg", FMOD_DEFAULT, 0, &sniper_reload);
+
 	ssystem->createSound(".\\res\\sounds\\sniper_bolt.mp3", FMOD_DEFAULT, 0, &sniper_bolt);
+
 	ssystem->createSound(".\\res\\sounds\\zoom.wav", FMOD_DEFAULT, 0, &zoom_sound);
 	ssystem->createSound(".\\res\\sounds\\unzoom.wav", FMOD_DEFAULT, 0, &unzoom_sound);
 	ssystem->createSound(".\\res\\sounds\\dry_fire.wav", FMOD_DEFAULT, 0, &dry_fire);
@@ -164,6 +169,22 @@ void show_target(HDC mdc, int mouse_x, int mouse_y, double var) {
 
 	SelectObject(mdc, oldpen);
 	DeleteObject(hpen);
+
+	hpen = CreatePen(PS_SOLID, 5, RGB(40, 40, 40));
+	oldpen = (HPEN)SelectObject(mdc, hpen);
+
+	//awp일 경우 관통 범위 표시
+	if (GUN_number == awp) {
+		MoveToEx(mdc, mouse_x - 500, mouse_y - 40, NULL);
+		LineTo(mdc, mouse_x - 500, mouse_y + 40);
+
+		MoveToEx(mdc, mouse_x + 500, mouse_y - 40, NULL);
+		LineTo(mdc, mouse_x + 500, mouse_y + 40);
+	}
+
+	SelectObject(mdc, oldpen);
+	DeleteObject(hpen);
+
 
 	hpen = CreatePen(PS_SOLID, 5, RGB(0, 255, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
@@ -213,12 +234,12 @@ void show_zoom_complited(HDC mdc) {
 
 //awp 관통 대상 탐색
 void find_target(int mx, int my) {
-	//마우스 좌표 mx +- 600 범위 내에 몬스터가 있을 시 관통 대상이 된다. 
+	//마우스 좌표 mx +- 500 범위 내에 몬스터가 있을 시 관통 대상이 된다. 
 	for (int i = 0; i < mdx_r; i++) {
-		if (CM_img_dir == 0 && mst_r[i].x <= mx && mst_r[i].x >= mx - 600 && my >= mst_r[i].y && my <= mst_r[i].y + 100)
+		if (CM_img_dir == 0 && mst_r[i].x <= mx && mst_r[i].x >= mx - 500 && my >= mst_r[i].y && my <= mst_r[i].y + 100)
 			mst_r[i].targeted = 1;
 
-		else if (CM_img_dir == 1 && mst_r[i].x + 100 >= mx && mst_r[i].x + 100 <= mx + 600 && my >= mst_r[i].y && my <= mst_r[i].y + 100)
+		else if (CM_img_dir == 1 && mst_r[i].x + 100 >= mx && mst_r[i].x + 100 <= mx + 500 && my >= mst_r[i].y && my <= mst_r[i].y + 100)
 			mst_r[i].targeted = 1;
 
 		else
@@ -226,10 +247,10 @@ void find_target(int mx, int my) {
 	}
 
 	for (int i = 0; i < mdx_big; i++) {
-		if (CM_img_dir == 0 && mst_big[i].x <= mx && mst_big[i].x >= mx - 600 && my >= mst_big[i].y && my <= mst_big[i].y + 200)
+		if (CM_img_dir == 0 && mst_big[i].x <= mx && mst_big[i].x >= mx - 500 && my >= mst_big[i].y && my <= mst_big[i].y + 200)
 			mst_big[i].targeted = 1;
 
-		else if (CM_img_dir == 1 && mst_big[i].x + 200 >= mx && mst_big[i].x + 200 <= mx + 600 && my >= mst_big[i].y && my <= mst_big[i].y + 200)
+		else if (CM_img_dir == 1 && mst_big[i].x + 200 >= mx && mst_big[i].x + 200 <= mx + 500 && my >= mst_big[i].y && my <= mst_big[i].y + 200)
 			mst_big[i].targeted = 1;
 
 		else
@@ -242,12 +263,12 @@ void show_awp_targeted(HDC mdc) {
 	//관통 대상이 된 몬스터는 따로 표시된다.
 	for (int i = 0; i < mdx_r; i++) {
 		if (mst_r[i].targeted == 1)
-			zoom_complited.Draw(mdc, mst_r[i].x, mst_r[i].y - 90, 100, 100, 0, 0, 100, 100);
+			zoom_targeted.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y - 90 + ss_x + landing_shake, 100, 100, 0, 0, 100, 100);
 	}
 
 	for (int i = 0; i < mdx_big; i++) {
 		if (mst_big[i].targeted == 1)
-			zoom_complited.Draw(mdc, mst_big[i].x + 50, mst_big[i].y - 90, 100, 100, 0, 0, 100, 100);
+			zoom_targeted.Draw(mdc, mst_big[i].x + 50 + ss_x, mst_big[i].y - 90 + landing_shake, 100, 100, 0, 0, 100, 100);
 	}
 }
 
@@ -314,7 +335,7 @@ void show_interface(HDC mdc, RECT rt) {
 
 	//재장전 게이지 출력
 	if (reload == 1)
-		reload_indicator(mdc, CM_x, CM_y - 30 + landing_shake, CM_x + reload_x, CM_y - 10 + landing_shake, CM_x, CM_y - 30 + landing_shake, CM_x + 100, CM_y - 10 + landing_shake);
+		reload_indicator(mdc, CM_x + ss_x, CM_y - 30 + landing_shake + ss_y, CM_x + reload_x + ss_x, CM_y - 10 + landing_shake + ss_y, CM_x + ss_x, CM_y - 30 + landing_shake + ss_y, CM_x + 100 + ss_x, CM_y - 10 + landing_shake + ss_y);
 
 
 
@@ -680,105 +701,64 @@ void update_monster_position() {
 	}
 }
 
-//몬스터 명중 판정
-void check_hit() {
-	//일반 몬스터 히트 판정
-	for (int i = mdx_r - 1; i >= 0; i--) {	// 중간 몬스터가 삭제될시 인덱스가 하나 줄어서 마지막 몬스터를 검사하지 못하므로 반대로 돌립니다.
+//AWP 전용 몬스터 명중 판정
+void check_hit_awp() {
+	//조건문 중복 방지 변수
+	int is_kill_r = 0; int is_kill_big = 0; int is_kill_air = 0;
+	//최소 한 마리의 몬스터를 맞추어야 관통 효과가 발동된다
+	for (int i = mdx_r - 1; i >= 0; i--) {
 		if (hit_x >= mst_r[i].x && hit_x <= mst_r[i].x + 100 && hit_y >= mst_r[i].y && hit_y <= mst_r[i].y + 100) {
-			hit = i;    //조준점 내부의 좌표가 몬스터 이미지 내부에 위치하면 히트로 판정되어 총알은 해당 몬스터에 가로막힌다.
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
 			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
 			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
-
-			//총마다 대미지를 다르게 줌
-			mst_r[hit].hp = cal_damage(mst_r[hit].hp, GUN_number);
-			ch_hit->stop(); //사운드 정지
-			ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
-
-			if (mst_r[hit].hp <= 0) {
-				//중간 인덱스를 가진 몬스터를 처치할 경우 나머지 몬스터들의 인덱스가 한 칸씩 앞당겨지고 인덱스 1 감소시킨다.
-				if (hit < mdx_r - 1) {
-					monster_array_push_r(hit, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;	// 인덱스값이 감소되도록 수정
-					init_exp_animation();
-				}
-
-				//최신 인덱스를 가진 몬스터의 경우 그냥 인덱스를 감소시킨다.
-				else if (hit == mdx_r - 1) {
-					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
-					init_exp_animation();
-				}
-				ch_exp->stop(); //사운드 정지
-				ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
-			}
-
-			//관통 조건 발동
+			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
 			is_hit = TRUE;
 		}
+	}
 
-		//나머지 관통 대상이 된 몬스터들도 같이 대미지를 받는다.
+	for (int i = mdx_big - 1; i >= 0; i--) {
+		if (hit_x >= mst_big[i].x && hit_x <= mst_big[i].x + 200 && hit_y >= mst_big[i].y && hit_y <= mst_big[i].y + 200) {
+			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
+			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
+			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
+			is_hit = TRUE;
+		}
+	}
+
+	//관통 대상이 된 몬스터들은 모두 대미지를 입는다
+	for (int i = mdx_r - 1; i >= 0; i--) {
 		if (is_hit == TRUE && mst_r[i].targeted == 1) {
 			mst_r[i].hp = cal_damage(mst_r[i].hp, GUN_number);
-			//인덱스 파트는 위와 같음
 			if (mst_r[i].hp <= 0) {
-				if (i < mdx_r - 1) {
+				if (i < mdx_r - 1 && is_kill_r == 0) {
 					monster_array_push_r(i, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
-					init_exp_animation();
+					init_exp_animation(); is_kill_r = 1;
 				}
-
-				else if (i == mdx_r - 1) {
+				else if (i == mdx_r - 1 && is_kill_r == 0) {
 					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
-					init_exp_animation();
+					init_exp_animation(); is_kill_r = 1;
 				}
-				ch_exp->stop();
-				ssystem->playSound(exp_get, 0, false, &ch_exp); 
+				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp);
+				is_kill_r = 0;
 			}
 		}
 	}
 
-	//대형 몬스터 히트 판정
 	for (int i = mdx_big - 1; i >= 0; i--) {
-		if (hit_x >= mst_big[i].x && hit_x <= mst_big[i].x + 200 && hit_y >= mst_big[i].y && hit_y <= mst_big[i].y + 200) {
-			hit = i;
-			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
-			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
-			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
-			mst_big[hit].hp = cal_damage(mst_big[hit].hp, GUN_number);
-			ch_hit->stop(); //사운드 정지
-			ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
-
-
-			if (mst_big[hit].hp <= 0) {
-				if (hit < mdx_big - 1) {
-					monster_array_push_big(hit, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
-					init_exp_animation();
-				}
-				if (hit == mdx_big - 1) {
-					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
-					init_exp_animation();
-				}
-				ch_exp->stop(); //사운드 정지
-				ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
-			}
-			is_hit = TRUE;
-		}
-
 		if (is_hit == TRUE && mst_big[i].targeted == 1) {
 			mst_big[i].hp = cal_damage(mst_big[i].hp, GUN_number);
-
 			if (mst_big[i].hp <= 0) {
-				//중간 인덱스를 가진 몬스터를 처치할 경우 나머지 몬스터들의 인덱스가 한 칸씩 앞당겨지고 인덱스 1 감소시킨다.
-				if (i < mdx_big - 1) {
-					monster_array_push_r(i, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;	// 인덱스값이 감소되도록 수정
-					init_exp_animation();
+				if (i < mdx_big - 1 && is_kill_big == 0) {
+					monster_array_push_big(i, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
+					init_exp_animation(); is_kill_big = 1;
 				}
-
-				//최신 인덱스를 가진 몬스터의 경우 그냥 인덱스를 감소시킨다.
-				else if (i == mdx_big - 1) {
+				else if (i == mdx_big - 1 && is_kill_big == 0) {
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
-					init_exp_animation();
+					init_exp_animation(); is_kill_big = 1;
 				}
-				ch_exp->stop(); //사운드 정지
-				ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
+				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
+				is_kill_big = 0;
 			}
 		}
 	}
@@ -790,21 +770,105 @@ void check_hit() {
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
 			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
 			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
-			mst_air[hit].hp = cal_damage(mst_air[hit].hp, GUN_number);
-			ch_hit->stop(); //사운드 정지
-			ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
 
+			mst_air[hit].hp = cal_damage(mst_air[hit].hp, GUN_number);
+			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
+			
 			if (mst_air[hit].hp <= 0) {
-				if (hit < mdx_air - 1) {
+				if (hit < mdx_air - 1 && is_kill_air == 0) {
 					monster_array_push_air(hit, mdx_air--); experience += 3; prev_up = 3; exp_up = TRUE;
-					init_exp_animation();
+					init_exp_animation(); is_kill_air = 1;
 				}
-				if (hit == mdx_air - 1) {
+				if (hit == mdx_air - 1 && is_kill_air == 0) {
 					mdx_air--; experience += 3; prev_up = 3; exp_up = TRUE;
-					init_exp_animation();
+					init_exp_animation(); is_kill_air = 1;
 				}
-				ch_exp->stop(); //사운드 정지
-				ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
+				ch_exp->stop();	ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
+				is_kill_air = 0;
+			}
+		}
+	}
+}
+
+//몬스터 명중 판정
+void check_hit() {
+	//조건문 중복 방지 변수
+	int is_kill = 0;
+	//일반 몬스터 히트 판정
+	for (int i = mdx_r - 1; i >= 0; i--) {	// 중간 몬스터가 삭제될시 인덱스가 하나 줄어서 마지막 몬스터를 검사하지 못하므로 반대로 돌립니다.
+		if (hit_x >= mst_r[i].x && hit_x <= mst_r[i].x + 100 && hit_y >= mst_r[i].y && hit_y <= mst_r[i].y + 100) {
+			hit = i;    //조준점 내부의 좌표가 몬스터 이미지 내부에 위치하면 히트로 판정되어 총알은 해당 몬스터에 가로막힌다.
+			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
+			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
+			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+
+			mst_r[hit].hp = cal_damage(mst_r[hit].hp, GUN_number);
+			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
+			
+			//최신 인덱스는 그냥 인덱스를 감소, 중간 인덱스일 경우 해당 인덱스 데이터에 바로 다음 인덱스의 데이터를 덮어씌움(인덱스 밀어내기)
+			if (mst_r[hit].hp <= 0) {
+				if (hit < mdx_r - 1 && is_kill == 0) {
+					monster_array_push_r(hit, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
+					init_exp_animation(); is_kill = 1;
+				}
+				else if (hit == mdx_r - 1 && is_kill == 0) {
+					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
+					init_exp_animation(); is_kill = 1;
+				}
+				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
+				is_kill = 0;
+			}
+		}
+	}
+
+	//대형 몬스터 히트 판정
+	for (int i = mdx_big - 1; i >= 0; i --) {
+		if (hit_x >= mst_big[i].x && hit_x <= mst_big[i].x + 200 && hit_y >= mst_big[i].y && hit_y <= mst_big[i].y + 200) {
+			hit = i;
+			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
+			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
+			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+
+			mst_big[hit].hp = cal_damage(mst_big[hit].hp, GUN_number);
+			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
+
+			if (mst_big[hit].hp <= 0) {
+				if (hit < mdx_big - 1 && is_kill == 0) {
+					monster_array_push_big(hit, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
+					init_exp_animation(); is_kill = 1;
+				}
+				else if (hit == mdx_big - 1 && is_kill == 0) {
+					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
+					init_exp_animation(); is_kill = 1;
+				}
+				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
+				is_kill = 0;
+			}
+		}
+	}
+
+	//공중 몬스터 히트 판정
+	for (int i = mdx_air - 1; i >= 0; i --) {
+		if (hit_x >= mst_air[i].x && hit_x <= mst_air[i].x + 150 && hit_y >= mst_air[i].y && hit_y <= mst_air[i].y + 60) {
+			hit = i;
+			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
+			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
+			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+
+			mst_air[hit].hp = cal_damage(mst_air[hit].hp, GUN_number);
+			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
+		
+			if (mst_air[hit].hp <= 0) {
+				if (hit < mdx_air - 1 && is_kill == 0) {
+					monster_array_push_air(hit, mdx_air--); experience += 3; prev_up = 3; exp_up = TRUE;
+					init_exp_animation(); is_kill = 1;
+				}
+				if (hit == mdx_air - 1 && is_kill == 0) {
+					mdx_air--; experience += 3; prev_up = 3; exp_up = TRUE;
+					init_exp_animation(); is_kill = 1;
+				}
+				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
+				is_kill = 0;
 			}
 		}
 	}
@@ -842,15 +906,18 @@ void make_rand_ammo(int ammo, int max_ammo) {
 	ammo_y2 = ammo_y1 + (1500 * sin(angle));
 
 	//히트 판정
-	check_hit();
+	if(GUN_number != awp)
+		check_hit();
+
+	//AWP일 경우 전용 히트 판정 함수 사용
+	if (GUN_number == awp)
+		check_hit_awp();
 
 	is_draw = TRUE; draw_hit = TRUE; //그리기 시작
 	ind_effect = 1; shake_effect = 1; //각각 인터페이스 이펙트, 흔들림 이펙트
 	shoot_delay = 0;	//딜레이는 0이되어 다시 딜레이가 증가하기 시작
 
 	can_shoot = FALSE;
-	//is_hit 다시 초기화
-	is_hit = FALSE;
 }
 
 //사격
@@ -881,9 +948,12 @@ void shoot() {
 				ch_reload->stop();
 				//볼트 작동 소리도 같이 출력
 				ssystem->playSound(sniper_bolt, 0, false, &ch_reload);
+				is_click = FALSE;
 				break;
 			}
 		}
+		//is_hit 다시 초기화
+		is_hit = FALSE;
 	}
 }
 
@@ -961,10 +1031,9 @@ void update_shoot_animation() {
 
 	//재장전 인디케이터
 	if (reload == 1) { 
-		if(reload_delay < Gun::reload_delay(GUN_number))
-			reload_delay++;
+		if(reload_delay < Gun::reload_delay(GUN_number)) reload_delay++;
 		if(reload_delay == Gun::reload_delay(GUN_number)) {
-			reload_delay = 0;
+			reload_delay = 0; 
 			reload_x += Gun::reload_speed(GUN_number);
 			if(reload_x + CM_x >= CM_x + 100) {
 				ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
@@ -976,24 +1045,18 @@ void update_shoot_animation() {
 	//경험치 증가 애니메이션
 	if (exp_up == TRUE) {
 		if (out == 1) {
-			if(exp_acc > 0)
-				exp_x += exp_acc--;
+			if(exp_acc > 0) exp_x += exp_acc--;
 			if (exp_acc == 0) {
 				exp_out_delay++;
 				if (exp_out_delay == 20) {
-					exp_out_delay = 0;
-					out = 0;
-					exp_acc = 20;
+					exp_out_delay = 0; out = 0; exp_acc = 20;
 				}
 			}
 		}
 		else if (out == 0) {
-			if(exp_acc > 0)
-				exp_x -= exp_acc--;
+			if(exp_acc > 0) exp_x -= exp_acc--;
 			if (exp_acc == 0) {
-				exp_up = FALSE;
-				out = 1;
-				exp_acc = 20;
+				exp_up = FALSE; out = 1; exp_acc = 20;
 			}
 		}
 	}
@@ -1026,6 +1089,7 @@ void wm_keydown() {
 			if (GUN_number == awp) {
 				ch_reload->stop();
 				ssystem->playSound(sniper_reload, 0, false, &ch_reload);
+				is_zoom = FALSE; avail_awp = FALSE;
 			}
 		}
 
@@ -1080,10 +1144,12 @@ void wm_lbuttondown() {
 
 //WM_RBUTTONDOWN
 void wm_rbuttondown() {
-	is_zoom = TRUE;
-	CM_move_dir = -1;
-	ch_zoom->stop();
-	ssystem->playSound(zoom_sound, 0, false, &ch_zoom);
+	if (reload == 0 && r_pressed == 0 && empty == 0) {
+		is_zoom = TRUE;
+		CM_move_dir = -1;
+		ch_zoom->stop();
+		ssystem->playSound(zoom_sound, 0, false, &ch_zoom);
+	}
 }
 
 //몬스터 애니메이션
@@ -1112,7 +1178,7 @@ void wm_paint(HDC mdc, RECT rt) {
 	//BG_scanner가 클수록 배경은 오른쪽으로 이동하게 됨
 
 	//정조준 완료 시에 관통 대상 표시
-	if (GUN_number == awp && is_zoom == TRUE) {
+	if (GUN_number == awp && is_zoom == TRUE && empty == 0 && reload == 0 && r_pressed == 0) {
 		find_target(mx, my);
 		show_awp_targeted(mdc);
 	}
@@ -1137,6 +1203,14 @@ void wm_paint(HDC mdc, RECT rt) {
 
 	//조준점 출력
 	if (!manager.isPaused()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
+
+	//인덱스 테스트
+	/*
+	TCHAR out[20];
+	SetTextColor(mdc, RGB(0, 0, 0));
+	wsprintf(out, L"mdx_r: %d", mdx_r);
+	TextOut(mdc, 0, 0, out, lstrlen(out));
+	*/
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -1185,7 +1259,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_RBUTTONUP:
 		is_zoom = FALSE;
 		avail_awp = FALSE;
-		if (GUN_number == awp) {
+		if (GUN_number == awp && reload == 0 && r_pressed == 0 && empty == 0) {
 			ch_zoom->stop();
 			ssystem->playSound(unzoom_sound, 0, false, &ch_zoom);
 			for (int i = 0; i < mdx_r; i++)
