@@ -2,6 +2,9 @@
 
 #include "Util.h"
 #include "monster_info.h"
+#include "player_info.h"
+#include "images.h"
+#include "ammo.h"
 
 #include <sstream>
 
@@ -32,6 +35,31 @@ void GameScene::setUp() {
     play_time = 0.0;
     start_time = 0;
     end_time = 0;
+
+    // 플레이어 위치 초기화
+    CM_x = 700, CM_y = 600;
+    BG_scanner = 1500;
+    // 플레이어 상태 초기화
+    CM_jump = 0;
+    CM_move_dir = -1;
+    CM_jump_acc = 28; 
+    CM_jump = 0; 
+    space_pressed = 0;
+    is_land = 1;
+    is_zoom = FALSE;
+    avail_awp = FALSE;
+    // 라운드 초기화
+    game_round = 1;
+    // 스폰된 몬스터 초기화
+    mdx_r = 0;
+    mdx_big = 0;
+    mdx_air = 0;
+    // 장탄수 초기화
+    ammo = 0;
+    reload = 0;
+    r_pressed = 0;
+    empty = 0;
+    can_shoot = TRUE;
 }
 
 

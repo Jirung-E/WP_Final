@@ -105,6 +105,9 @@
     <ClCompile Include="gun_info.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="player_info.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="images.h">
