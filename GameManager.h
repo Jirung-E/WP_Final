@@ -40,6 +40,8 @@ public:
 
     SceneID getCurrentSceneID() const;
     bool isPaused() const;
+    bool isGameOver() const;
+    double getPlayTime() const;
 
 private:
     void gameStart(const HWND& hWnd);

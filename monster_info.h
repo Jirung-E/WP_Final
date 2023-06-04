@@ -20,14 +20,21 @@ struct monster_info_air { //공중 몬스터
 	int hp;
 };
 
-static int mdx_r = 0;                 //일반 몬스터 수 (monster - index_regular)
-static int spawn_timer_r = 10;   //라운드가 올라갈 수록 스폰 주기가 빨라진다. -> 수치가 낮아진다. 기본 수치는 500부터 시작
+extern int game_round;			// 스폰 주기를 결정함
 
-static int mdx_big = 0;				  //대형 몬스터 수
-static int spawn_timer_big = 10;		// 1000
+extern int mdx_r;                 //일반 몬스터 수 (monster - index_regular)
+extern int spawn_timer_r;   //라운드가 올라갈 수록 스폰 주기가 빨라진다. -> 수치가 낮아진다. 기본 수치는 500부터 시작
+extern const int spawn_timer_r_max;	// 스폰 주기 최초 수치
 
-static int mdx_air = 0;				  //공중 몬스터 수
-static int spawn_timer_air = 10;		// 600
+extern int mdx_big;				  //대형 몬스터 수
+extern int spawn_timer_big;
+extern const int spawn_timer_big_max;
+
+extern int mdx_air;				  //공중 몬스터 수
+extern int spawn_timer_air;
+extern const int spawn_timer_air_max;
+
+int calc_spawn_timer(int spawn_timer_max);
 
 void spawn_monster_regular(int mdx, int BG_scanner, RECT rt);
 void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt);

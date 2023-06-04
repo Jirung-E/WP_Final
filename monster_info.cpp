@@ -8,6 +8,27 @@ monster_info_regular mst_r[100];
 monster_info_big mst_big[100];
 monster_info_air mst_air[100];
 
+int game_round = 1;			// 스폰 주기를 결정함
+
+int mdx_r = 0;                 //일반 몬스터 수 (monster - index_regular)
+int spawn_timer_r = 10;   //라운드가 올라갈 수록 스폰 주기가 빨라진다. -> 수치가 낮아진다. 기본 수치는 500부터 시작
+const int spawn_timer_r_max = 500;	// 스폰 주기 최초 수치
+
+int mdx_big = 0;				  //대형 몬스터 수
+int spawn_timer_big = 10;		// 1000
+const int spawn_timer_big_max = 1000;
+
+int mdx_air = 0;				  //공중 몬스터 수
+int spawn_timer_air = 10;		// 600
+const int spawn_timer_air_max = 600;
+
+int calc_spawn_timer(int spawn_timer_max) {
+	if(game_round < 100) {
+		return spawn_timer_max * (100.0 - (game_round-1)) / 100;
+	}
+	return spawn_timer_max * 2.0 / 100;
+}
+
 //일반 몬스터 생성
 void spawn_monster_regular(int mdx_r, int BG_scanner, RECT rt) {
 	int spawn_dir = 0;

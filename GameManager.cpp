@@ -70,7 +70,12 @@ void GameManager::keyboardInput(const HWND& hWnd, int keycode) {
 		switch(keycode) {
 		case VK_ESCAPE:
 			game_scene.togglePauseState();
-			releaseCursor();
+			if(game_scene.isPaused()) {
+				releaseCursor();
+			}
+			else {
+				lockCursor(hWnd);
+			}
 			break;
 		case L'a': case L'A':
 			game_scene.moveLeft();
@@ -200,6 +205,18 @@ bool GameManager::isPaused() const {
 		return game_scene.isPaused();
 	}
 	return false;
+}
+
+bool GameManager::isGameOver() const {
+	switch(current_scene->getID()) {
+	case Game:
+		return game_scene.isGameOver();
+	}
+	return false;
+}
+
+double GameManager::getPlayTime() const {
+	return game_scene.getPlayTime();
 }
 
 

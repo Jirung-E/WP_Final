@@ -440,7 +440,7 @@ void make_monster(RECT rt) {
 	//일반 몬스터
 	spawn_timer_r--;
 	if (spawn_timer_r == 0) {
-		spawn_timer_r = 10;		// 원래값 500
+		spawn_timer_r = calc_spawn_timer(spawn_timer_r_max);		// 원래값 500
 		if (mdx_r < 99) {
 			spawn_monster_regular(mdx_r, BG_scanner, rt); mdx_r++;
 		}
@@ -449,7 +449,7 @@ void make_monster(RECT rt) {
 	//대형 몬스터
 	spawn_timer_big--;
 	if (spawn_timer_big == 0) {
-		spawn_timer_big = 10;	// 원래값 1000
+		spawn_timer_big = calc_spawn_timer(spawn_timer_big_max);	// 원래값 1000
 		if (mdx_big < 99) {
 			spawn_monster_big(mdx_big, BG_scanner, rt); mdx_big++;
 		}
@@ -458,7 +458,7 @@ void make_monster(RECT rt) {
 	//공중 몬스터
 	spawn_timer_air--;
 	if (spawn_timer_air == 0) {
-		spawn_timer_air = 10;	// 원래값 600
+		spawn_timer_air = calc_spawn_timer(spawn_timer_air_max);	// 원래값 600
 		if (mdx_air < 99) {
 			spawn_monster_air(mdx_air, BG_scanner, rt); mdx_air++;
 		}
@@ -1080,7 +1080,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		CM_move_dir = -1; break;
 
 	case WM_LBUTTONDOWN:
-		if (manager.getCurrentSceneID() == Game && !manager.isPaused() && can_shoot == TRUE) wm_lbuttondown();
+		if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver() && can_shoot == TRUE) wm_lbuttondown();
 		manager.clickScene(hWnd, { LOWORD(lParam), HIWORD(lParam) }, Left);
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;
@@ -1110,13 +1110,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_MOUSEMOVE:
 		mx = LOWORD(lParam); my = HIWORD(lParam);
-		if(manager.getCurrentSceneID() == Game && !manager.isPaused())  update_player_direction(mx);
+		if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver())  update_player_direction(mx);
 		break;
 
 	case WM_TIMER:
 		switch(wParam) {
 		case KEYDOWN: //키보드 입력 전용 타이머. 이동과 점프를 동시에 할 수 있음.
-			if (manager.getCurrentSceneID() == Game && !manager.isPaused()) wm_keydown();
+			if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) wm_keydown();
 			break;
 
 		case UPDATE: //게임 전체 타이머
@@ -1193,7 +1193,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	WndClass.lpszClassName = lpszClass;
 	WndClass.hIconSm = LoadIcon(NULL, IDI_QUESTION);
 	RegisterClassEx(&WndClass);
-	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_EX_TOPMOST | WS_THICKFRAME, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
+	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_EX_TOPMOST, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 

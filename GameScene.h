@@ -22,7 +22,6 @@ private:
     TextBox game_over_message;
     bool game_over;
 
-    double kill_count;
     double play_time;
     clock_t start_time;
     clock_t end_time;
@@ -45,6 +44,8 @@ public:
     void resume();
 
     bool isPaused() const;
+    bool isGameOver() const;
+    double getPlayTime() const;
 
 private:
     //void updatePlayer(const POINT& mouse_cursor_point);

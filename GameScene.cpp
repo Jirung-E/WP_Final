@@ -1,6 +1,7 @@
 #include "GameScene.h"
 
 #include "Util.h"
+#include "monster_info.h"
 
 #include <sstream>
 
@@ -28,7 +29,6 @@ player { { 8, 4.5 } } {
 void GameScene::setUp() {
     paused = false;
     game_over = false;
-    kill_count = 0;
     play_time = 0.0;
     start_time = 0;
     end_time = 0;
@@ -36,6 +36,9 @@ void GameScene::setUp() {
 
 
 void GameScene::update(const POINT& point) {
+    if(game_over) {
+        return;
+    }
     if(paused) {
         return;
     }
@@ -43,7 +46,12 @@ void GameScene::update(const POINT& point) {
         end_time = clock();
         play_time += end_time - start_time;
         start_time = clock();
-        updatePlayer(point);
+        game_round = int(play_time/1000) / 10 + 1;
+        if(mdx_r + mdx_big + mdx_air > 100) {
+            game_over = true;
+            ShowCursor(true);
+        }
+        //updatePlayer(point);
     }
     //updateEnemy();
     //collisionCheck();
@@ -64,6 +72,9 @@ void GameScene::moveRight() {
 
 
 void GameScene::togglePauseState() {
+    if(game_over) {
+        return;
+    }
     if(paused) {
         resume();
     }
@@ -90,6 +101,14 @@ void GameScene::resume() {
 
 bool GameScene::isPaused() const {
     return paused;
+}
+
+bool GameScene::isGameOver() const {
+    return game_over;
+}
+
+double GameScene::getPlayTime() const {
+    return play_time/1000;
 }
 
 
@@ -147,7 +166,23 @@ void GameScene::drawScore(const HDC& hdc) const {
     // ...
 
     // 플레이 시간 출력
+    //ss << L"ROUND" << int(play_time/1000) % 100 / 10 + 1 << L"  PlayTime: " << play_time/1000 << "\"";
+    ss << L"ROUND" << int(play_time/1000) / 10 + 1;
+    text = ss.str();
+    score.text = ss.str();
+    score.position.y += 5;
+    score.show(hdc, valid_area);
+    ss.str(L"");
+
     ss << L"PlayTime: " << play_time/1000 << "\"";
+    text = ss.str();
+    score.text = ss.str();
+    score.position.y += 5;
+    score.show(hdc, valid_area);
+    ss.str(L"");
+
+    // (테스트용) 몬스터 수 출력
+    ss << L"Monsters: " << (mdx_r + mdx_big + mdx_air);
     text = ss.str();
     score.text = ss.str();
     score.position.y += 5;
