@@ -708,9 +708,6 @@ void check_hit_awp() {
 	//최소 한 마리의 몬스터를 맞추어야 관통 효과가 발동된다
 	for (int i = mdx_r - 1; i >= 0; i--) {
 		if (hit_x >= mst_r[i].x && hit_x <= mst_r[i].x + 100 && hit_y >= mst_r[i].y && hit_y <= mst_r[i].y + 100) {
-			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
-			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
-			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
 			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
 			is_hit = TRUE;
 		}
@@ -718,9 +715,6 @@ void check_hit_awp() {
 
 	for (int i = mdx_big - 1; i >= 0; i--) {
 		if (hit_x >= mst_big[i].x && hit_x <= mst_big[i].x + 200 && hit_y >= mst_big[i].y && hit_y <= mst_big[i].y + 200) {
-			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
-			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
-			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
 			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
 			is_hit = TRUE;
 		}
@@ -767,9 +761,6 @@ void check_hit_awp() {
 	for (int i = mdx_air - 1; i >= 0; i--) {
 		if (hit_x >= mst_air[i].x && hit_x <= mst_air[i].x + 150 && hit_y >= mst_air[i].y && hit_y <= mst_air[i].y + 60) {
 			hit = i;
-			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
-			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
-			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
 
 			mst_air[hit].hp = cal_damage(mst_air[hit].hp, GUN_number);
 			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
@@ -1187,7 +1178,7 @@ void wm_paint(HDC mdc, RECT rt) {
 	show_monster(mdc, ss_x, ss_y, landing_shake);
 
 	//총알 궤적 그리기
-	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2);
+	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2, GUN_number);
 
 	//awp 정조준 완료 표시
 	show_zoom_complited(mdc);
