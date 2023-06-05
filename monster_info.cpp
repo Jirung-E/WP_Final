@@ -91,38 +91,42 @@ void spawn_monster_air(int mdx_air, int BG_scanner, RECT rt) {
 		mst_air[mdx_air].y = 200;
 	}
 	mst_air[mdx_air].hp = 30;
-	mst_air[mdx_air].attack_timer = 10;
+	mst_air[mdx_air].attack_timer = 50;
 	mst_air[mdx_air].height = 60;
 	mst_air[mdx_air].motion_acc = 8;
 }
 
 //일반 몬스터 이미지 방향
 void update_monster_dir_r(double monster_x, double CM_x, int mdx_r) { 
-	if (mst_r[mdx_r].x < CM_x)
-		mst_r[mdx_r].img_dir = 1;  //오른쪽 방향
+	if (mst_r[mdx_r].x > CM_x + 4 || mst_r[mdx_r].x < CM_x - 4) {
+		if (mst_r[mdx_r].x < CM_x)
+			mst_r[mdx_r].img_dir = 1;  //오른쪽 방향
 
-	else if (mst_r[mdx_r].x > CM_x)
-		mst_r[mdx_r].img_dir = 0;  //왼쪽 방향
-
-	
+		else if (mst_r[mdx_r].x > CM_x)
+			mst_r[mdx_r].img_dir = 0;  //왼쪽 방향
+	}
 }
 
 //대형 몬스터 이미지 방향
 void update_monster_dir_big(double monster_x, double CM_x, int mdx_big) {
-	if (mst_big[mdx_big].x + 50 < CM_x)
-		mst_big[mdx_big].img_dir = 1;  //오른쪽 방향
+	if (mst_big[mdx_big].x + 50 > CM_x + 4 || mst_big[mdx_big].x + 50 < CM_x - 4) {
+		if (mst_big[mdx_big].x + 50 < CM_x)
+			mst_big[mdx_big].img_dir = 1;  //오른쪽 방향
 
-	else if (mst_big[mdx_big].x + 50 > CM_x)
-		mst_big[mdx_big].img_dir = 0;  //왼쪽 방향
+		else if (mst_big[mdx_big].x + 50 > CM_x)
+			mst_big[mdx_big].img_dir = 0;  //왼쪽 방향
+	}
 }
 
 //공중 몬스터 이미지 방향
 void update_monster_dir_air(double monster_x, double CM_x, int mdx_air) {
-	if (mst_air[mdx_air].x + 75 < CM_x)
-		mst_air[mdx_air].img_dir = 1;  //오른쪽 방향
+	if (mst_air[mdx_air].x + 25 > CM_x + 4 || mst_air[mdx_air].x + 25 < CM_x - 4) {
+		if (mst_air[mdx_air].x + 25 < CM_x)
+			mst_air[mdx_air].img_dir = 1;  //오른쪽 방향
 
-	else if (mst_air[mdx_air].x + 75 > CM_x)
-		mst_air[mdx_air].img_dir = 0;  //왼쪽 방향
+		else if (mst_air[mdx_air].x + 25 > CM_x)
+			mst_air[mdx_air].img_dir = 0;  //왼쪽 방향
+	}
 }
 
 //몬스터 체력 표시
@@ -231,5 +235,4 @@ void monster_array_push_air(int hit, int idx) {
 	mst_air[idx].attack_timer = 0;
 	mst_air[idx].height = 0;
 	mst_air[idx].motion_acc = 0;
-}
 }

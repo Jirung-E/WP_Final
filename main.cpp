@@ -671,43 +671,42 @@ void update_player_position(RECT rt) {
 //몬스터 이미지 방향 업데이트
 void update_monster_direction(double CM_x) {
 	//일반 몬스터
-	for (int i = 0; i < mdx_r; i++)
+	for (int i = mdx_r - 1; i >= 0; i--) 
 		update_monster_dir_r(mst_r[i].x + ss_x, CM_x + ss_x, i);
 
 	//대형 몬스터
-	for (int i = 0; i < mdx_big; i++)
+	for (int i = mdx_big - 1; i >= 0; i--) 
 		update_monster_dir_big(mst_big[i].x + ss_x, CM_x + ss_x, i);
 
 	//공중 몬스터
-	for (int i = 0; i < mdx_air; i++)
+	for (int i = mdx_air - 1; i >= 0; i--) 
 		update_monster_dir_air(mst_air[i].x + ss_x, CM_x + ss_x, i);
 }
 
 //몬스터 위치 업데이트
 void update_monster_position() {
 	//일반 몬스터 위치
-	for (int i = 0; i < mdx_r; i++) {
-		if (mst_r[i].img_dir == 0)
-			mst_r[i].x -= 5;
-
-		else if (mst_r[i].img_dir == 1)
-			mst_r[i].x += 5;
+	for (int i = mdx_r - 1; i >= 0; i--) {
+		if (mst_r[i].x > CM_x + 4 || mst_r[i].x < CM_x - 4) {
+			if (mst_r[i].img_dir == 0) mst_r[i].x -= 5; 
+			else if (mst_r[i].img_dir == 1) mst_r[i].x += 5; 
+		}
 	}
 
 	//대형 몬스터 위치
-	for (int i = 0; i < mdx_big; i++) {
-		if (mst_big[i].img_dir == 0)
-			mst_big[i].x -= 3;
-		else if (mst_big[i].img_dir == 1)
-			mst_big[i].x += 3;
+	for (int i = mdx_big - 1; i >= 0; i--) {
+		if (mst_big[i].x + 50 > CM_x + 4 || mst_big[i].x + 50 < CM_x - 4) {
+			if (mst_big[i].img_dir == 0) mst_big[i].x -= 3; 
+			else if (mst_big[i].img_dir == 1) mst_big[i].x += 3;
+		}
 	}
 
 	//공중 몬스터 위치
-	for (int i = 0; i < mdx_air; i++) {
-		if (mst_air[i].img_dir == 0)
-			mst_air[i].x -= 2;
-		else if (mst_air[i].img_dir == 1)
-			mst_air[i].x += 2;
+	for (int i = mdx_air - 1; i >= 0; i--) {
+		if (mst_air[i].x + 25 > CM_x + 4 || mst_air[i].x + 25 < CM_x - 4) {
+			if (mst_air[i].img_dir == 0) mst_air[i].x -= 2; 
+			else if (mst_air[i].img_dir == 1) mst_air[i].x += 2; 
+		}
 	}
 }
 
@@ -1103,8 +1102,8 @@ void check_monster_attack() {
 	//공중 몬스터는 점프 방해가 주 목적이므로 접촉하면 즉시 대미지를 입는다.
 	for (int i = mdx_air - 1; i >= 0; i--) {
 		if (CM_x + 50 >= mst_air[i].x && CM_x + 50 <= mst_air[i].x + 150 && CM_y <= mst_air[i].y + 60) {
-			if (mst_air[i].attack_timer < 10) mst_air[i].attack_timer++;
-			if (mst_air[i].attack_timer == 10) {
+			if (mst_air[i].attack_timer < 50) mst_air[i].attack_timer++;
+			if (mst_air[i].attack_timer == 50) {
 				health -= 10;
 				mst_air[i].attack_timer = 0;
 				mst_air[i].height = 95;
@@ -1116,7 +1115,7 @@ void check_monster_attack() {
 		}
 
 		else
-			mst_air[i].attack_timer = 10;
+			mst_air[i].attack_timer = 50;
 	}
 }
 
