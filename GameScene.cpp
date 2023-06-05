@@ -219,12 +219,13 @@ void GameScene::drawGameOverScene(const HDC& hdc) const {
     score.transparent_background = true;
     score.transparent_border = true;
     score.bold = 4;
+    score.text_color = White;
 
     tstring text;
     std::basic_stringstream<TCHAR> ss;
 
     // 라운드 출력
-    ss << L"ROUND" << game_round;
+    ss << L"ROUND" << game_round << " [" << this->score << "/" << game_round * 10 << "]";
     text = ss.str();
     score.text = ss.str();
     score.show(hdc, valid_area);
