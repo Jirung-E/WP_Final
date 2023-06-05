@@ -7,8 +7,6 @@
 #include "ammo.h"
 
 #include <sstream>
-#include <windows.h>
-
 
 GameScene::GameScene() : Scene { Game },
 map { 16, 9 },      // 좌표계.  전체화면비율인 16:9에 맞춥니다.
@@ -32,7 +30,6 @@ player { { 8, 4.5 } } {
 HWND hWnd;
 
 void GameScene::setUp() {
-    KillTimer(hWnd, 1);
     paused = false;
     game_over = false;
     play_time = 0.0;
@@ -90,7 +87,8 @@ void GameScene::update(const POINT& point) {
         play_time += end_time - start_time;
         start_time = clock();
         game_round = int(play_time/1000) / 10 + 1;
-        if(mdx_r + mdx_big + mdx_air > 100) {
+        if(health <= 0) {
+            setUp();
             game_over = true;
             ShowCursor(true);
         }

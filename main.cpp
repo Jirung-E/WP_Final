@@ -19,7 +19,7 @@
 FMOD::System* ssystem;
 FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot, *dry_fire;
 FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
-FMOD::Sound* hurt;
+FMOD::Sound* hurt, *dead;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -41,6 +41,8 @@ FMOD::Channel* ch_zoom = 0;
 FMOD::Channel* ch_dry = 0;
 //hurt
 FMOD::Channel* ch_hurt = 0;
+//dead
+FMOD::Channel* ch_dead = 0;
 
 FMOD_RESULT result;
 void* extradriverdata = 0;
@@ -144,7 +146,7 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\land.wav", FMOD_DEFAULT, 0, &land_sound);
 	ssystem->createSound(".\\res\\sounds\\exp_get.ogg", FMOD_DEFAULT, 0, &exp_get);
 	ssystem->createSound(".\\res\\sounds\\hurt.ogg", FMOD_DEFAULT, 0, &hurt);
-
+	ssystem->createSound(".\\res\\sounds\\player_dead.wav", FMOD_DEFAULT, 0, &dead);
 }
 
 //광클 방지
@@ -1391,6 +1393,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					ch_walk->stop(); //사운드 정지
 					ssystem->playSound(walk, 0, false, &ch_walk); //사운드 재생
 				}
+			}
+
+			if (health <= 0) {
+				ch_dead->stop(); ssystem->playSound(dead, 0, false, &ch_dead);
 			}
 
 			break;
