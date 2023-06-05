@@ -49,6 +49,8 @@ void spawn_monster_regular(int mdx_r, int BG_scanner, RECT rt) {
 	mst_r[mdx_r].hp = 50;
 	mst_r[mdx_r].targeted = 0;
 	mst_r[mdx_r].attack_timer = 0;
+	mst_r[mdx_r].height = 100;
+	mst_r[mdx_r].motion_acc = 8;
 }
 
 //대형 몬스터 생성
@@ -69,6 +71,8 @@ void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt) {
 	mst_big[mdx_big].hp = 100;
 	mst_big[mdx_big].targeted = 0;
 	mst_big[mdx_big].attack_timer = 0;
+	mst_big[mdx_big].height = 200;
+	mst_big[mdx_big].motion_acc = 8;
 }
 
 //공중 몬스터 생성
@@ -87,6 +91,9 @@ void spawn_monster_air(int mdx_air, int BG_scanner, RECT rt) {
 		mst_air[mdx_air].y = 200;
 	}
 	mst_air[mdx_air].hp = 30;
+	mst_air[mdx_air].attack_timer = 10;
+	mst_air[mdx_air].height = 60;
+	mst_air[mdx_air].motion_acc = 8;
 }
 
 //일반 몬스터 이미지 방향
@@ -96,6 +103,8 @@ void update_monster_dir_r(double monster_x, double CM_x, int mdx_r) {
 
 	else if (mst_r[mdx_r].x > CM_x)
 		mst_r[mdx_r].img_dir = 0;  //왼쪽 방향
+
+	
 }
 
 //대형 몬스터 이미지 방향
@@ -159,6 +168,9 @@ void monster_array_push_r(int hit, int idx) {
 		mst_r[i].img_dir = mst_r[i + 1].img_dir;
 		mst_r[i].move_dir = mst_r[i + 1].move_dir;
 		mst_r[i].targeted = mst_r[i + 1].targeted;
+		mst_r[i].attack_timer = mst_r[i + 1].attack_timer;
+		mst_r[i].height = mst_r[i + 1].height;
+		mst_r[i].motion_acc = mst_r[i + 1].motion_acc;
 	}
 	idx--;
 	mst_r[idx].x = -400;
@@ -167,6 +179,9 @@ void monster_array_push_r(int hit, int idx) {
 	mst_r[idx].move_dir = -1;
 	mst_r[idx].img_dir = -1; //현재 인덱스의 바로 전 인덱스까지 모두 한 칸씩 앞으로 당긴 후 남는 인덱스의 몬스터는 화면 밖으로 이동(나중에 몬스터 스폰 시 다시 값이 생성되므로 문제 없음)
 	mst_r[idx].targeted = 0;
+	mst_r[idx].attack_timer = 0;
+	mst_r[idx].height = 0;
+	mst_r[idx].motion_acc = 0;
 }
 
 //대형 몬스터 배열 밀어내기
@@ -178,6 +193,9 @@ void monster_array_push_big(int hit, int idx) {
 		mst_big[i].img_dir = mst_big[i + 1].img_dir;
 		mst_big[i].move_dir = mst_big[i + 1].move_dir;
 		mst_big[i].targeted = mst_big[i + 1].targeted;
+		mst_big[i].attack_timer = mst_big[i + 1].attack_timer;
+		mst_big[i].height = mst_big[i + 1].height;
+		mst_big[i].motion_acc = mst_big[i + 1].motion_acc;
 	}
 	idx--;
 	mst_big[idx].x = -400;
@@ -186,6 +204,9 @@ void monster_array_push_big(int hit, int idx) {
 	mst_big[idx].move_dir = -1;
 	mst_big[idx].img_dir = -1;
 	mst_big[idx].targeted = 0;
+	mst_big[idx].attack_timer = 0;
+	mst_big[idx].height = 0;
+	mst_big[idx].motion_acc = 0;
 }
 
 //공중 몬스터 배열 밀어내기

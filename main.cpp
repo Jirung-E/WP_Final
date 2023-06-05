@@ -19,6 +19,7 @@
 FMOD::System* ssystem;
 FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot, *dry_fire;
 FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
+FMOD::Sound* hurt;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -38,6 +39,8 @@ FMOD::Channel* ch_exp = 0;
 FMOD::Channel* ch_zoom = 0;
 //awp_no_zoom
 FMOD::Channel* ch_dry = 0;
+//hurt
+FMOD::Channel* ch_hurt = 0;
 
 FMOD_RESULT result;
 void* extradriverdata = 0;
@@ -140,6 +143,7 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\jump.wav", FMOD_DEFAULT, 0, &jump);
 	ssystem->createSound(".\\res\\sounds\\land.wav", FMOD_DEFAULT, 0, &land_sound);
 	ssystem->createSound(".\\res\\sounds\\exp_get.ogg", FMOD_DEFAULT, 0, &exp_get);
+	ssystem->createSound(".\\res\\sounds\\hurt.ogg", FMOD_DEFAULT, 0, &hurt);
 
 }
 
@@ -539,13 +543,13 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 		case 0:
 			MST_w = monster_left.GetWidth();
 			MST_h = monster_left.GetHeight();
-			monster_left.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y + ss_y + landing_shake, 100, 100, 0, 0, MST_w, MST_h);
+			monster_left.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y + ss_y + landing_shake, 100, mst_r[i].height, 0, 0, MST_w, MST_h);
 			break;
 
 		case 1:
 			MST_w = monster_right.GetWidth();
 			MST_h = monster_right.GetHeight();
-			monster_right.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y + ss_y + landing_shake, 100, 100, 0, 0, MST_w, MST_h);
+			monster_right.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y + ss_y + landing_shake, 100, mst_r[i].height, 0, 0, MST_w, MST_h);
 			break;
 		}
 	}
@@ -556,13 +560,13 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 		case 0:
 			MST_big_w = monster_big_left.GetWidth();
 			MST_big_h = monster_big_left.GetHeight();
-			monster_big_left.Draw(mdc, mst_big[i].x + ss_x, mst_big[i].y + ss_y + landing_shake, 200, 200, 0, 0, MST_big_w, MST_big_h);
+			monster_big_left.Draw(mdc, mst_big[i].x + ss_x, mst_big[i].y + ss_y + landing_shake, 200, mst_big[i].height, 0, 0, MST_big_w, MST_big_h);
 			break;
 
 		case 1:
 			MST_big_w = monster_big_right.GetWidth();
 			MST_big_h = monster_big_right.GetHeight();
-			monster_big_right.Draw(mdc, mst_big[i].x + ss_x, mst_big[i].y + ss_y + landing_shake, 200, 200, 0, 0, MST_big_w, MST_big_h);
+			monster_big_right.Draw(mdc, mst_big[i].x + ss_x, mst_big[i].y + ss_y + landing_shake, 200, mst_big[i].height , 0, 0, MST_big_w, MST_big_h);
 			break;
 		}
 	}
@@ -573,13 +577,13 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 		case 0:
 			MST_air_w = monster_air_left[air].GetWidth();
 			MST_air_h = monster_air_left[air].GetHeight();
-			monster_air_left[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, 60, 0, 0, MST_air_w, MST_air_h);
+			monster_air_left[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, mst_air[i].height, 0, 0, MST_air_w, MST_air_h);
 			break;
 
 		case 1:
 			MST_air_w = monster_air_right[air].GetWidth();
 			MST_air_h = monster_air_right[air].GetHeight();
-			monster_air_right[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, 60, 0, 0, MST_air_w, MST_air_h);
+			monster_air_right[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, mst_air[i].height, 0, 0, MST_air_w, MST_air_h);
 			break;
 		}
 	}
@@ -685,6 +689,7 @@ void update_monster_position() {
 	for (int i = 0; i < mdx_r; i++) {
 		if (mst_r[i].img_dir == 0)
 			mst_r[i].x -= 5;
+
 		else if (mst_r[i].img_dir == 1)
 			mst_r[i].x += 5;
 	}
@@ -985,10 +990,8 @@ void update_shoot_animation() {
 
 	//사격 시 화면 흔들림
 	//좌측 값: 흔들리는 정도, 오른쪽 값: 흔들리는 시간
-	if (shake_effect == 1) {
-		make_shake(Gun::shake(GUN_number), Gun::shake_time(GUN_number));
-	}
-
+	if (shake_effect == 1) make_shake(Gun::shake(GUN_number), Gun::shake_time(GUN_number));
+		
 	//아주 짧은 시간동안 총알의 궤적을 그린다.
 	if (is_draw == TRUE) { 
 		draw_timer++;
@@ -1058,39 +1061,62 @@ void update_shoot_animation() {
 	}
 }
 
+//몬스터 공격 판정
 void check_monster_attack() {
 	//일반 몬스터 공격 판정
 	for (int i = mdx_r - 1; i >= 0; i --) {
-		if (fabs((mst_r[i].x + 50) - (CM_x + 50)) <= 100) {
-			if(mst_r[i].attack_timer < 30)
-				mst_r[i].attack_timer++;
-			if (mst_r[i].attack_timer == 30) {
-				mst_r[i].is_attack == TRUE;
-				health -= 10;
+		if (fabs((mst_r[i].x + 50) - (CM_x + 50)) <= 120 && CM_y + 100 >= mst_r[i].y + 50) {
+			if(mst_r[i].attack_timer < 20) mst_r[i].attack_timer++;
+			if (mst_r[i].attack_timer == 20) {
+			    health -= 20;
 				mst_r[i].attack_timer = 0;
+				mst_r[i].motion_acc = 8;
+				mst_r[i].height = 135;
+				mst_r[i].y = 565;
+				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
+				shake_effect = 2;
 			}
 		}
-		else {
+		else
 			mst_r[i].attack_timer = 0;
-			mst_r[i].is_attack = FALSE;
-		}
 	}
 
 	//대형 몬스터 공격 판정
 	for (int i = mdx_big - 1; i >= 0; i--) {
-		if (fabs((mst_big[i].x + 100) - (CM_x + 50)) <= 200) {
-			if (mst_big[i].attack_timer < 30)
-				mst_big[i].attack_timer++;
-			if (mst_big[i].attack_timer == 30) {
-				mst_big[i].is_attack == TRUE;
+		if (fabs((mst_big[i].x + 100) - (CM_x + 50)) <= 170 && CM_y + 100 >= mst_big[i].y + 100) {
+			if (mst_big[i].attack_timer < 20) mst_big[i].attack_timer++;
+			if (mst_big[i].attack_timer == 20) {
 				health -= 30;
 				mst_big[i].attack_timer = 0;
+				mst_big[i].height = 235;
+				mst_big[i].y = 465;
+				mst_big[i].motion_acc = 8;
+				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
+				shake_effect = 2;
 			}
 		}
-		else {
+		else 
 			mst_big[i].attack_timer = 0;
-			mst_big[i].is_attack = FALSE;
+		
+	}
+
+	//공중 몬스터는 점프 방해가 주 목적이므로 접촉하면 즉시 대미지를 입는다.
+	for (int i = mdx_air - 1; i >= 0; i--) {
+		if (CM_x + 50 >= mst_air[i].x && CM_x + 50 <= mst_air[i].x + 150 && CM_y <= mst_air[i].y + 60) {
+			if (mst_air[i].attack_timer < 10) mst_air[i].attack_timer++;
+			if (mst_air[i].attack_timer == 10) {
+				health -= 10;
+				mst_air[i].attack_timer = 0;
+				mst_air[i].height = 95;
+				mst_air[i].y = 165;
+				mst_air[i].motion_acc = 8;
+				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
+				shake_effect = 2;
+			}
 		}
+
+		else
+			mst_air[i].attack_timer = 10;
 	}
 }
 
@@ -1186,6 +1212,7 @@ void wm_rbuttondown() {
 
 //몬스터 애니메이션
 void monster_animation() {
+	//공중 몬스터 idle 애니메이션
 	if (up_down == 1) {
 		Fdelay_air++;
 		if (Fdelay_air == 7) {
@@ -1200,6 +1227,29 @@ void monster_animation() {
 			if (air == 0) up_down = 1;
 		}
 	}
+
+	//몬스터 공격 애니메이션
+	for (int i = mdx_r - 1; i >= 0; i--) {
+		if (mst_r[i].y < 600) {
+			mst_r[i].y += mst_r[i].motion_acc;
+			mst_r[i].height -= mst_r[i].motion_acc--;
+		}
+	}
+	for (int i = mdx_big - 1; i >= 0; i--) {
+		if (mst_big[i].y < 500) {
+			mst_big[i].y += mst_big[i].motion_acc;
+			mst_big[i].height -= mst_big[i].motion_acc--;
+		}
+	}
+	for (int i = mdx_air - 1; i >= 0; i--) {
+		if (mst_air[i].y < 200) {
+			mst_air[i].y += mst_air[i].motion_acc;
+			mst_air[i].height -= mst_air[i].motion_acc--;
+		}
+	}
+
+	//몬스터에게 대미지를 받으면 화면이 흔들린다.
+	if (shake_effect == 2) make_shake(10, 5);
 }
 
 //그리기 파트
@@ -1215,17 +1265,19 @@ void wm_paint(HDC mdc, RECT rt) {
 		show_awp_targeted(mdc);
 	}
 
-	//몬스터 이미지 출력
-	show_monster(mdc, ss_x, ss_y, landing_shake);
-
-	//총알 궤적 그리기
-	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2, GUN_number);
+	
 
 	//awp 정조준 완료 표시
 	show_zoom_complited(mdc);
 
 	//플레이어 이미지 출력
 	show_player(mdc);
+
+	//몬스터 이미지 출력
+	show_monster(mdc, ss_x, ss_y, landing_shake);
+
+	//총알 궤적 그리기
+	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2, GUN_number);
 
 	//히트 포인트 그리기
 	if (draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2);
