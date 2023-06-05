@@ -7,7 +7,6 @@
 #include "ammo.h"
 
 #include <sstream>
-#include <windows.h>
 
 
 GameScene::GameScene() : Scene { Game },
@@ -29,10 +28,8 @@ player { { 8, 4.5 } } {
     player.addSprite(new Sprite { L"./res/commando_right.png" });
 }
 
-HWND hWnd;
 
 void GameScene::setUp() {
-    KillTimer(hWnd, 1);
     paused = false;
     game_over = false;
     play_time = 0.0;
