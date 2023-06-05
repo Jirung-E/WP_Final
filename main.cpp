@@ -1295,11 +1295,11 @@ void wm_paint(HDC mdc, RECT rt) {
 	//awp 정조준 완료 표시
 	show_zoom_complited(mdc);
 
-	//플레이어 이미지 출력
-	show_player(mdc);
-
 	//몬스터 이미지 출력
 	show_monster(mdc, ss_x, ss_y, landing_shake);
+
+	//플레이어 이미지 출력
+	show_player(mdc);
 
 	//총알 궤적 그리기
 	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2, GUN_number);

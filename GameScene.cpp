@@ -104,6 +104,7 @@ void GameScene::update(const POINT& point) {
         if(health <= 0) {
             game_over = true;
             ShowCursor(true);
+            health = 100; //사망 사운드 중복 재생 방지
         }
     }
 }
