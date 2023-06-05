@@ -54,6 +54,13 @@ FMOD::Channel* ch_button = 0;
 FMOD_RESULT result;
 void* extradriverdata = 0;
 
+extern BOOL button_feed_clickScene; //TRUE일시 버튼 클릭음 재생
+extern BOOL button_feed_armory_button; //TRUE일시 버튼 클릭음 재생
+extern BOOL button_feed_armory_select; //TRUE일시 버튼 클릭음 재생
+extern BOOL button_feed_clickScene_start;
+extern BOOL button_feed_clickScene_quit;
+
+
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"NON STOP";
@@ -77,12 +84,6 @@ enum Timer {
 static double mx, my;
 //마우스 클릭 여부
 static BOOL is_click = FALSE; 
-
-extern BOOL button_feed_clickScene; //TRUE일시 버튼 클릭음 재생
-extern BOOL button_feed_armory_button; //TRUE일시 버튼 클릭음 재생
-extern BOOL button_feed_armory_select; //TRUE일시 버튼 클릭음 재생
-extern BOOL button_feed_clickScene_start;
-extern BOOL button_feed_clickScene_quit;
 
 //이미지 파일 로드
 void IMG_FILE_LOAD() {
@@ -1311,11 +1312,11 @@ void wm_paint(HDC mdc, RECT rt) {
 	//몬스터 이미지 출력
 	show_monster(mdc, ss_x, ss_y, landing_shake);
 
-	//플레이어 이미지 출력
-	show_player(mdc);
-
 	//총알 궤적 그리기
 	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2, GUN_number);
+
+	//플레이어 이미지 출력
+	show_player(mdc);
 
 	//히트 포인트 그리기
 	if (draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2);
