@@ -176,6 +176,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="변경사항.txt" />
+    <Text Include="userdata.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="TODOLIST.md" />

@@ -211,11 +211,26 @@ void ArmoryScene::draw(const HDC& hdc) const {
     }
     
     if(unlocked[idx-1]) {
-        equip_button.show(hdc, valid_area);
+        if(idx-1 != GUN_number-1) {
+            equip_button.show(hdc, valid_area);
+        }
     }
     else {
         unlock_button.show(hdc, valid_area);
+
     }
+
+    Sprite lock { L"./res/lock_white.png" };
+    Sprite blind { L"./res/blind.png" };
+    for(int i=0; i<weapon_buttons.size(); ++i) {
+        if(!unlocked[i]) {
+            r = weapon_buttons[i].absoluteArea(valid_area);
+            blind.source.Draw(hdc, r);
+            r = rectToSquare(r);
+            lock.source.Draw(hdc, r);
+        }
+    }
+
     quit_button.show(hdc, valid_area);
 }
 
