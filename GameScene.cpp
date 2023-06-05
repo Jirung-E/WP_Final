@@ -72,6 +72,10 @@ void GameScene::setUp() {
     r_pressed = 0;
     empty = 0;
     can_shoot = TRUE;
+
+    //게임오버 씬 초기화
+    death_x = -500;
+    death_acc = 54;
 }
 
 

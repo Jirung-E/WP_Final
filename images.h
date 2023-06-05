@@ -10,6 +10,7 @@ extern CImage monster_right, monster_left, monster_big_right, monster_big_left;
 extern CImage monster_air_right[3], monster_air_left[3];
 extern CImage exp_icon, flame_right, flame_left;
 extern CImage zoom_complited, zoom_targeted;
+extern CImage CM_dead;
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지
@@ -56,3 +57,6 @@ extern int shake_acc;		  //부드러운 흔들림 효과를 위해 감속 적용
 
 extern int ypos_zc;
 extern int ypos_zc_acc;
+
+extern int death_x;
+extern int death_acc;

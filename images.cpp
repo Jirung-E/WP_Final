@@ -9,6 +9,7 @@ CImage monster_right, monster_left, monster_big_right, monster_big_left;
 CImage monster_air_right[3], monster_air_left[3];
 CImage exp_icon, flame_right, flame_left;
 CImage zoom_complited, zoom_targeted;
+CImage CM_dead;
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지
@@ -51,3 +52,6 @@ int shake_acc;		  //부드러운 흔들림 효과를 위해 감속 적용
 
 int ypos_zc = 0; //사격 가능 표시의 y좌표, 수치가 커질수록 플레이어 머리 위로 더 높이 올라간다.
 int ypos_zc_acc = 15; //사격 가능 표시의 애니메이션 가속도
+
+int death_x = -500;
+int death_acc = 54;
