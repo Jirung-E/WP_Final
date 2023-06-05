@@ -20,6 +20,7 @@ FMOD::System* ssystem;
 FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot, *dry_fire;
 FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
 FMOD::Sound* hurt, *dead;
+FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -43,6 +44,10 @@ FMOD::Channel* ch_dry = 0;
 FMOD::Channel* ch_hurt = 0;
 //dead
 FMOD::Channel* ch_dead = 0;
+//monster_sound
+FMOD::Channel* ch_mst_idle_sound = 0;
+//monster_attack_sound
+FMOD::Channel* ch_mst_attack_sound = 0;
 
 FMOD_RESULT result;
 void* extradriverdata = 0;
@@ -52,6 +57,7 @@ LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"NON STOP";
 
 static int walk_sound_delay; //발소리가 너무 빠르게 들리면 안되므로 딜레이를 줘 가며 재생
+static int monster_sound_delay; //몬스터 idle 사운드 딜레이
 
 std::random_device rd_main;
 std::mt19937 gen(rd_main());
@@ -117,6 +123,8 @@ void IMG_FILE_LOAD() {
 	ammo_sniper_icon.Load(L".\\res\\ammo_sniper_icon.png");
 	zoom_complited.Load(L".\\res\\zoom_complited.png");
 	zoom_targeted.Load(L".\\res\\zoom_targeted.png");
+
+	CM_dead.Load(L".\\res\\commando_dead.png");
 } 
 
 //FMOD 세팅
@@ -145,8 +153,27 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\jump.wav", FMOD_DEFAULT, 0, &jump);
 	ssystem->createSound(".\\res\\sounds\\land.wav", FMOD_DEFAULT, 0, &land_sound);
 	ssystem->createSound(".\\res\\sounds\\exp_get.ogg", FMOD_DEFAULT, 0, &exp_get);
-	ssystem->createSound(".\\res\\sounds\\hurt.ogg", FMOD_DEFAULT, 0, &hurt);
+	ssystem->createSound(".\\res\\sounds\\hurt.mp3", FMOD_DEFAULT, 0, &hurt);
 	ssystem->createSound(".\\res\\sounds\\player_dead.wav", FMOD_DEFAULT, 0, &dead);
+
+	ssystem->createSound(".\\res\\sounds\\monster_sound1.ogg", FMOD_DEFAULT, 0, &mst_idle_sound1);
+	ssystem->createSound(".\\res\\sounds\\monster_sound2.ogg", FMOD_DEFAULT, 0, &mst_idle_sound2);
+
+	ssystem->createSound(".\\res\\sounds\\monster_attack1.ogg", FMOD_DEFAULT, 0, &mst_attack_sound1);
+	ssystem->createSound(".\\res\\sounds\\monster_attack2.ogg", FMOD_DEFAULT, 0, &mst_attack_sound2);
+}
+
+//몬스터 공격 사운드
+void play_attack_sound() {
+	std::random_device rd_sound;
+	std::mt19937 gen(rd_sound());
+	std::uniform_int_distribution<int> rand_sound(0, 1);
+
+	if (rand_sound(gen) == 0)
+		ssystem->playSound(mst_attack_sound1, 0, false, &ch_mst_attack_sound);
+
+	else if (rand_sound(gen) == 1)
+		ssystem->playSound(mst_attack_sound2, 0, false, &ch_mst_attack_sound);
 }
 
 //광클 방지
@@ -1070,11 +1097,11 @@ void check_monster_attack() {
 			if(mst_r[i].attack_timer < 20) mst_r[i].attack_timer++;
 			if (mst_r[i].attack_timer == 20) {
 			    health -= 20;
-				mst_r[i].attack_timer = 0;
-				mst_r[i].motion_acc = 8;
-				mst_r[i].height = 135;
-				mst_r[i].y = 565;
+				mst_r[i].attack_timer = 0; mst_r[i].motion_acc = 8;
+				mst_r[i].height = 135; mst_r[i].y = 565;
+				
 				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
+				ch_mst_attack_sound->stop();  play_attack_sound();
 				shake_effect = 2;
 			}
 		}
@@ -1088,11 +1115,11 @@ void check_monster_attack() {
 			if (mst_big[i].attack_timer < 20) mst_big[i].attack_timer++;
 			if (mst_big[i].attack_timer == 20) {
 				health -= 30;
-				mst_big[i].attack_timer = 0;
-				mst_big[i].height = 235;
-				mst_big[i].y = 465;
-				mst_big[i].motion_acc = 8;
+				mst_big[i].attack_timer = 0; mst_big[i].height = 235;
+				mst_big[i].y = 465;	mst_big[i].motion_acc = 8;
+				
 				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
+				ch_mst_attack_sound->stop();  play_attack_sound();
 				shake_effect = 2;
 			}
 		}
@@ -1107,10 +1134,9 @@ void check_monster_attack() {
 			if (mst_air[i].attack_timer < 50) mst_air[i].attack_timer++;
 			if (mst_air[i].attack_timer == 50) {
 				health -= 10;
-				mst_air[i].attack_timer = 0;
-				mst_air[i].height = 95;
-				mst_air[i].y = 165;
-				mst_air[i].motion_acc = 8;
+				mst_air[i].attack_timer = 0; mst_air[i].height = 95;
+				mst_air[i].y = 165; mst_air[i].motion_acc = 8;
+				
 				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
 				shake_effect = 2;
 			}
@@ -1266,8 +1292,6 @@ void wm_paint(HDC mdc, RECT rt) {
 		show_awp_targeted(mdc);
 	}
 
-	
-
 	//awp 정조준 완료 표시
 	show_zoom_complited(mdc);
 
@@ -1287,7 +1311,20 @@ void wm_paint(HDC mdc, RECT rt) {
 	show_interface(mdc, rt);
 
 	//조준점 출력
-	if (!manager.isPaused()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
+	if (!manager.isPaused() && !manager.isGameOver()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
+
+	if (manager.isGameOver()) {
+		HBRUSH hbrush, oldbrush;
+		hbrush = CreateSolidBrush(RGB(0, 0, 0));
+		oldbrush = (HBRUSH)SelectObject(mdc, hbrush);
+
+		Rectangle(mdc, rt.left, rt.top, rt.right, rt.bottom);
+
+		SelectObject(mdc, oldbrush);
+		DeleteObject(hbrush);
+
+		CM_dead.Draw(mdc, death_x, 200, 500, 500, 0, 0, 500, 500);
+	}
 
 	//인덱스 테스트
 	/*
@@ -1371,7 +1408,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		case UPDATE: //게임 전체 타이머
 			GetClientRect(hWnd, &rt); manager.update(hWnd);
 
-			if(manager.getCurrentSceneID() == Game && !manager.isPaused()) {
+			if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
 				update_player_position(rt);
 				shoot();
 				update_shoot_animation();
@@ -1395,8 +1432,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 
+
+			//지상형 몬스터가 1마리 이상 있을 경우 랜덤으로 소리 2가지 중 하나를 재생한다.
+			if (!manager.isPaused() && !manager.isGameOver() && (mdx_r > 0 || mdx_big > 0)) {
+				if (monster_sound_delay < 200) monster_sound_delay++;
+				if (monster_sound_delay == 200) {
+					std::random_device rd_sound;
+					std::mt19937 gen(rd_sound());
+					std::uniform_int_distribution<int> rand_sound(0 ,1);
+
+					ch_mst_idle_sound->stop();
+
+					if (rand_sound(gen) == 0)
+						ssystem->playSound(mst_idle_sound1, 0, false, &ch_mst_idle_sound);
+					else if(rand_sound(gen) == 1)
+						ssystem->playSound(mst_idle_sound2, 0, false, &ch_mst_idle_sound);
+
+					monster_sound_delay = 0;
+				}
+			}
+
+			//플레이어가 죽을 경우 죽는 소리가 재생
 			if (health <= 0) {
 				ch_dead->stop(); ssystem->playSound(dead, 0, false, &ch_dead);
+			}
+
+			if (manager.isGameOver()) {
+				if (death_acc > 0)
+					death_x += death_acc--;
 			}
 
 			break;
