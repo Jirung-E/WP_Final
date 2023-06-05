@@ -770,7 +770,7 @@ void check_hit_awp() {
 					monster_array_push_air(hit, mdx_air--); experience += 3; prev_up = 3; exp_up = TRUE;
 					init_exp_animation(); is_kill_air = 1;
 				}
-				if (hit == mdx_air - 1 && is_kill_air == 0) {
+				else if (hit == mdx_air - 1 && is_kill_air == 0) {
 					mdx_air--; experience += 3; prev_up = 3; exp_up = TRUE;
 					init_exp_animation(); is_kill_air = 1;
 				}
@@ -854,7 +854,7 @@ void check_hit() {
 					monster_array_push_air(hit, mdx_air--); experience += 3; prev_up = 3; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
-				if (hit == mdx_air - 1 && is_kill == 0) {
+				else if (hit == mdx_air - 1 && is_kill == 0) {
 					mdx_air--; experience += 3; prev_up = 3; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
