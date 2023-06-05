@@ -217,6 +217,10 @@ void monster_array_push_air(int hit, int idx) {
 		mst_air[i].hp = mst_air[i + 1].hp;
 		mst_air[i].img_dir = mst_air[i + 1].img_dir;
 		mst_air[i].move_dir = mst_air[i + 1].move_dir;
+		mst_air[i].attack_timer = mst_air[i + 1].attack_timer;
+		mst_air[i].height = mst_air[i + 1].height;
+		mst_air[i].motion_acc = mst_air[i + 1].motion_acc;
+		
 	}
 	idx --;
 	mst_air[idx].x = -400;
@@ -224,4 +228,8 @@ void monster_array_push_air(int hit, int idx) {
 	mst_air[idx].hp = 0;
 	mst_air[idx].move_dir = -1;
 	mst_air[idx].img_dir = -1;
+	mst_air[idx].attack_timer = 0;
+	mst_air[idx].height = 0;
+	mst_air[idx].motion_acc = 0;
+}
 }
