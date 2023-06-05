@@ -20,7 +20,7 @@ FMOD::System* ssystem;
 FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot, *dry_fire;
 FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
 FMOD::Sound* hurt, *dead;
-FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2;
+FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -48,6 +48,8 @@ FMOD::Channel* ch_dead = 0;
 FMOD::Channel* ch_mst_idle_sound = 0;
 //monster_attack_sound
 FMOD::Channel* ch_mst_attack_sound = 0;
+//button_sound
+FMOD::Channel* ch_button = 0;
 
 FMOD_RESULT result;
 void* extradriverdata = 0;
@@ -75,6 +77,9 @@ enum Timer {
 static double mx, my;
 //마우스 클릭 여부
 static BOOL is_click = FALSE; 
+
+extern BOOL button_feed_clickScene; //TRUE일시 버튼 클릭음 재생
+extern BOOL button_feed_armory; //TRUE일시 버튼 클릭음 재생
 
 //이미지 파일 로드
 void IMG_FILE_LOAD() {
@@ -161,6 +166,7 @@ void set_FMOD() {
 
 	ssystem->createSound(".\\res\\sounds\\monster_attack1.ogg", FMOD_DEFAULT, 0, &mst_attack_sound1);
 	ssystem->createSound(".\\res\\sounds\\monster_attack2.ogg", FMOD_DEFAULT, 0, &mst_attack_sound2);
+	ssystem->createSound(".\\res\\sounds\\button.wav", FMOD_DEFAULT, 0, &button_sound);
 }
 
 //몬스터 공격 사운드
@@ -1417,6 +1423,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				make_monster(rt);  
 				monster_animation();
 				check_monster_attack();
+
+				//지상형 몬스터가 1마리 이상 있을 경우 랜덤으로 소리 2가지 중 하나를 재생한다.
+				if (mdx_r > 0 || mdx_big > 0){
+					if (monster_sound_delay < 300) monster_sound_delay++;
+					if (monster_sound_delay == 300) {
+						std::random_device rd_sound;
+						std::mt19937 gen(rd_sound());
+						std::uniform_int_distribution<int> rand_sound(0, 1);
+
+						ch_mst_idle_sound->stop();
+
+						if (rand_sound(gen) == 0)
+							ssystem->playSound(mst_idle_sound1, 0, false, &ch_mst_idle_sound);
+						else if (rand_sound(gen) == 1)
+							ssystem->playSound(mst_idle_sound2, 0, false, &ch_mst_idle_sound);
+
+						monster_sound_delay = 0;
+					}
+				}
 			}
 
 			//연사 속도가 느린 총을 마우스 광클로 빨리 쏘는 꼼수 방지
@@ -1432,26 +1457,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 
-
-			//지상형 몬스터가 1마리 이상 있을 경우 랜덤으로 소리 2가지 중 하나를 재생한다.
-			if (!manager.isPaused() && !manager.isGameOver() && (mdx_r > 0 || mdx_big > 0)) {
-				if (monster_sound_delay < 200) monster_sound_delay++;
-				if (monster_sound_delay == 200) {
-					std::random_device rd_sound;
-					std::mt19937 gen(rd_sound());
-					std::uniform_int_distribution<int> rand_sound(0 ,1);
-
-					ch_mst_idle_sound->stop();
-
-					if (rand_sound(gen) == 0)
-						ssystem->playSound(mst_idle_sound1, 0, false, &ch_mst_idle_sound);
-					else if(rand_sound(gen) == 1)
-						ssystem->playSound(mst_idle_sound2, 0, false, &ch_mst_idle_sound);
-
-					monster_sound_delay = 0;
-				}
-			}
-
 			//플레이어가 죽을 경우 죽는 소리가 재생
 			if (health <= 0) {
 				ch_dead->stop(); ssystem->playSound(dead, 0, false, &ch_dead);
@@ -1460,6 +1465,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			if (manager.isGameOver()) {
 				if (death_acc > 0)
 					death_x += death_acc--;
+			}
+
+			if (button_feed_clickScene == TRUE || button_feed_armory == TRUE) {
+				ch_button->stop();
+				ssystem->playSound(button_sound, 0, false, &ch_button);
+				button_feed_clickScene = FALSE;
+				button_feed_armory = FALSE;
 			}
 
 			break;

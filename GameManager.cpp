@@ -7,6 +7,7 @@
 
 using namespace std;
 
+BOOL button_feed_clickScene = FALSE;
 
 GameManager::GameManager() : main_scene { }, game_scene { }, armory_scene { },
 current_scene { &main_scene }, mouse_position { 0, 0 } {
@@ -103,12 +104,14 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 		case Main:
 			switch(buttonClicked(point)) {
 			case MainScene::Start:
+				button_feed_clickScene = TRUE;
 				gameStart(hWnd);
 				break;
 			case MainScene::Quit:
 				PostQuitMessage(0);
 				break;
 			case MainScene::Armory:
+				button_feed_clickScene = TRUE;
 				armory_scene.selected_weapon_button_index = -1;
 				current_scene = &armory_scene;
 				break;
@@ -117,10 +120,12 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 		case Game:
 			switch(buttonClicked(point)) {
 			case GameScene::Resume:
+				button_feed_clickScene = TRUE;
 				game_scene.resume();
 				lockCursor(hWnd);
 				break;
 			case GameScene::Quit:
+				button_feed_clickScene = TRUE;
 				quit(hWnd);
 				break;
 			}
@@ -128,6 +133,7 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 		case Armory:
 			switch(buttonClicked(point)) {
 			case ArmoryScene::Quit:
+				button_feed_clickScene = TRUE;
 				current_scene = &main_scene;
 				break;
 			}
