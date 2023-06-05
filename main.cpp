@@ -75,6 +75,7 @@ GameManager manager;
 extern monster_info_regular mst_r[100]; //몬스터 정보를 저정하는 구조체, monster_info.h에 선언
 extern monster_info_big mst_big[100];
 extern monster_info_air mst_air[100];
+extern dead_location dl[100];
 
 enum Timer {
 	KEYDOWN, UPDATE
@@ -134,6 +135,11 @@ void IMG_FILE_LOAD() {
 	zoom_targeted.Load(L".\\res\\zoom_targeted.png");
 
 	CM_dead.Load(L".\\res\\commando_dead.png");
+	monster_dead_left.Load(L".\\res\\monster_dead_left.png");
+	monster_big_dead_left.Load(L".\\res\\monster_big_dead_left.png");
+	monster_dead_right.Load(L".\\res\\monster_dead_right.png");
+	monster_big_dead_right.Load(L".\\res\\monster_big_dead_right.png");
+	monster_air_dead.Load(L".\\res\\bat_dead.png");
 } 
 
 //FMOD 세팅
@@ -580,6 +586,24 @@ void make_monster(RECT rt) {
 
 //몬스터 이미지 출력
 void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
+	//죽은 몬스터 출력
+	for (int i = 0; i < ddx; i++) {
+		if (dl[i].monster_type == 1) {
+			if(dl[i].dir == 0)
+				monster_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100);
+			else if(dl[i].dir == 1)
+				monster_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100);
+		}
+		if (dl[i].monster_type == 2) {
+			if(dl[i].dir == 0)
+				monster_big_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200);
+			else if (dl[i].dir == 1)
+				monster_big_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200);
+		}
+		if (dl[i].monster_type == 3)
+			monster_air_dead.Draw(mdc, dl[i].x + ss_x, dl[i].y  + ss_y + landing_shake, 150, 60, 0, 0, 150, 60);
+	}
+
 	//일반 몬스터 출력
 	for (int i = 0; i < mdx_r; i++) {
 		switch (mst_r[i].img_dir) {
@@ -682,6 +706,8 @@ void update_player_position(RECT rt) {
 				mst_big[i].x += 15;
 			for (int i = 0; i < mdx_air; i++)
 				mst_air[i].x += 15;
+			for (int i = 0; i < ddx; i++)
+				dl[i].x += 15;
 		}
 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) //배경 인식 좌표가 10이되고 플레이어가 다시 가운데로 이동할 때까지
@@ -700,6 +726,8 @@ void update_player_position(RECT rt) {
 				mst_big[i].x -= 15;
 			for (int i = 0; i < mdx_air; i++)
 				mst_air[i].x -= 15;
+			for (int i = 0; i < ddx; i++)
+				dl[i].x -= 15;
 		}
 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700))
@@ -778,10 +806,12 @@ void check_hit_awp() {
 			mst_r[i].hp = cal_damage(mst_r[i].hp, GUN_number);
 			if (mst_r[i].hp <= 0) {
 				if (i < mdx_r - 1 && is_kill_r == 0) {
+					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[hit].img_dir;
 					monster_array_push_r(i, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
 					init_exp_animation(); is_kill_r = 1;
 				}
 				else if (i == mdx_r - 1 && is_kill_r == 0) {
+					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[hit].img_dir;
 					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
 					init_exp_animation(); is_kill_r = 1;
 				}
@@ -796,10 +826,12 @@ void check_hit_awp() {
 			mst_big[i].hp = cal_damage(mst_big[i].hp, GUN_number);
 			if (mst_big[i].hp <= 0) {
 				if (i < mdx_big - 1 && is_kill_big == 0) {
+					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[hit].img_dir;
 					monster_array_push_big(i, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill_big = 1;
 				}
 				else if (i == mdx_big - 1 && is_kill_big == 0) {
+					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[hit].img_dir;
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill_big = 1;
 				}
@@ -819,10 +851,12 @@ void check_hit_awp() {
 			
 			if (mst_air[hit].hp <= 0) {
 				if (hit < mdx_air - 1 && is_kill_air == 0) {
+					dl[ddx].x = mst_air[hit].x; dl[ddx].y = mst_air[hit].y; dl[ddx].monster_type = 3; dl[ddx++].acc = 0;
 					monster_array_push_air(hit, mdx_air--); experience += 3; prev_up = 3; exp_up = TRUE;
 					init_exp_animation(); is_kill_air = 1;
 				}
 				else if (hit == mdx_air - 1 && is_kill_air == 0) {
+					dl[ddx].x = mst_air[hit].x; dl[ddx].y = mst_air[hit].y; dl[ddx].monster_type = 3; dl[ddx++].acc = 0;
 					mdx_air--; experience += 3; prev_up = 3; exp_up = TRUE;
 					init_exp_animation(); is_kill_air = 1;
 				}
@@ -851,10 +885,13 @@ void check_hit() {
 			//최신 인덱스는 그냥 인덱스를 감소, 중간 인덱스일 경우 해당 인덱스 데이터에 바로 다음 인덱스의 데이터를 덮어씌움(인덱스 밀어내기)
 			if (mst_r[hit].hp <= 0) {
 				if (hit < mdx_r - 1 && is_kill == 0) {
+					//죽기 직전에 몬스터가 가지고 있던 위치, 방향 정보를 시체 구조체로 복사한다.
+					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[hit].img_dir;  
 					monster_array_push_r(hit, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
 				else if (hit == mdx_r - 1 && is_kill == 0) {
+					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[hit].img_dir;
 					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
@@ -877,10 +914,12 @@ void check_hit() {
 
 			if (mst_big[hit].hp <= 0) {
 				if (hit < mdx_big - 1 && is_kill == 0) {
+					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[hit].img_dir;
 					monster_array_push_big(hit, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
 				else if (hit == mdx_big - 1 && is_kill == 0) {
+					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[hit].img_dir;
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
@@ -903,10 +942,12 @@ void check_hit() {
 		
 			if (mst_air[hit].hp <= 0) {
 				if (hit < mdx_air - 1 && is_kill == 0) {
+					dl[ddx].x = mst_air[hit].x; dl[ddx].y = mst_air[hit].y; dl[ddx].monster_type = 3; dl[ddx++].acc = 0;
 					monster_array_push_air(hit, mdx_air--); experience += 3; prev_up = 3; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
 				else if (hit == mdx_air - 1 && is_kill == 0) {
+					dl[ddx].x = mst_air[hit].x; dl[ddx].y = mst_air[hit].y; dl[ddx].monster_type = 3; dl[ddx++].acc = 0;
 					mdx_air--; experience += 3; prev_up = 3; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
@@ -1291,6 +1332,12 @@ void monster_animation() {
 
 	//몬스터에게 대미지를 받으면 화면이 흔들린다.
 	if (shake_effect == 2) make_shake(10, 5);
+
+	//공중 몬스터 시체는 하늘에서 떨어진다.
+	for (int i = ddx - 1; i >= 0; i--) {
+		if (dl[i].monster_type == 3 && dl[i].acc < 30)
+			dl[i].y += dl[i].acc++;
+	}
 }
 
 //그리기 파트
@@ -1448,6 +1495,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 							ssystem->playSound(mst_idle_sound2, 0, false, &ch_mst_idle_sound);
 
 						monster_sound_delay = 0;
+					}
+				}
+
+				//시체 인덱스 삭제
+				if (ddx > 0) {
+					if (delete_delay < 200) delete_delay++;
+					if (delete_delay == 200) {
+						push_dead(ddx--);
+						delete_delay = 0;
 					}
 				}
 			}

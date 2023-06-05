@@ -10,6 +10,7 @@ CImage monster_air_right[3], monster_air_left[3];
 CImage exp_icon, flame_right, flame_left;
 CImage zoom_complited, zoom_targeted;
 CImage CM_dead;
+CImage monster_dead_left, monster_dead_right, monster_big_dead_left, monster_big_dead_right, monster_air_dead;
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지

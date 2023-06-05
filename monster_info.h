@@ -31,6 +31,17 @@ struct monster_info_air { //공중 몬스터
 	int motion_acc;
 };
 
+//몬스터가 죽은 후 시체 이미지 출력. 가장 먼저 생성된 이미지부터 사라진다.
+struct dead_location {
+	int monster_type; //1: 일반 몬스터, 2: 대형 몬스터, 3: 공중 몬스터
+	double x, y;
+	int acc;
+	int dir;
+};
+
+extern int ddx; //dead-index
+extern int delete_delay;
+
 extern int game_round;			// 스폰 주기를 결정함
 
 extern int mdx_r;                 //일반 몬스터 수 (monster - index_regular)
@@ -63,3 +74,4 @@ void monster_hp_ind(HDC mdc, int x1, int y1, int x2, int y2, int x3, int y3, int
 void monster_array_push_r(int hit, int idx);
 void monster_array_push_big(int hit, int idx);
 void monster_array_push_air(int i, int mdx_air);
+void push_dead(int idx);

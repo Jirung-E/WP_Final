@@ -7,8 +7,12 @@
 monster_info_regular mst_r[100];
 monster_info_big mst_big[100];
 monster_info_air mst_air[100];
+dead_location dl[100];
 
 int game_round = 1;			// 스폰 주기를 결정함
+
+int ddx = 0;
+int delete_delay = 0;  //특정 수치가 되면 시체 인덱스를 하나씩 삭제한다.
 
 int mdx_r = 0;                 //일반 몬스터 수 (monster - index_regular)
 int spawn_timer_r = 10;   //라운드가 올라갈 수록 스폰 주기가 빨라진다. -> 수치가 낮아진다. 기본 수치는 500부터 시작
@@ -235,4 +239,15 @@ void monster_array_push_air(int hit, int idx) {
 	mst_air[idx].attack_timer = 0;
 	mst_air[idx].height = 0;
 	mst_air[idx].motion_acc = 0;
+}
+
+//시체 인덱스 밀어내기
+void push_dead(int idx) {
+	for (int i = 0; i < idx - 1; i++) {
+		dl[i].x = dl[i + 1].x;
+		dl[i].y = dl[i + 1].y;
+		dl[i].monster_type = dl[i + 1].monster_type;
+		dl[i].acc = dl[i + 1].acc;
+		dl[i].dir = dl[i + 1].dir;
+	}
 }
