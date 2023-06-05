@@ -5,11 +5,11 @@
 #include "player_info.h"
 #include "images.h"
 #include "ammo.h"
+#include "exp.h"
 
 #include <sstream>
 
-
-GameScene::GameScene() : Scene { Game },
+GameScene::GameScene() : Scene { Game }, score { 0 }, player_exp_first { 0 },
 map { 16, 9 },      // 좌표계.  전체화면비율인 16:9에 맞춥니다.
 resume_button { Resume, L"Resume", { 20, 30 }, 60, 15 }, quit_button { Quit, L"Quit", { 20, 60 }, 60, 15 },
 game_over_message { L"Game Over", { 10, 30 }, 80, 15 },
@@ -61,6 +61,10 @@ void GameScene::setUp() {
     // 라운드 초기화
     game_round = 1;
 
+    // 스코어 초기화
+    score = 0;
+    player_exp_first = experience;
+
     // 스폰된 몬스터 초기화
     mdx_r = 0;
     mdx_big = 0;
@@ -86,15 +90,18 @@ void GameScene::update(const POINT& point) {
         end_time = clock();
         play_time += end_time - start_time;
         start_time = clock();
-        game_round = int(play_time/1000) / 10 + 1;
-        if(mdx_r + mdx_big + mdx_air > 100) {
+        //game_round = int(play_time/1000) / 10 + 1;
+        score += experience - player_exp_first;
+        player_exp_first = experience;
+        if(score >= game_round * 10) {
+            score -= game_round * 10;
+            game_round++;
+        }
+        if(health <= 0) {
             game_over = true;
             ShowCursor(true);
         }
-        //updatePlayer(point);
     }
-    //updateEnemy();
-    //collisionCheck();
 }
 
 void GameScene::updatePlayer(const POINT& point) {
@@ -153,17 +160,6 @@ double GameScene::getPlayTime() const {
 
 
 void GameScene::draw(const HDC& hdc) const {
-    //drawBackground(hdc, White);
-
-    RECT view_area = getViewArea();
-
-    //map.draw(hdc, view_area);
-
-    //for(auto e : enemies) {
-    //    e->draw(hdc, map, view_area);
-    //}
-    //player.draw(hdc, view_area, map);
-
     drawScore(hdc);
 
     if(paused) {
@@ -172,22 +168,6 @@ void GameScene::draw(const HDC& hdc) const {
     else if(game_over) {
         drawGameOverScene(hdc);
     }
-}
-
-RECT GameScene::getViewArea() const {
-    // 보이는 영역의 크기 설정
-    // ...
-
-    // 플레이어가 중앙에 오도록 평행이동
-    // ...
-
-    //return {
-    //    LONG(floor(valid_area.left - px - A)),
-    //    LONG(floor(valid_area.top - py - A)),
-    //    LONG(floor(valid_area.right - px + A)),
-    //    LONG(floor(valid_area.bottom - py + A))
-    //};
-    return valid_area;
 }
 
 void GameScene::drawScore(const HDC& hdc) const {
@@ -205,29 +185,21 @@ void GameScene::drawScore(const HDC& hdc) const {
     // 킬 수 출력
     // ...
 
-    // 플레이 시간 출력
-    //ss << L"ROUND" << int(play_time/1000) % 100 / 10 + 1 << L"  PlayTime: " << play_time/1000 << "\"";
-    ss << L"ROUND" << int(play_time/1000) / 10 + 1;
+    // 라운드 출력
+    ss << L"ROUND" << game_round << " [" << this->score << "/" << game_round * 10 << "]";
     text = ss.str();
     score.text = ss.str();
     score.position.y += 5;
     score.show(hdc, valid_area);
     ss.str(L"");
 
-    ss << L"PlayTime: " << play_time/1000 << "\"";
-    text = ss.str();
-    score.text = ss.str();
-    score.position.y += 5;
-    score.show(hdc, valid_area);
-    ss.str(L"");
-
-    // (테스트용) 몬스터 수 출력
-    ss << L"Monsters: " << (mdx_r + mdx_big + mdx_air);
-    text = ss.str();
-    score.text = ss.str();
-    score.position.y += 5;
-    score.show(hdc, valid_area);
-    ss.str(L"");
+    //// (테스트용) 몬스터 수 출력
+    //ss << L"Monsters: " << (mdx_r + mdx_big + mdx_air);
+    //text = ss.str();
+    //score.text = ss.str();
+    //score.position.y += 5;
+    //score.show(hdc, valid_area);
+    //ss.str(L"");
 }
 
 void GameScene::drawPauseScene(const HDC& hdc) const {
@@ -247,8 +219,8 @@ void GameScene::drawGameOverScene(const HDC& hdc) const {
     tstring text;
     std::basic_stringstream<TCHAR> ss;
 
-    // 플레이 시간 출력
-    ss << L"PlayTime: " << play_time/1000 << "\"";
+    // 라운드 출력
+    ss << L"ROUND" << game_round;
     text = ss.str();
     score.text = ss.str();
     score.show(hdc, valid_area);

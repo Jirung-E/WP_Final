@@ -22,6 +22,9 @@ private:
     TextBox game_over_message;
     bool game_over;
 
+    int score;          // 라운드를 결정하는 변수.
+    int player_exp_first;          // 게임 시작 시점의 플레이어 경험치
+
     double play_time;
     clock_t start_time;
     clock_t end_time;
@@ -47,16 +50,8 @@ public:
     bool isGameOver() const;
     double getPlayTime() const;
 
-private:
-    //void updatePlayer(const POINT& mouse_cursor_point);
-    //void updateEnemy();
-    //void collisionCheck();
-    //void playerCollisionCheck();
-    //void enemyCollisionCheck();
-
 protected:
     void draw(const HDC& hdc) const;
-    RECT getViewArea() const;
     void drawScore(const HDC& hdc) const;
     void drawPauseScene(const HDC& hdc) const;
     void drawGameOverScene(const HDC& hdc) const;
