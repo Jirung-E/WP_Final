@@ -4,7 +4,8 @@
 #include "gun_info.h"
 #include "exp.h"
 
-BOOL button_feed_armory = FALSE;
+BOOL button_feed_armory_button = FALSE;
+BOOL button_feed_armory_select = FALSE;
 
 ArmoryScene::ArmoryScene() : Scene { Armory }, 
 quit_button { Quit, L"Quit", { 15, 15 }, 80, 40 },
@@ -276,7 +277,7 @@ int ArmoryScene::clickL(const POINT& point) {
         if(PtInRect(&r, point)) {
             if(selected_weapon_button_index >= 0) {
                 GUN_number = selected_weapon_button_index+1;
-                button_feed_armory = TRUE;
+                button_feed_armory_select = TRUE;
             }
             return equip_button.getID();
         }
@@ -300,11 +301,11 @@ int ArmoryScene::clickL(const POINT& point) {
         if(PtInRect(&r, point)) {
             if(selected_weapon_button_index == i) {
                 selected_weapon_button_index = -1;
-                button_feed_armory = TRUE;
+                button_feed_armory_button = TRUE;
             }
             else {
                 selected_weapon_button_index = i;
-                button_feed_armory = TRUE;
+                button_feed_armory_button = TRUE;
             }
             return weapon_buttons[i].getID();
         }

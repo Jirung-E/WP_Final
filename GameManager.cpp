@@ -8,6 +8,8 @@
 using namespace std;
 
 BOOL button_feed_clickScene = FALSE;
+BOOL button_feed_clickScene_start = FALSE;
+BOOL button_feed_clickScene_quit = FALSE;
 
 GameManager::GameManager() : main_scene { }, game_scene { }, armory_scene { },
 current_scene { &main_scene }, mouse_position { 0, 0 } {
@@ -104,7 +106,7 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 		case Main:
 			switch(buttonClicked(point)) {
 			case MainScene::Start:
-				button_feed_clickScene = TRUE;
+				button_feed_clickScene_start = TRUE;
 				gameStart(hWnd);
 				break;
 			case MainScene::Quit:
@@ -125,7 +127,7 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 				lockCursor(hWnd);
 				break;
 			case GameScene::Quit:
-				button_feed_clickScene = TRUE;
+				button_feed_clickScene_quit = TRUE;
 				quit(hWnd);
 				break;
 			}

@@ -20,7 +20,7 @@ FMOD::System* ssystem;
 FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot, *dry_fire;
 FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
 FMOD::Sound* hurt, *dead;
-FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound;
+FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound, *weapon_select, *weapon_button, *start_button, *quit_button;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -79,7 +79,10 @@ static double mx, my;
 static BOOL is_click = FALSE; 
 
 extern BOOL button_feed_clickScene; //TRUE일시 버튼 클릭음 재생
-extern BOOL button_feed_armory; //TRUE일시 버튼 클릭음 재생
+extern BOOL button_feed_armory_button; //TRUE일시 버튼 클릭음 재생
+extern BOOL button_feed_armory_select; //TRUE일시 버튼 클릭음 재생
+extern BOOL button_feed_clickScene_start;
+extern BOOL button_feed_clickScene_quit;
 
 //이미지 파일 로드
 void IMG_FILE_LOAD() {
@@ -167,6 +170,10 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\monster_attack1.ogg", FMOD_DEFAULT, 0, &mst_attack_sound1);
 	ssystem->createSound(".\\res\\sounds\\monster_attack2.ogg", FMOD_DEFAULT, 0, &mst_attack_sound2);
 	ssystem->createSound(".\\res\\sounds\\button.wav", FMOD_DEFAULT, 0, &button_sound);
+	ssystem->createSound(".\\res\\sounds\\weapon_button.wav", FMOD_DEFAULT, 0, &weapon_button);
+	ssystem->createSound(".\\res\\sounds\\weapon_select.wav", FMOD_DEFAULT, 0, &weapon_select);
+	ssystem->createSound(".\\res\\sounds\\start_button.wav", FMOD_DEFAULT, 0, &start_button);
+	ssystem->createSound(".\\res\\sounds\\quit_button.wav", FMOD_DEFAULT, 0, &quit_button);
 }
 
 //몬스터 공격 사운드
@@ -1467,11 +1474,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					death_x += death_acc--;
 			}
 
-			if (button_feed_clickScene == TRUE || button_feed_armory == TRUE) {
+			if (button_feed_clickScene == TRUE) {
 				ch_button->stop();
 				ssystem->playSound(button_sound, 0, false, &ch_button);
 				button_feed_clickScene = FALSE;
-				button_feed_armory = FALSE;
+			}
+
+			if (button_feed_armory_button == TRUE) {
+				ch_button->stop();
+				ssystem->playSound(weapon_button, 0, false, &ch_button);
+				button_feed_armory_button = FALSE;
+			}
+
+			if (button_feed_armory_select == TRUE) {
+				ch_button->stop();
+				ssystem->playSound(weapon_select, 0, false, &ch_button);
+				button_feed_armory_select = FALSE;
+			}
+
+			if (button_feed_clickScene_start == TRUE) {
+				ch_button->stop();
+				ssystem->playSound(start_button, 0, false, &ch_button);
+				button_feed_clickScene_start = FALSE;
+			}
+
+			if (button_feed_clickScene_quit == TRUE) {
+				ch_button->stop();
+				ssystem->playSound(quit_button, 0, false, &ch_button);
+				button_feed_clickScene_quit = FALSE;
 			}
 
 			break;
