@@ -8,3 +8,7 @@ extern double CM_x, CM_y;    //플레이어 캐릭터의 위치
 
 extern bool is_zoom;
 extern bool avail_awp;
+
+extern int health;
+
+void player_health(HDC mdc, RECT rt, double ss_x, double ss_y, double landing_shake, int health);

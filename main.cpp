@@ -351,6 +351,11 @@ void show_interface(HDC mdc, RECT rt) {
 	for (int i = 0; i < mdx_air; i++)
 		monster_hp_ind(mdc, mst_air[i].x + ss_x, mst_air[i].y - 30 + landing_shake + ss_y, mst_air[i].x + mst_air[i].hp * 5 + ss_x, mst_air[i].y - 15 + landing_shake + ss_y,
 			mst_air[i].x + ss_x, mst_air[i].y - 30 + landing_shake + ss_y, mst_air[i].x + 150 + ss_x, mst_air[i].y - 15 + landing_shake + ss_y);
+	//플레이어 체력, 따로 만들기 귀찮아서 몬스터 체력 게이지로 공용
+	monster_hp_ind(mdc, (rt.left + 10) + ss_x, (rt.bottom - 30) + landing_shake + ss_y, (rt.left + 10) + (health * 3) + ss_x, (rt.bottom - 10) + landing_shake + ss_y,
+	(rt.left + 10) + ss_x, (rt.bottom - 30) + landing_shake + ss_y, (rt.left + 10) + 300 + ss_x, (rt.bottom - 10) + landing_shake + ss_y);
+
+	player_health(mdc, rt, ss_x, ss_y, landing_shake, health);
 }
 
 //플레이어 이미지, 총 이미지 출력
@@ -1053,6 +1058,42 @@ void update_shoot_animation() {
 	}
 }
 
+void check_monster_attack() {
+	//일반 몬스터 공격 판정
+	for (int i = mdx_r - 1; i >= 0; i --) {
+		if (fabs((mst_r[i].x + 50) - (CM_x + 50)) <= 100) {
+			if(mst_r[i].attack_timer < 30)
+				mst_r[i].attack_timer++;
+			if (mst_r[i].attack_timer == 30) {
+				mst_r[i].is_attack == TRUE;
+				health -= 10;
+				mst_r[i].attack_timer = 0;
+			}
+		}
+		else {
+			mst_r[i].attack_timer = 0;
+			mst_r[i].is_attack = FALSE;
+		}
+	}
+
+	//대형 몬스터 공격 판정
+	for (int i = mdx_big - 1; i >= 0; i--) {
+		if (fabs((mst_big[i].x + 100) - (CM_x + 50)) <= 200) {
+			if (mst_big[i].attack_timer < 30)
+				mst_big[i].attack_timer++;
+			if (mst_big[i].attack_timer == 30) {
+				mst_big[i].is_attack == TRUE;
+				health -= 30;
+				mst_big[i].attack_timer = 0;
+			}
+		}
+		else {
+			mst_big[i].attack_timer = 0;
+			mst_big[i].is_attack = FALSE;
+		}
+	}
+}
+
 
 
 //WM_KEYDOWN
@@ -1285,6 +1326,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				update_monster_position();     
 				make_monster(rt);  
 				monster_animation();
+				check_monster_attack();
 			}
 
 			//연사 속도가 느린 총을 마우스 광클로 빨리 쏘는 꼼수 방지

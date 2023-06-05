@@ -48,6 +48,7 @@ void spawn_monster_regular(int mdx_r, int BG_scanner, RECT rt) {
 	}
 	mst_r[mdx_r].hp = 50;
 	mst_r[mdx_r].targeted = 0;
+	mst_r[mdx_r].attack_timer = 0;
 }
 
 //대형 몬스터 생성
@@ -67,6 +68,7 @@ void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt) {
 	}
 	mst_big[mdx_big].hp = 100;
 	mst_big[mdx_big].targeted = 0;
+	mst_big[mdx_big].attack_timer = 0;
 }
 
 //공중 몬스터 생성
