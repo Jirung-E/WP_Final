@@ -57,7 +57,10 @@ void TextBox::drawBase(const HDC& hdc, const RECT& valid_area) const {
 
 void TextBox::drawText(const HDC& hdc, const RECT& valid_area, const Direction& bias) const {
     LOGFONT logfont;
-    GetObject((HFONT)GetStockObject(DEFAULT_GUI_FONT), sizeof(LOGFONT), &logfont);
+    HFONT font = CreateFont(100, 0, 0, 0, 0, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
+    GetObject(font, sizeof(LOGFONT), &logfont);
+    DeleteObject(font);
+    //GetObject((HFONT)GetStockObject(DEFAULT_GUI_FONT), sizeof(LOGFONT), &logfont);
 
     RECT rect = percentOf(absoluteArea(valid_area), 90);
 

@@ -11,14 +11,17 @@ background_image { L"./res/Armory_background(temp).jpg" } {
     start_button.border_color = Gray;
     start_button.border_width = 10;
     start_button.background_color = LightGray;
+    quit_button.bold = 2;
 
     quit_button.border_color = Gray;
     quit_button.border_width = 10;
     quit_button.background_color = LightGray;
+    quit_button.bold = 2;
 
     armory_button.border_color = Gray;
     armory_button.border_width = 10;
     armory_button.background_color = LightGray;
+    armory_button.bold = 2;
 }
 
 

@@ -17,14 +17,16 @@ player { { 8, 4.5 } } {
     setUp();
     resume_button.border_color = Gray;
     resume_button.border_width = 3;
+    resume_button.bold = 2;
 
     quit_button.border_color = Gray;
     quit_button.border_width = 3;
+    quit_button.bold = 2;
 
     game_over_message.text_color = Red;
     game_over_message.transparent_background = true;
     game_over_message.transparent_border = true;
-    game_over_message.bold = 4;
+    game_over_message.bold = 2;
 
     player.addSprite(new Sprite { L"./res/commando_right.png" });
 }

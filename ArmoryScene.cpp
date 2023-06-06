@@ -19,16 +19,19 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
     quit_button.border_width = 2;
     quit_button.background_color = LightGray;
     quit_button.absolute = true;
+    //quit_button.bold = 1;
 
     equip_button.border_color = Gray;
     equip_button.border_width = 2;
     equip_button.background_color = LightGray;
     equip_button.absolute = true;
+    //equip_button.bold = 1;
 
     unlock_button.border_color = Gray;
     unlock_button.border_width = 2;
     unlock_button.background_color = LightGray;
     unlock_button.absolute = true;
+    //unlock_button.bold = 1;
 
     weapon_buttons.reserve(5);              // 장비가 추가될때마다 이 숫자 증가
     weapon_buttons.push_back(Button { Weapon0, L"SCAR-H", { }, 0, 0 });
@@ -57,6 +60,7 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
         e.border_width = 2;
         e.absolute = true;
         e.padding = 5; 
+        //e.bold = 1;
     }
 
     for(auto& e : unlocked) {
