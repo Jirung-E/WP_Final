@@ -10,6 +10,10 @@ using namespace std;
 BOOL button_feed_clickScene = FALSE;
 BOOL button_feed_clickScene_start = FALSE;
 BOOL button_feed_clickScene_quit = FALSE;
+BOOL to_resume = FALSE;
+BOOL to_pause = FALSE;
+
+BOOL is_resumed = FALSE;
 
 GameManager::GameManager() : main_scene { }, game_scene { }, armory_scene { },
 current_scene { &main_scene }, mouse_position { 0, 0 } {
@@ -72,12 +76,20 @@ void GameManager::keyboardInput(const HWND& hWnd, int keycode) {
 	case Game:
 		switch(keycode) {
 		case VK_ESCAPE:
-			game_scene.togglePauseState();
-			if(game_scene.isPaused()) {
-				releaseCursor();
-			}
-			else {
-				lockCursor(hWnd);
+			if (!game_scene.isGameOver()) {
+				game_scene.togglePauseState();
+
+				if (game_scene.isPaused()) {
+					to_pause = TRUE;
+					pause_y = 900; CM_paused_y = 850; //일시정지 화면 가속값 및 좌표값 초기화
+					pause_acc = 84; cm_pause_acc = 80;
+					releaseCursor();
+				}
+				else {
+					to_resume = TRUE; is_resumed = TRUE; //일시정지 화면 가속값 초기화
+					pause_acc = 88; cm_pause_acc = 88;
+					lockCursor(hWnd);
+				}
 			}
 			break;
 		case L'a': case L'A':
@@ -122,12 +134,15 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 		case Game:
 			switch(buttonClicked(point)) {
 			case GameScene::Resume:
-				button_feed_clickScene = TRUE;
+				to_resume = TRUE; is_resumed = TRUE; //일시정지 화면 가속값 초기화
+				pause_acc = 88; cm_pause_acc = 88; 
 				game_scene.resume();
 				lockCursor(hWnd);
 				break;
 			case GameScene::Quit:
 				button_feed_clickScene_quit = TRUE;
+				is_resumed = FALSE;
+				pause_y = 900; CM_paused_y = 850; //일시정지 화면 좌표 초기화
 				quit(hWnd);
 				break;
 			}

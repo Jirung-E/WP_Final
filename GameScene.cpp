@@ -33,7 +33,7 @@ player { { 8, 4.5 } } {
 
 
 void GameScene::setUp() {
-    paused = false;
+    is_paused = false;
     game_over = false;
     play_time = 0.0;
     start_time = 0;
@@ -91,6 +91,8 @@ void GameScene::setUp() {
     //게임오버 씬 초기화
     death_x = -500;
     death_acc = 54;
+
+    //일시정시 씬 초기화
 }
 
 
@@ -105,7 +107,7 @@ void GameScene::update(const POINT& point) {
         }
         return;
     }
-    if(paused) {
+    if(is_paused) {
         RECT r = resume_button.absoluteArea(valid_area);
         if(PtInRect(&r, point)) {
             resume_button.highlighting = true;
@@ -159,7 +161,7 @@ void GameScene::togglePauseState() {
     if(game_over) {
         return;
     }
-    if(paused) {
+    if(is_paused) {
         resume();
     }
     else {
@@ -169,14 +171,14 @@ void GameScene::togglePauseState() {
 
 void GameScene::pause() {
     if(!game_over) {
-        paused = true;
+        is_paused = true;
     }
     ShowCursor(true);                //커서 대신 조준점 보이기
 }
 
 void GameScene::resume() {
     if(!game_over) {
-        paused = false;
+        is_paused = false;
         end_time = clock();
         start_time = clock();
     }
@@ -184,7 +186,7 @@ void GameScene::resume() {
 }
 
 bool GameScene::isPaused() const {
-    return paused;
+    return is_paused;
 }
 
 bool GameScene::isGameOver() const {
@@ -199,7 +201,7 @@ double GameScene::getPlayTime() const {
 void GameScene::draw(const HDC& hdc) const {
     drawScore(hdc);
 
-    if(paused) {
+    if(is_paused) {
         drawPauseScene(hdc);
     }
     else if(game_over) {
@@ -267,7 +269,7 @@ void GameScene::drawGameOverScene(const HDC& hdc) const {
 
 
 int GameScene::clickL(const POINT& point) {
-    if(paused) {
+    if(is_paused) {
         RECT r = resume_button.absoluteArea(valid_area);
         if(PtInRect(&r, point)) {
             return resume_button.getID();
@@ -290,7 +292,7 @@ int GameScene::clickL(const POINT& point) {
 }
 
 int GameScene::clickR(const POINT& point) {
-    if(paused) {
+    if(is_paused) {
         return None;
     }
     if(game_over) {

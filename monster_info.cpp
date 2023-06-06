@@ -16,15 +16,15 @@ int delete_delay = 0;  //특정 수치가 되면 시체 인덱스를 하나씩 삭제한다.
 
 int mdx_r = 0;                 //일반 몬스터 수 (monster - index_regular)
 int spawn_timer_r = 10;   //라운드가 올라갈 수록 스폰 주기가 빨라진다. -> 수치가 낮아진다. 기본 수치는 500부터 시작
-const int spawn_timer_r_max = 500;	// 스폰 주기 최초 수치
+const int spawn_timer_r_max = 200;	// 스폰 주기 최초 수치
 
 int mdx_big = 0;				  //대형 몬스터 수
 int spawn_timer_big = 10;		// 1000
-const int spawn_timer_big_max = 1000;
+const int spawn_timer_big_max = 600;
 
 int mdx_air = 0;				  //공중 몬스터 수
 int spawn_timer_air = 10;		// 600
-const int spawn_timer_air_max = 600;
+const int spawn_timer_air_max = 300;
 
 BOOL is_hit = FALSE;
 

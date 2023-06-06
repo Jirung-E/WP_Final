@@ -13,6 +13,7 @@ extern CImage zoom_complited, zoom_targeted;
 extern CImage CM_dead;
 extern CImage monster_dead_left, monster_dead_right, monster_big_dead_left, monster_big_dead_right, monster_air_dead;
 extern CImage catridge[4];
+extern CImage BG_paused, CM_paused;
 
 struct gun_catridge {
     double x, y;
@@ -25,6 +26,12 @@ struct gun_catridge {
 
 extern int cdx; // 탄피 인덱스 (catridge-index)
 extern int cat_delete_delay;
+
+//일시정지 화면에 쓰이는 가속값과 좌표값
+extern int CM_paused_y;
+extern int pause_y;
+extern int pause_acc;
+extern int cm_pause_acc;
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지

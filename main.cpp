@@ -22,6 +22,7 @@ FMOD::Sound* scar_distance, * m16_distance, * mp44_distance, *mg42_distance, * a
 FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
 FMOD::Sound* hurt, *dead, *cat_hit_ground, *cat_stop;
 FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound, *weapon_select, *weapon_button, *start_button, *quit_button;
+FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -55,15 +56,26 @@ FMOD::Channel* ch_mst_attack_sound = 0;
 FMOD::Channel* ch_button = 0;
 //catridge sound
 FMOD::Channel* ch_cat = 0;
+//main bgm
+FMOD::Channel* ch_bgm = 0;
 
 FMOD_RESULT result;
 void* extradriverdata = 0;
 
-extern BOOL button_feed_clickScene; //TRUE일시 버튼 클릭음 재생
-extern BOOL button_feed_armory_button; //TRUE일시 버튼 클릭음 재생
-extern BOOL button_feed_armory_select; //TRUE일시 버튼 클릭음 재생
+//버튼 사운드 재생 유무 //TRUE일시 버튼 클릭음 재생
+extern BOOL button_feed_clickScene; 
+extern BOOL button_feed_armory_button;
+extern BOOL button_feed_armory_select;
 extern BOOL button_feed_clickScene_start;
 extern BOOL button_feed_clickScene_quit;
+extern BOOL to_resume;
+extern BOOL to_pause;
+
+//브금 중복 재생 방지
+static BOOL main_bgm_on = FALSE;
+static BOOL game_bgm_on = FALSE;
+static BOOL gameover_bgm_on = FALSE;
+static BOOL pause_bgm_on = FALSE;
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -89,11 +101,16 @@ enum Timer {
 //마우스 좌표
 static double mx, my;
 //마우스 클릭 여부
-static BOOL is_click = FALSE; 
+static BOOL is_click = FALSE;
+
+//TRUE일 경우 일시정지 화면이 사라지는 애니메이션 재생
+extern BOOL is_resumed;
 
 //이미지 파일 로드
 void IMG_FILE_LOAD() {
 	BackGround.Load(L".\\res\\BackGround_wide.png");
+	BG_paused.Load(L".\\res\\BackGround_paused.png");
+	CM_paused.Load(L".\\res\\commando_paused.png");
 
 	commando_right.Load(L".\\res\\commando_right.png");
 	commando_left.Load(L".\\res\\commando_left.png");
@@ -157,6 +174,12 @@ void set_FMOD() {
 	result = FMOD::System_Create(&ssystem); //--- 사운드 시스템 생성
 	if (result != FMOD_OK) exit(0);
 	ssystem->init(32, FMOD_INIT_NORMAL, extradriverdata); //--- 사운드 시스템 초기화
+	ssystem->createSound(".\\res\\sounds\\game_bgm.wav", FMOD_LOOP_NORMAL, 0, &game_bgm);
+	ssystem->createSound(".\\res\\sounds\\main_bgm.wav", FMOD_LOOP_NORMAL, 0, &main_bgm);
+	ssystem->createSound(".\\res\\sounds\\gameover_bgm.wav", FMOD_LOOP_NORMAL, 0, &gameover_bgm);
+	ssystem->createSound(".\\res\\sounds\\pause_bgm.wav", FMOD_LOOP_NORMAL, 0, &pause_bgm);
+
+
 	ssystem->createSound(".\\res\\sounds\\scar_h.wav", FMOD_DEFAULT, 0, &scar_shoot);
 	ssystem->createSound(".\\res\\sounds\\m16.wav", FMOD_DEFAULT, 0, &m16_shoot);
 	ssystem->createSound(".\\res\\sounds\\mp44.wav", FMOD_DEFAULT, 0, &mp44_shoot);
@@ -202,6 +225,9 @@ void set_FMOD() {
 
 	ssystem->createSound(".\\res\\sounds\\cat_hit_ground.wav", FMOD_DEFAULT, 0, &cat_hit_ground);
 	ssystem->createSound(".\\res\\sounds\\cat_stop.wav", FMOD_DEFAULT, 0, &cat_stop);
+
+	ssystem->createSound(".\\res\\sounds\\paused.wav", FMOD_DEFAULT, 0, &pause);
+	ssystem->createSound(".\\res\\sounds\\resume.wav", FMOD_DEFAULT, 0, &resume);
 }
 
 //몬스터 공격 사운드
@@ -261,6 +287,18 @@ void play_button_sound() {
 		ch_button->stop();
 		ssystem->playSound(quit_button, 0, false, &ch_button);
 		button_feed_clickScene_quit = FALSE;
+	}
+
+	if (to_pause == TRUE) {
+		ch_button->stop();
+		ssystem->playSound(pause, 0, false, &ch_button);
+		to_pause = FALSE;
+	}
+
+	if (to_resume == TRUE) {
+		ch_button->stop();
+		ssystem->playSound(resume, 0, false, &ch_button);
+		to_resume = FALSE;
 	}
 }
 
@@ -1160,6 +1198,7 @@ void shoot() {
 	}
 }
 
+//awp 탄피 생성
 void make_cat_awp() {
 	if (CM_img_dir == 0)
 		gc[cdx].x = CM_x + 10;
@@ -1383,8 +1422,8 @@ void check_monster_attack() {
 			if(mst_r[i].attack_timer < 20) mst_r[i].attack_timer++;
 			if (mst_r[i].attack_timer == 20) {
 			    health -= 20;
-				mst_r[i].attack_timer = 0; mst_r[i].motion_acc = 8;
-				mst_r[i].height = 135; mst_r[i].y = 565;
+				mst_r[i].attack_timer = 0; mst_r[i].motion_acc = 10;
+				mst_r[i].height = 155; mst_r[i].y = 545;
 				
 				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
 				ch_mst_attack_sound->stop();  play_attack_sound();
@@ -1401,8 +1440,8 @@ void check_monster_attack() {
 			if (mst_big[i].attack_timer < 20) mst_big[i].attack_timer++;
 			if (mst_big[i].attack_timer == 20) {
 				health -= 30;
-				mst_big[i].attack_timer = 0; mst_big[i].height = 235;
-				mst_big[i].y = 465;	mst_big[i].motion_acc = 8;
+				mst_big[i].attack_timer = 0; mst_big[i].height = 255;
+				mst_big[i].y = 445;	mst_big[i].motion_acc = 10;
 				
 				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
 				ch_mst_attack_sound->stop();  play_attack_sound();
@@ -1420,8 +1459,8 @@ void check_monster_attack() {
 			if (mst_air[i].attack_timer < 50) mst_air[i].attack_timer++;
 			if (mst_air[i].attack_timer == 50) {
 				health -= 10;
-				mst_air[i].attack_timer = 0; mst_air[i].height = 95;
-				mst_air[i].y = 165; mst_air[i].motion_acc = 8;
+				mst_air[i].attack_timer = 0; mst_air[i].height = 115;
+				mst_air[i].y = 145; mst_air[i].motion_acc = 10;
 				
 				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
 				shake_effect = 2;
@@ -1562,7 +1601,7 @@ void monster_animation() {
 	}
 
 	//몬스터에게 대미지를 받으면 화면이 흔들린다.
-	if (shake_effect == 2) make_shake(10, 5);
+	if (shake_effect == 2) make_shake(15, 10);
 
 	
 	for (int i = ddx - 1; i >= 0; i--) {
@@ -1625,6 +1664,12 @@ void wm_paint(HDC mdc, RECT rt) {
 	//조준점 출력
 	if (!manager.isPaused() && !manager.isGameOver()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
 
+	//일시정지 씬
+	if (manager.isPaused() || is_resumed == TRUE) {
+		BG_paused.Draw(mdc, rt.left, pause_y, 1500, 800, 0, 0, 1500, 800);
+		CM_paused.Draw(mdc, rt.right - 550, CM_paused_y, 550, 800, 0, 0, 550, 800);
+	}
+
 	//게임 오버 씬
 	if (manager.isGameOver()) {
 		HBRUSH hbrush, oldbrush;
@@ -1639,6 +1684,7 @@ void wm_paint(HDC mdc, RECT rt) {
 		CM_dead.Draw(mdc, death_x, 200, 500, 500, 0, 0, 500, 500);
 	}
 
+
 	//인덱스 테스트
 	/*
 	TCHAR out[20];
@@ -1650,6 +1696,7 @@ void wm_paint(HDC mdc, RECT rt) {
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hdc, mdc;  PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt;
+
 
 	switch(uMsg) {
 	case WM_CREATE:
@@ -1721,7 +1768,44 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		case UPDATE: //게임 전체 타이머
 			GetClientRect(hWnd, &rt); manager.update(hWnd);
 
+			//메인 화면 브금
+			if (manager.getCurrentSceneID() == Main && main_bgm_on == FALSE) {
+				ch_bgm->stop();
+				ssystem->playSound(main_bgm, 0, false, &ch_bgm);
+				main_bgm_on = TRUE;
+				gameover_bgm_on = FALSE;
+				game_bgm_on = FALSE;
+			}
+
+			//게임 오버 브금
+			if (manager.isGameOver()) {
+				if (gameover_bgm_on == FALSE) {
+					ch_bgm->stop();
+					ssystem->playSound(gameover_bgm, 0, false, &ch_bgm);
+					gameover_bgm_on = TRUE;
+					game_bgm_on = FALSE;
+				}
+			}
+
+			//일시 정지 브금
+			if (manager.isPaused()) {
+				if (pause_bgm_on == FALSE) {
+					ch_bgm->stop();
+					ssystem->playSound(pause_bgm, 0, false, &ch_bgm);
+					game_bgm_on = FALSE;
+					pause_bgm_on = TRUE;
+				}
+			}
+
 			if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
+				//인 게임 브금
+				if (game_bgm_on == FALSE) {
+					ch_bgm->stop();
+					ssystem->playSound(game_bgm, 0, false, &ch_bgm);
+					main_bgm_on = FALSE;
+					pause_bgm_on = FALSE;
+					game_bgm_on = TRUE;
+				}
 				update_player_position(rt);
 				shoot();
 				update_shoot_animation();
@@ -1741,8 +1825,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 				//시체 인덱스 삭제
 				if (ddx > 0) {
-					if (delete_delay < 200) delete_delay++;
-					if (delete_delay == 200) {
+					if (delete_delay < 100) delete_delay++;
+					if (delete_delay == 100) {
 						push_dead(ddx--); delete_delay = 0; 
 					}
 				}
@@ -1780,6 +1864,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 
+			//일시정지 화면 애니메이션
+			if (manager.isPaused()) {
+				if (pause_acc > 0) {
+					pause_y -= pause_acc; pause_acc -= 4;
+				}
+				if (pause_acc == 0) {
+					if (cm_pause_acc > 0) {
+						CM_paused_y -= cm_pause_acc; cm_pause_acc -= 4;
+					}
+				}
+			}
+			if (!manager.isPaused() && is_resumed == TRUE) {
+				if (pause_acc > 0) {
+					pause_y += pause_acc--; pause_acc -= 4; 
+				}
+				if (cm_pause_acc > 0) {
+					CM_paused_y += cm_pause_acc--; cm_pause_acc -= 4; 
+				}
+				if (pause_acc == 0) is_resumed = FALSE; 
+			}
+
 			//연사 속도가 느린 총을 마우스 광클로 빨리 쏘는 꼼수 방지
 			if (can_shoot == FALSE) mouse_fastClick_prevention();
 
@@ -1798,6 +1903,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				ch_dead->stop(); ssystem->playSound(dead, 0, false, &ch_dead);
 			}
 
+			//게임 오버 화면 애니메이션
 			if (manager.isGameOver()) {
 				if (death_acc > 0) death_x += death_acc--;
 			}

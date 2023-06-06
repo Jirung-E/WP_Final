@@ -13,11 +13,18 @@ CImage zoom_complited, zoom_targeted;
 CImage CM_dead;
 CImage monster_dead_left, monster_dead_right, monster_big_dead_left, monster_big_dead_right, monster_air_dead;
 CImage catridge[4];
+CImage BG_paused, CM_paused;
 
 gun_catridge gc[500];
 
 int cdx = 0; // 탄피 인덱스 (catridge-index)
 int cat_delete_delay; //탄피 삭제 딜레이
+
+//일시정지 화면에 쓰이는 가속값과 좌표값
+int pause_y = 900;
+int pause_acc;
+int CM_paused_y = 850;
+int cm_pause_acc;
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지

@@ -18,7 +18,7 @@ private:
     Map map;
     Button resume_button;
     Button quit_button;
-    bool paused;
+    bool is_paused;
     TextBox game_over_message;
     bool game_over;
 
