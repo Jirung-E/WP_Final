@@ -43,6 +43,9 @@
     <Filter Include="Object">
       <UniqueIdentifier>{bbecf76c-7ecb-4f9e-b69b-05db3ad637a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\in game">
+      <UniqueIdentifier>{179cf2dd-419f-422e-9865-ad05fe8372bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -87,26 +90,26 @@
     <ClCompile Include="Player.cpp">
       <Filter>Object</Filter>
     </ClCompile>
-    <ClCompile Include="ammo.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="monster_info.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="exp.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="images.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="ArmoryScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="gun_info.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="player_info.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\in game</Filter>
+    </ClCompile>
+    <ClCompile Include="monster_info.cpp">
+      <Filter>소스 파일\in game</Filter>
+    </ClCompile>
+    <ClCompile Include="gun_info.cpp">
+      <Filter>소스 파일\in game</Filter>
+    </ClCompile>
+    <ClCompile Include="exp.cpp">
+      <Filter>소스 파일\in game</Filter>
+    </ClCompile>
+    <ClCompile Include="ammo.cpp">
+      <Filter>소스 파일\in game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -42,9 +42,11 @@ void GameScene::setUp() {
     shake_count = 0;
     shake_acc = 0;
     shake_effect = 0;
+    ss_x = 0;
+    ss_y = 0;
 
     // 플레이어 위치 및 상태 초기화
-    CM_x = 700, CM_y = 600;
+    CM_x = 700; CM_y = 600;
     BG_scanner = 1500;  
     CM_jump = 0;
     CM_move_dir = -1;

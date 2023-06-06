@@ -806,12 +806,12 @@ void check_hit_awp() {
 			mst_r[i].hp = cal_damage(mst_r[i].hp, GUN_number);
 			if (mst_r[i].hp <= 0) {
 				if (i < mdx_r - 1 && is_kill_r == 0) {
-					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[hit].img_dir;
+					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[i].img_dir;
 					monster_array_push_r(i, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
 					init_exp_animation(); is_kill_r = 1;
 				}
 				else if (i == mdx_r - 1 && is_kill_r == 0) {
-					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[hit].img_dir;
+					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[i].img_dir;
 					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
 					init_exp_animation(); is_kill_r = 1;
 				}
@@ -826,12 +826,12 @@ void check_hit_awp() {
 			mst_big[i].hp = cal_damage(mst_big[i].hp, GUN_number);
 			if (mst_big[i].hp <= 0) {
 				if (i < mdx_big - 1 && is_kill_big == 0) {
-					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[hit].img_dir;
+					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[i].img_dir;
 					monster_array_push_big(i, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill_big = 1;
 				}
 				else if (i == mdx_big - 1 && is_kill_big == 0) {
-					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[hit].img_dir;
+					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[i].img_dir;
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill_big = 1;
 				}
