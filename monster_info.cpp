@@ -249,5 +249,6 @@ void push_dead(int idx) {
 		dl[i].monster_type = dl[i + 1].monster_type;
 		dl[i].acc = dl[i + 1].acc;
 		dl[i].dir = dl[i + 1].dir;
+		dl[i].motion_dir = dl[i + 1].motion_dir;
 	}
 }

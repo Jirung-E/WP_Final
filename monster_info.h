@@ -37,6 +37,7 @@ struct dead_location {
 	double x, y;
 	int acc;
 	int dir;
+	int motion_dir;
 };
 
 extern int ddx; //dead-index

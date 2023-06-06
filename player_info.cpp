@@ -12,6 +12,7 @@ bool is_zoom = false;
 bool avail_awp = false;
 
 int health = 100; //플레이어 기본 체력 100
+int recovery_delay = 0; //플레이어 체력 회복 딜레이
 
 //플레이어 체력 수치 표시
 void player_health(HDC mdc, RECT rt, double ss_x, double ss_y, double landing_shake, int health) {

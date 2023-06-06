@@ -4,8 +4,8 @@
 
 
 MainScene::MainScene() : Scene { Main }, 
-start_button { Start, L"Start", { 25, 25 }, 50, 50 }, 
-quit_button { Quit, L"Quit", { 80, 30 }, 40, 40 },
+start_button { Start, L"¢º", { 25, 25 }, 50, 50 }, 
+quit_button { Quit, L"¡æ]", { 80, 30 }, 40, 40 },
 armory_button { Armory, L"Armory", { -20, 30 }, 40, 40 },
 background_image { L"./res/Armory_background(temp).jpg" } {
     start_button.border_color = Gray;

@@ -196,6 +196,53 @@ void play_attack_sound() {
 		ssystem->playSound(mst_attack_sound2, 0, false, &ch_mst_attack_sound);
 }
 
+//몬스터 idle 사운드
+void play_idle_sound() {
+	std::random_device rd_sound;
+	std::mt19937 gen(rd_sound());
+	std::uniform_int_distribution<int> rand_sound(0, 1);
+
+	ch_mst_idle_sound->stop();
+
+	if (rand_sound(gen) == 0)
+		ssystem->playSound(mst_idle_sound1, 0, false, &ch_mst_idle_sound);
+	else if (rand_sound(gen) == 1)
+		ssystem->playSound(mst_idle_sound2, 0, false, &ch_mst_idle_sound);
+}
+
+//버튼 사운드
+void play_button_sound() {
+	if (button_feed_clickScene == TRUE) {
+		ch_button->stop();
+		ssystem->playSound(button_sound, 0, false, &ch_button);
+		button_feed_clickScene = FALSE;
+	}
+
+	if (button_feed_armory_button == TRUE) {
+		ch_button->stop();
+		ssystem->playSound(weapon_button, 0, false, &ch_button);
+		button_feed_armory_button = FALSE;
+	}
+
+	if (button_feed_armory_select == TRUE) {
+		ch_button->stop();
+		ssystem->playSound(weapon_select, 0, false, &ch_button);
+		button_feed_armory_select = FALSE;
+	}
+
+	if (button_feed_clickScene_start == TRUE) {
+		ch_button->stop();
+		ssystem->playSound(start_button, 0, false, &ch_button);
+		button_feed_clickScene_start = FALSE;
+	}
+
+	if (button_feed_clickScene_quit == TRUE) {
+		ch_button->stop();
+		ssystem->playSound(quit_button, 0, false, &ch_button);
+		button_feed_clickScene_quit = FALSE;
+	}
+}
+
 //광클 방지
 void mouse_fastClick_prevention() {
 	if (after_delay < Gun::shoot_speed(GUN_number))
@@ -806,12 +853,14 @@ void check_hit_awp() {
 			mst_r[i].hp = cal_damage(mst_r[i].hp, GUN_number);
 			if (mst_r[i].hp <= 0) {
 				if (i < mdx_r - 1 && is_kill_r == 0) {
-					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[i].img_dir;
+					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
+					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					monster_array_push_r(i, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
 					init_exp_animation(); is_kill_r = 1;
 				}
 				else if (i == mdx_r - 1 && is_kill_r == 0) {
-					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[i].img_dir;
+					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
+					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
 					init_exp_animation(); is_kill_r = 1;
 				}
@@ -826,12 +875,14 @@ void check_hit_awp() {
 			mst_big[i].hp = cal_damage(mst_big[i].hp, GUN_number);
 			if (mst_big[i].hp <= 0) {
 				if (i < mdx_big - 1 && is_kill_big == 0) {
-					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[i].img_dir;
+					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
+					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					monster_array_push_big(i, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill_big = 1;
 				}
 				else if (i == mdx_big - 1 && is_kill_big == 0) {
 					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[i].img_dir;
+					dl[ddx].acc = 20; dl[ddx].motion_dir = 1;
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill_big = 1;
 				}
@@ -886,12 +937,14 @@ void check_hit() {
 			if (mst_r[hit].hp <= 0) {
 				if (hit < mdx_r - 1 && is_kill == 0) {
 					//죽기 직전에 몬스터가 가지고 있던 위치, 방향 정보를 시체 구조체로 복사한다.
-					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[hit].img_dir;  
+					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[hit].img_dir;  
+					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					monster_array_push_r(hit, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
 				else if (hit == mdx_r - 1 && is_kill == 0) {
-					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx++].dir = mst_r[hit].img_dir;
+					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[hit].img_dir;
+					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
@@ -914,12 +967,14 @@ void check_hit() {
 
 			if (mst_big[hit].hp <= 0) {
 				if (hit < mdx_big - 1 && is_kill == 0) {
-					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[hit].img_dir;
+					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[hit].img_dir;
+					dl[ddx].acc = 20;  dl[ddx++].motion_dir = 1;
 					monster_array_push_big(hit, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
 				else if (hit == mdx_big - 1 && is_kill == 0) {
-					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[hit].img_dir;
+					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[hit].img_dir;
+					dl[ddx].acc = 20;  dl[ddx++].motion_dir = 1;
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill = 1;
 				}
@@ -1333,10 +1388,27 @@ void monster_animation() {
 	//몬스터에게 대미지를 받으면 화면이 흔들린다.
 	if (shake_effect == 2) make_shake(10, 5);
 
-	//공중 몬스터 시체는 하늘에서 떨어진다.
+	
 	for (int i = ddx - 1; i >= 0; i--) {
+		//공중 몬스터 시체는 하늘에서 떨어진다.
 		if (dl[i].monster_type == 3 && dl[i].acc < 30)
 			dl[i].y += dl[i].acc++;
+
+		//지상 몬스터 사망 애니메이션
+		if (dl[i].monster_type == 1 || dl[i].monster_type == 2) {
+			if (dl[i].motion_dir == 1) {
+				if (dl[i].acc > -1)
+					dl[i].y -= dl[i].acc--;
+				if (dl[i].acc == -1)
+					dl[i].motion_dir = 2;
+			}
+			if (dl[i].motion_dir == 2) {
+				if (dl[i].acc < 21)
+					dl[i].y += dl[i].acc++;
+				if (dl[i].acc == 21)
+					dl[i].motion_dir = -1;
+			}
+		}
 	}
 }
 
@@ -1374,6 +1446,7 @@ void wm_paint(HDC mdc, RECT rt) {
 	//조준점 출력
 	if (!manager.isPaused() && !manager.isGameOver()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
 
+	//게임 오버 씬
 	if (manager.isGameOver()) {
 		HBRUSH hbrush, oldbrush;
 		hbrush = CreateSolidBrush(RGB(0, 0, 0));
@@ -1483,18 +1556,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				if (mdx_r > 0 || mdx_big > 0){
 					if (monster_sound_delay < 300) monster_sound_delay++;
 					if (monster_sound_delay == 300) {
-						std::random_device rd_sound;
-						std::mt19937 gen(rd_sound());
-						std::uniform_int_distribution<int> rand_sound(0, 1);
-
-						ch_mst_idle_sound->stop();
-
-						if (rand_sound(gen) == 0)
-							ssystem->playSound(mst_idle_sound1, 0, false, &ch_mst_idle_sound);
-						else if (rand_sound(gen) == 1)
-							ssystem->playSound(mst_idle_sound2, 0, false, &ch_mst_idle_sound);
-
-						monster_sound_delay = 0;
+						play_idle_sound(); monster_sound_delay = 0;
 					}
 				}
 
@@ -1504,6 +1566,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					if (delete_delay == 200) {
 						push_dead(ddx--);
 						delete_delay = 0;
+					}
+				}
+
+				//체력이 100보다 낮을 경우 자가 회복
+				if (health < 100) {
+					if(recovery_delay < 100) recovery_delay++;
+					if (recovery_delay == 100) {
+						health++;
+						recovery_delay = 0;
 					}
 				}
 			}
@@ -1531,35 +1602,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					death_x += death_acc--;
 			}
 
-			if (button_feed_clickScene == TRUE) {
-				ch_button->stop();
-				ssystem->playSound(button_sound, 0, false, &ch_button);
-				button_feed_clickScene = FALSE;
-			}
-
-			if (button_feed_armory_button == TRUE) {
-				ch_button->stop();
-				ssystem->playSound(weapon_button, 0, false, &ch_button);
-				button_feed_armory_button = FALSE;
-			}
-
-			if (button_feed_armory_select == TRUE) {
-				ch_button->stop();
-				ssystem->playSound(weapon_select, 0, false, &ch_button);
-				button_feed_armory_select = FALSE;
-			}
-
-			if (button_feed_clickScene_start == TRUE) {
-				ch_button->stop();
-				ssystem->playSound(start_button, 0, false, &ch_button);
-				button_feed_clickScene_start = FALSE;
-			}
-
-			if (button_feed_clickScene_quit == TRUE) {
-				ch_button->stop();
-				ssystem->playSound(quit_button, 0, false, &ch_button);
-				button_feed_clickScene_quit = FALSE;
-			}
+			play_button_sound();
 
 			break;
 		}

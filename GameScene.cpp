@@ -11,8 +11,8 @@
 
 GameScene::GameScene() : Scene { Game }, score { 0 }, player_exp_first { 0 },
 map { 16, 9 },      // 좌표계.  전체화면비율인 16:9에 맞춥니다.
-resume_button { Resume, L"Resume", { 20, 30 }, 60, 15 }, quit_button { Quit, L"Quit", { 20, 60 }, 60, 15 },
-game_over_message { L"Game Over", { 0, 25 }, 100, 20 },
+resume_button { Resume, L"▶", { 20, 30 }, 60, 15 }, quit_button { Quit, L"→]", { 20, 60 }, 60, 15 },
+game_over_message { L"You Died!", { 0, 25 }, 100, 20 },
 player { { 8, 4.5 } } {
     setUp();
     resume_button.border_color = Gray;
@@ -60,6 +60,7 @@ void GameScene::setUp() {
     avail_awp = FALSE;
     shoot_delay = 0;
     after_delay = 0;
+    var = 0;
 
     // 라운드 초기화
     game_round = 1;
@@ -80,6 +81,7 @@ void GameScene::setUp() {
     reload = 0;
     r_pressed = 0;
     empty = 0;
+    reload_x = 0;
     can_shoot = TRUE;
 
     //게임오버 씬 초기화
