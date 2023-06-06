@@ -724,6 +724,7 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 	}
 }
 
+//탄피 출력
 void show_catridge(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 	for (int i = cdx - 1; i >= 0; i--) {
 		catridge[gc[i].frame].Draw(mdc, gc[i].x + ss_x, gc[i].y + ss_y + landing_shake, 20, 20, 0, 0, 20, 20);
