@@ -76,5 +76,5 @@ int MainScene::clickL(const POINT& point) const {
     if(PtInRect(&r, point)) {
         return armory_button.getID();
     }
-    return None;
+    return None; 
 }

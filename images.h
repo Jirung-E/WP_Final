@@ -12,6 +12,19 @@ extern CImage exp_icon, flame_right, flame_left;
 extern CImage zoom_complited, zoom_targeted;
 extern CImage CM_dead;
 extern CImage monster_dead_left, monster_dead_right, monster_big_dead_left, monster_big_dead_right, monster_air_dead;
+extern CImage catridge[4];
+
+struct gun_catridge {
+    double x, y;
+    int frame;
+    int acc;
+    int x_speed;
+    int motion_dir;
+    int dir;
+};
+
+extern int cdx; // 탄피 인덱스 (catridge-index)
+extern int cat_delete_delay;
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지
@@ -61,3 +74,5 @@ extern int ypos_zc_acc;
 
 extern int death_x;
 extern int death_acc;
+
+void push_cat(int idx);

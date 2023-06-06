@@ -1,4 +1,5 @@
 #include <atlImage.h>
+#include "images.h"
 
 
 CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon, ammo_sniper_icon;
@@ -11,6 +12,12 @@ CImage exp_icon, flame_right, flame_left;
 CImage zoom_complited, zoom_targeted;
 CImage CM_dead;
 CImage monster_dead_left, monster_dead_right, monster_big_dead_left, monster_big_dead_right, monster_air_dead;
+CImage catridge[4];
+
+gun_catridge gc[500];
+
+int cdx = 0; // 탄피 인덱스 (catridge-index)
+int cat_delete_delay; //탄피 삭제 딜레이
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지
@@ -56,3 +63,16 @@ int ypos_zc_acc = 15; //사격 가능 표시의 애니메이션 가속도
 
 int death_x = -500;
 int death_acc = 54;
+
+//탄피 인덱스 밀어내기
+void push_cat(int idx) {
+	for (int i = 0; i < idx - 1; i++) {
+		gc[i].x = gc[i + 1].x;
+		gc[i].y = gc[i + 1].y;
+		gc[i].dir = gc[i + 1].dir;
+		gc[i].motion_dir = gc[i + 1].motion_dir;
+		gc[i].frame = gc[i + 1].frame;
+		gc[i].x_speed = gc[i + 1].x_speed;
+		gc[i].acc = gc[i + 1].acc;
+	}
+}

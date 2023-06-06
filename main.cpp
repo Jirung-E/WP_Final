@@ -76,6 +76,7 @@ extern monster_info_regular mst_r[100]; //몬스터 정보를 저정하는 구�
 extern monster_info_big mst_big[100];
 extern monster_info_air mst_air[100];
 extern dead_location dl[100];
+extern gun_catridge gc[500];
 
 enum Timer {
 	KEYDOWN, UPDATE
@@ -140,6 +141,11 @@ void IMG_FILE_LOAD() {
 	monster_dead_right.Load(L".\\res\\monster_dead_right.png");
 	monster_big_dead_right.Load(L".\\res\\monster_big_dead_right.png");
 	monster_air_dead.Load(L".\\res\\bat_dead.png");
+
+	catridge[0].Load(L".\\res\\catridge\\catridge1.png");
+	catridge[1].Load(L".\\res\\catridge\\catridge2.png");
+	catridge[2].Load(L".\\res\\catridge\\catridge3.png");
+	catridge[3].Load(L".\\res\\catridge\\catridge4.png");
 } 
 
 //FMOD 세팅
@@ -703,6 +709,12 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 	}
 }
 
+void show_catridge(HDC mdc, int ss_x, int ss_y, int landing_shake) {
+	for (int i = cdx - 1; i >= 0; i--) {
+		catridge[gc[i].frame].Draw(mdc, gc[i].x + ss_x, gc[i].y + ss_y + landing_shake, 20, 20, 0, 0, 20, 20);
+	}
+}
+
 //플레이어 이미지 방향 업데이트
 void update_player_direction(int mouse_x) {
 	if(mouse_x < CM_x + 50) //마우스 좌표가 플레이어보다 왼쪽에 있으면 왼쪽을 바라보고, 오른쪽에 있으면 오른쪽을 바라봄
@@ -755,6 +767,8 @@ void update_player_position(RECT rt) {
 				mst_air[i].x += 15;
 			for (int i = 0; i < ddx; i++)
 				dl[i].x += 15;
+			for (int i = 0; i < cdx; i++)
+				gc[i].x += 15;
 		}
 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) //배경 인식 좌표가 10이되고 플레이어가 다시 가운데로 이동할 때까지
@@ -775,6 +789,8 @@ void update_player_position(RECT rt) {
 				mst_air[i].x -= 15;
 			for (int i = 0; i < ddx; i++)
 				dl[i].x -= 15;
+			for (int i = 0; i < cdx; i++)
+				gc[i].x -= 15;
 		}
 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700))
@@ -1090,6 +1106,22 @@ void shoot() {
 				is_click = FALSE;
 				break;
 			}
+
+			gc[cdx].x = CM_x + 50; gc[cdx].y = CM_y + 50; gc[cdx].frame = 1;
+			std::random_device rd_cat;
+			std::mt19937 gen(rd_cat());
+
+			//탄피 랜덤 속도 생성
+			std::uniform_int_distribution<int> cat_rand(6, 12); 
+			gc[cdx].acc = cat_rand(gen);
+			std::uniform_int_distribution<int> speed_rand(10, 15);
+			gc[cdx].x_speed = speed_rand(gen);
+
+			gc[cdx].motion_dir = 1; //1: up 2: down
+			if (CM_img_dir == 0)
+				gc[cdx++].dir = 0;
+			else if (CM_img_dir == 1)
+				gc[cdx++].dir = 1;
 		}
 		//is_hit 다시 초기화
 		is_hit = FALSE;
@@ -1194,6 +1226,106 @@ void update_shoot_animation() {
 			if(exp_acc > 0) exp_x -= exp_acc--;
 			if (exp_acc == 0) {
 				exp_up = FALSE; out = 1; exp_acc = 20;
+			}
+		}
+	}
+
+	//탄피 회전 및 탄피 떨어지는 애니메이션
+	for (int i = cdx - 1; i >= 0; i--) {
+		if (gc[i].motion_dir != -1) {
+			if (gc[i].dir == 0) {
+				if (gc[i].frame < 4)
+					gc[i].frame++;
+				if (gc[i].frame == 4)
+					gc[i].frame = 0;
+			}
+
+			else if (gc[i].dir == 1) {
+				if (gc[i].frame > 0)
+					gc[i].frame --;
+				if (gc[i].frame == 0)
+					gc[i].frame = 4;
+			}
+		}
+	
+
+		if (gc[i].dir == 0) { 
+			if (gc[i].motion_dir == 1) {
+				gc[i].x += gc[i].x_speed;
+				if (gc[i].acc > 0)
+					gc[i].y -= gc[i].acc--;
+
+				if (gc[i].acc == 0)
+					gc[i].motion_dir = 2;
+			}
+			
+
+			else if (gc[i].motion_dir == 2) {
+				gc[i].x += gc[i].x_speed;
+				gc[i].y += gc[i].acc++;
+				if (gc[i].y >= 700) {
+					gc[i].motion_dir = 3;
+					gc[i].acc = 0;
+				}
+			}
+					
+			else if (gc[i].motion_dir == 3) {
+				gc[i].x += gc[i].x_speed - 2;
+				if (gc[i].acc < 12)
+					gc[i].y -= gc[i].acc++;
+				if (gc[i].acc == 12) {
+					gc[i].motion_dir = 4;
+					gc[i].acc = 0;
+				}
+			}
+
+			else if (gc[i].motion_dir == 4) {
+				gc[i].x += gc[i].x_speed - 2;
+				gc[i].y += gc[i].acc++;
+				if (gc[i].y >= 700) {
+					gc[i].motion_dir = -1;
+					gc[i].frame = 0;
+				}
+			}
+		}
+
+		else if (gc[i].dir == 1) {
+			if (gc[i].motion_dir == 1) {
+				gc[i].x -= gc[i].x_speed;
+				if (gc[i].acc > 0)
+					gc[i].y -= gc[i].acc--;
+
+				if (gc[i].acc == 0)
+					gc[i].motion_dir = 2;
+			}
+
+
+			else if (gc[i].motion_dir == 2) {
+				gc[i].x -= gc[i].x_speed;
+				gc[i].y += gc[i].acc++;
+				if (gc[i].y >= 700) {
+					gc[i].motion_dir = 3;
+					gc[i].acc = 0;
+				}
+			}
+
+			else if (gc[i].motion_dir == 3) {
+				gc[i].x -= gc[i].x_speed - 2;
+				if (gc[i].acc < 12)
+					gc[i].y -= gc[i].acc++;
+				if (gc[i].acc == 12) {
+					gc[i].motion_dir = 4;
+					gc[i].acc = 0;
+				}
+			}
+
+			else if (gc[i].motion_dir == 4) {
+				gc[i].x -= gc[i].x_speed - 2;
+				gc[i].y += gc[i].acc++;
+				if (gc[i].y >= 700) {
+					gc[i].motion_dir = -1;
+					gc[i].frame = 0;
+				}
 			}
 		}
 	}
@@ -1437,6 +1569,9 @@ void wm_paint(HDC mdc, RECT rt) {
 	//플레이어 이미지 출력
 	show_player(mdc);
 
+	//탄피 이미지 출력
+	show_catridge(mdc, ss_x, ss_y, landing_shake);
+
 	//히트 포인트 그리기
 	if (draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2);
 
@@ -1566,6 +1701,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					if (delete_delay == 200) {
 						push_dead(ddx--);
 						delete_delay = 0;
+					}
+				}
+
+				//탄피 인덱스 삭제 
+				if (cdx > 5) {
+					if (cat_delete_delay < 10) cat_delete_delay++;
+					if (cat_delete_delay == 10) {
+						cat_delete_delay = 0;
+						push_cat(cdx--);
 					}
 				}
 
