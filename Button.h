@@ -8,6 +8,7 @@ class Button : public TextBox {
 public:
     Sprite* sprite;
     int padding;
+    bool highlighting;
 
 private:
     int id;
@@ -19,4 +20,7 @@ public:
 public:
     void show(const HDC& hdc, const RECT& valid_area, const Direction& bias = None) const;
     int getID() const;
+
+protected:
+    void drawBase(const HDC& hdc, const RECT& valid_area) const;
 };

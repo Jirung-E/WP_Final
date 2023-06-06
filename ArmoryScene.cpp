@@ -146,7 +146,7 @@ void ArmoryScene::draw(const HDC& hdc) const {
     damage_value.show(hdc, preview_area);
 
     TextBox speed_text { L"Speed", { 50, 80 }, 25, 10 };
-    TextBox speed_value { std::to_wstring(100-Gun::shoot_speed(idx)), { 75, 80 }, 25, 10 };
+    TextBox speed_value { std::to_wstring(100-Gun::shoot_speed(idx)/2), { 75, 80 }, 25, 10 };
     speed_text.font_size = font_size;
     speed_value.font_size = font_size;
     speed_text.background_color = LightGray;

@@ -12,7 +12,7 @@
 GameScene::GameScene() : Scene { Game }, score { 0 }, player_exp_first { 0 },
 map { 16, 9 },      // 좌표계.  전체화면비율인 16:9에 맞춥니다.
 resume_button { Resume, L"Resume", { 20, 30 }, 60, 15 }, quit_button { Quit, L"Quit", { 20, 60 }, 60, 15 },
-game_over_message { L"Game Over", { 10, 30 }, 80, 15 },
+game_over_message { L"Game Over", { 0, 25 }, 100, 20 },
 player { { 8, 4.5 } } {
     setUp();
     resume_button.border_color = Gray;
@@ -22,7 +22,8 @@ player { { 8, 4.5 } } {
     quit_button.border_width = 3;
 
     game_over_message.text_color = Red;
-    game_over_message.background_color = LightGray;
+    game_over_message.transparent_background = true;
+    game_over_message.transparent_border = true;
     game_over_message.bold = 4;
 
     player.addSprite(new Sprite { L"./res/commando_right.png" });
@@ -87,9 +88,30 @@ void GameScene::setUp() {
 
 void GameScene::update(const POINT& point) {
     if(game_over) {
+        RECT r = quit_button.absoluteArea(valid_area);
+        if(PtInRect(&r, point)) {
+            quit_button.highlighting = true;
+        }
+        else {
+            quit_button.highlighting = false;
+        }
         return;
     }
     if(paused) {
+        RECT r = resume_button.absoluteArea(valid_area);
+        if(PtInRect(&r, point)) {
+            resume_button.highlighting = true;
+        }
+        else {
+            resume_button.highlighting = false;
+        }
+        r = quit_button.absoluteArea(valid_area);
+        if(PtInRect(&r, point)) {
+            quit_button.highlighting = true;
+        }
+        else {
+            quit_button.highlighting = false;
+        }
         return;
     }
     if(!game_over) {
