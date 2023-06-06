@@ -237,6 +237,42 @@ void ArmoryScene::draw(const HDC& hdc) const {
 }
 
 
+void ArmoryScene::update(const POINT& point) {
+    RECT r = quit_button.absoluteArea(valid_area);
+    if(PtInRect(&r, point)) {
+        quit_button.highlighting = true;
+    }
+    else {
+        quit_button.highlighting = false;
+    }
+
+    r = equip_button.absoluteArea(valid_area);
+    if(PtInRect(&r, point)) {
+        equip_button.highlighting = true;
+    }
+    else {
+        equip_button.highlighting = false;
+    }
+
+    r = unlock_button.absoluteArea(valid_area);
+    if(PtInRect(&r, point)) {
+        unlock_button.highlighting = true;
+    }
+    else {
+        unlock_button.highlighting = false;
+    }
+
+    for(auto& e : weapon_buttons) {
+        r = e.absoluteArea(valid_area);
+        if(PtInRect(&r, point)) {
+            e.highlighting = true;
+        }
+        else {
+            e.highlighting = false;
+        }
+    }
+}
+
 void ArmoryScene::syncSize(const HWND& hWnd) {
     Scene::syncSize(hWnd);
     preview_area = { valid_area.left + 15, valid_area.top + 70,

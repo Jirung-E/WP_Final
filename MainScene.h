@@ -24,6 +24,7 @@ protected:
     void draw(const HDC& hdc) const;
 
 public:
+    void update(const POINT& point);
     void syncSize(const HWND& hWnd);
     int clickL(const POINT& point) const;
     //int clickR(const POINT& point) const;

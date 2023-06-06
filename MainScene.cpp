@@ -31,6 +31,38 @@ void MainScene::draw(const HDC& hdc) const {
 }
 
 
+void MainScene::update(const POINT& point) {
+    RECT r = quit_button.absoluteArea(valid_area);
+    if(PtInRect(&r, point)) {
+        quit_button.highlighting = true;
+    }
+    else {
+        quit_button.highlighting = false;
+    }
+    r = start_button.absoluteArea(valid_area);
+    if(PtInRect(&r, point)) {
+        start_button.highlighting = true;
+    }
+    else {
+        start_button.highlighting = false;
+    }
+    r = armory_button.absoluteArea(valid_area);
+    if(PtInRect(&r, point)) {
+        armory_button.highlighting = true;
+    }
+    else {
+        armory_button.highlighting = false;
+    }
+}
+
+void MainScene::syncSize(const HWND& hWnd) {
+    Scene::syncSize(hWnd);
+
+    start_button.font_size = percentOf(vertical_length, 20);
+    quit_button.font_size = percentOf(vertical_length, 10);
+    armory_button.font_size = percentOf(vertical_length, 10);
+}
+
 int MainScene::clickL(const POINT& point) const {
     RECT r = start_button.absoluteArea(valid_area);
     if(PtInRect(&r, point)) {
@@ -45,13 +77,4 @@ int MainScene::clickL(const POINT& point) const {
         return armory_button.getID();
     }
     return None;
-}
-
-
-void MainScene::syncSize(const HWND& hWnd) {
-    Scene::syncSize(hWnd);
-
-    start_button.font_size = percentOf(vertical_length, 20);
-    quit_button.font_size = percentOf(vertical_length, 10);
-    armory_button.font_size = percentOf(vertical_length, 10);
 }

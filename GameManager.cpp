@@ -157,8 +157,11 @@ void GameManager::update(const HWND& hWnd) {
 	case Game:
 		game_scene.update(mouse_position);
 		break;
+	case Armory:
+		armory_scene.update(mouse_position);
+		break;
 	case Main:
-
+		main_scene.update(mouse_position);
 		break;
 	}
 }
