@@ -74,7 +74,9 @@ void GameScene::setUp() {
     mdx_big = 0;
     mdx_air = 0;
     ddx = 0;
+    cdx = 0;
     delete_delay = 0;
+    cat_delete_delay = 0;
 
     // 장탄수 초기화
     ammo = 0;

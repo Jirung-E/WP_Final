@@ -2,6 +2,8 @@
 
 #include "images.h"
 
+int cat_ready = 0;
+int awp_cat_delay = 0;
 
 int Gun::damage(int gun_id) {
     switch(gun_id) {

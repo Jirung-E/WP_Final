@@ -18,12 +18,15 @@
 
 FMOD::System* ssystem;
 FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot, *dry_fire;
+FMOD::Sound* scar_distance, * m16_distance, * mp44_distance, *mg42_distance, * awp_distance;
 FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
-FMOD::Sound* hurt, *dead;
+FMOD::Sound* hurt, *dead, *cat_hit_ground, *cat_stop;
 FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound, *weapon_select, *weapon_button, *start_button, *quit_button;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
+//gun_distance sound
+FMOD::Channel* ch_gun2 = 0;
 //reload_sound
 FMOD::Channel* ch_reload = 0;
 //hit_sound
@@ -50,6 +53,8 @@ FMOD::Channel* ch_mst_idle_sound = 0;
 FMOD::Channel* ch_mst_attack_sound = 0;
 //button_sound
 FMOD::Channel* ch_button = 0;
+//catridge sound
+FMOD::Channel* ch_cat = 0;
 
 FMOD_RESULT result;
 void* extradriverdata = 0;
@@ -59,7 +64,6 @@ extern BOOL button_feed_armory_button; //TRUE일시 버튼 클릭음 재생
 extern BOOL button_feed_armory_select; //TRUE일시 버튼 클릭음 재생
 extern BOOL button_feed_clickScene_start;
 extern BOOL button_feed_clickScene_quit;
-
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -159,6 +163,14 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\mg42.wav", FMOD_DEFAULT, 0, &mg42_shoot);
 	ssystem->createSound(".\\res\\sounds\\awp.wav", FMOD_DEFAULT, 0, &awp_shoot);
 
+	ssystem->createSound(".\\res\\sounds\\scar_h_distance.wav", FMOD_DEFAULT, 0, &scar_distance);
+	ssystem->createSound(".\\res\\sounds\\m16_distance.wav", FMOD_DEFAULT, 0, &m16_distance);
+	ssystem->createSound(".\\res\\sounds\\mp44_distance.wav", FMOD_DEFAULT, 0, &mp44_distance);
+	ssystem->createSound(".\\res\\sounds\\mg42_distance.wav", FMOD_DEFAULT, 0, &mg42_distance);
+	ssystem->createSound(".\\res\\sounds\\awp_distance.wav", FMOD_DEFAULT, 0, &awp_distance);
+
+
+
 	ssystem->createSound(".\\res\\sounds\\rifle_reload.wav", FMOD_DEFAULT, 0, &rifle_reload);
 	ssystem->createSound(".\\res\\sounds\\lmg_reload.ogg", FMOD_DEFAULT, 0, &lmg_reload);
 	ssystem->createSound(".\\res\\sounds\\sniper_reload.ogg", FMOD_DEFAULT, 0, &sniper_reload);
@@ -187,6 +199,9 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\weapon_select.wav", FMOD_DEFAULT, 0, &weapon_select);
 	ssystem->createSound(".\\res\\sounds\\start_button.wav", FMOD_DEFAULT, 0, &start_button);
 	ssystem->createSound(".\\res\\sounds\\quit_button.wav", FMOD_DEFAULT, 0, &quit_button);
+
+	ssystem->createSound(".\\res\\sounds\\cat_hit_ground.wav", FMOD_DEFAULT, 0, &cat_hit_ground);
+	ssystem->createSound(".\\res\\sounds\\cat_stop.wav", FMOD_DEFAULT, 0, &cat_stop);
 }
 
 //몬스터 공격 사운드
@@ -897,8 +912,8 @@ void check_hit_awp() {
 					init_exp_animation(); is_kill_big = 1;
 				}
 				else if (i == mdx_big - 1 && is_kill_big == 0) {
-					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx++].dir = mst_big[i].img_dir;
-					dl[ddx].acc = 20; dl[ddx].motion_dir = 1;
+					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
+					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill_big = 1;
 				}
@@ -1038,7 +1053,7 @@ void make_shake(int shake_acc, int shake_end) {
 	ss_x = shake_x(gen); ss_y = shake_y(gen);
 	shake_count++;          //몇 번 카운트를 세냐에 따라 화면 흔들리는 시간이 달라진다. 많이 세면 샐 수록 흔들리는 시간이 길어진다.
 	shake_acc -= 2;          //변경되는 좌표의 크기가 점차 줄면서 좀 더 자연스러운 흔들림을 만듬
-	if (shake_count == shake_end) { //특정 횟수가 되면
+	if (shake_count >= shake_end) { //특정 횟수가 되면
 		shake_count = 0;    //카운트 초기화
 		ss_x = 0; ss_y = 0; //화면 좌표는 원래대로 돌아온다
 		shake_effect = 0;   //더 이상 흔들리지 않는다.
@@ -1085,47 +1100,87 @@ void shoot() {
 			var += Gun::recoil(GUN_number); ammo++;
 			is_zoom = FALSE; avail_awp = FALSE;
 			ch_gun->stop(); //사운드 정지
+			ch_gun2->stop();
 			switch(GUN_number) {
 			case scar_h:
 				ssystem->playSound(scar_shoot, 0, false, &ch_gun); //사운드 재생
+				ssystem->playSound(scar_distance, 0, false, &ch_gun2); //사운드 재생
 				break;
 			case m16:
 				ssystem->playSound(m16_shoot, 0, false, &ch_gun); //사운드 재생
+				ssystem->playSound(m16_distance, 0, false, &ch_gun2); //사운드 재생
 				break;
 			case mp_44:
 				ssystem->playSound(mp44_shoot, 0, false, &ch_gun); //사운드 재생
+				ssystem->playSound(mp44_distance, 0, false, &ch_gun2); //사운드 재생
 				break;
 			case mg_42:
 				ssystem->playSound(mg42_shoot, 0, false, &ch_gun);
+				ssystem->playSound(mg42_distance, 0, false, &ch_gun2); //사운드 재생
 				break;
 			case awp:
 				ssystem->playSound(awp_shoot, 0, false, &ch_gun);
+				ssystem->playSound(awp_distance, 0, false, &ch_gun2); //사운드 재생
 				ch_reload->stop();
 				//볼트 작동 소리도 같이 출력
 				ssystem->playSound(sniper_bolt, 0, false, &ch_reload);
 				is_click = FALSE;
+				//탄피를 배출할 준비를 한다.
+				cat_ready = 1;
 				break;
 			}
 
-			gc[cdx].x = CM_x + 50; gc[cdx].y = CM_y + 50; gc[cdx].frame = 1;
-			std::random_device rd_cat;
-			std::mt19937 gen(rd_cat());
+			if (GUN_number != awp) {
+				if (CM_img_dir == 0)
+					gc[cdx].x = CM_x + 10;
 
-			//탄피 랜덤 속도 생성
-			std::uniform_int_distribution<int> cat_rand(6, 12); 
-			gc[cdx].acc = cat_rand(gen);
-			std::uniform_int_distribution<int> speed_rand(10, 15);
-			gc[cdx].x_speed = speed_rand(gen);
+				else if (CM_img_dir == 1)
+					gc[cdx].x = CM_x + 90;
 
-			gc[cdx].motion_dir = 1; //1: up 2: down
-			if (CM_img_dir == 0)
-				gc[cdx++].dir = 0;
-			else if (CM_img_dir == 1)
-				gc[cdx++].dir = 1;
+				gc[cdx].y = CM_y + 50; gc[cdx].frame = 1;
+				std::random_device rd_cat;
+				std::mt19937 gen(rd_cat());
+
+				//탄피 랜덤 속도 생성
+				std::uniform_int_distribution<int> cat_rand(6, 12);
+				gc[cdx].acc = cat_rand(gen);
+				std::uniform_int_distribution<int> speed_rand(10, 15);
+				gc[cdx].x_speed = speed_rand(gen);
+
+				gc[cdx].motion_dir = 1; //1: up 2: down
+				if (CM_img_dir == 0)
+					gc[cdx++].dir = 0;
+				else if (CM_img_dir == 1)
+					gc[cdx++].dir = 1;
+			}
 		}
 		//is_hit 다시 초기화
 		is_hit = FALSE;
 	}
+}
+
+void make_cat_awp() {
+	if (CM_img_dir == 0)
+		gc[cdx].x = CM_x + 10;
+
+	else if (CM_img_dir == 1)
+		gc[cdx].x = CM_x + 90;
+
+	gc[cdx].y = CM_y + 50; gc[cdx].frame = 1;
+	std::random_device rd_cat;
+	std::mt19937 gen(rd_cat());
+
+	//탄피 랜덤 속도 생성
+	std::uniform_int_distribution<int> cat_rand(6, 12);
+	gc[cdx].acc = cat_rand(gen);
+	std::uniform_int_distribution<int> speed_rand(10, 15);
+	gc[cdx].x_speed = speed_rand(gen);
+
+	gc[cdx].motion_dir = 1; //1: up 2: down
+	if (CM_img_dir == 0)
+		gc[cdx++].dir = 0;
+	else if (CM_img_dir == 1)
+		gc[cdx++].dir = 1;
 }
 
 //사격 관련 애니메이션 업데이트
@@ -1161,6 +1216,7 @@ void update_shoot_animation() {
 	//사격 시 화면 흔들림
 	//좌측 값: 흔들리는 정도, 오른쪽 값: 흔들리는 시간
 	if (shake_effect == 1) make_shake(Gun::shake(GUN_number), Gun::shake_time(GUN_number));
+	
 		
 	//아주 짧은 시간동안 총알의 궤적을 그린다.
 	if (is_draw == TRUE) { 
@@ -1232,59 +1288,53 @@ void update_shoot_animation() {
 
 	//탄피 회전 및 탄피 떨어지는 애니메이션
 	for (int i = cdx - 1; i >= 0; i--) {
+		//어느 방향에서 총을 쐈냐에 따라 탄피 회전 방향이 달라짐
+		//motion_dir가 -1이 된 탄피는 더 이상 회전하지 않음
 		if (gc[i].motion_dir != -1) {
 			if (gc[i].dir == 0) {
-				if (gc[i].frame < 4)
-					gc[i].frame++;
-				if (gc[i].frame == 4)
-					gc[i].frame = 0;
+				if (gc[i].frame < 4) gc[i].frame++; 
+				if (gc[i].frame == 4) gc[i].frame = 0; 
 			}
 
 			else if (gc[i].dir == 1) {
-				if (gc[i].frame > 0)
-					gc[i].frame --;
-				if (gc[i].frame == 0)
-					gc[i].frame = 4;
+				if (gc[i].frame > 0) gc[i].frame --; 
+				if (gc[i].frame == 0) gc[i].frame = 4; 
 			}
 		}
 	
 
 		if (gc[i].dir == 0) { 
+			//탄피가 총 밖으로 배출되며 살짝 올라간다
 			if (gc[i].motion_dir == 1) {
 				gc[i].x += gc[i].x_speed;
-				if (gc[i].acc > 0)
-					gc[i].y -= gc[i].acc--;
-
-				if (gc[i].acc == 0)
-					gc[i].motion_dir = 2;
+				if (gc[i].acc > 0) gc[i].y -= gc[i].acc--; 
+				if (gc[i].acc == 0) gc[i].motion_dir = 2; 
 			}
 			
-
+			//탄피가 땅으로 떨어진다
 			else if (gc[i].motion_dir == 2) {
-				gc[i].x += gc[i].x_speed;
-				gc[i].y += gc[i].acc++;
+				gc[i].x += gc[i].x_speed; gc[i].y += gc[i].acc++; 
 				if (gc[i].y >= 700) {
-					gc[i].motion_dir = 3;
-					gc[i].acc = 0;
+					ch_cat->stop(); ssystem->playSound(cat_hit_ground, 0, false, &ch_cat); 
+					gc[i].motion_dir = 3; gc[i].acc = 0; 
 				}
 			}
-					
+			
+			//탄피가 땅에 튕긴다
 			else if (gc[i].motion_dir == 3) {
 				gc[i].x += gc[i].x_speed - 2;
-				if (gc[i].acc < 12)
-					gc[i].y -= gc[i].acc++;
+				if (gc[i].acc < 12) gc[i].y -= gc[i].acc++; 
 				if (gc[i].acc == 12) {
-					gc[i].motion_dir = 4;
-					gc[i].acc = 0;
+					gc[i].motion_dir = 4; gc[i].acc = 0; 
 				}
 			}
 
+			//탄피는 더 이상 튕기지 않는다
 			else if (gc[i].motion_dir == 4) {
-				gc[i].x += gc[i].x_speed - 2;
-				gc[i].y += gc[i].acc++;
+				gc[i].x += gc[i].x_speed - 2; gc[i].y += gc[i].acc++; 
 				if (gc[i].y >= 700) {
-					gc[i].motion_dir = -1;
-					gc[i].frame = 0;
+					ch_cat->stop(); ssystem->playSound(cat_stop, 0, false, &ch_cat); 
+					gc[i].motion_dir = -1; gc[i].frame = 0; 
 				}
 			}
 		}
@@ -1292,39 +1342,32 @@ void update_shoot_animation() {
 		else if (gc[i].dir == 1) {
 			if (gc[i].motion_dir == 1) {
 				gc[i].x -= gc[i].x_speed;
-				if (gc[i].acc > 0)
-					gc[i].y -= gc[i].acc--;
-
-				if (gc[i].acc == 0)
-					gc[i].motion_dir = 2;
+				if (gc[i].acc > 0) gc[i].y -= gc[i].acc--; 
+				if (gc[i].acc == 0) gc[i].motion_dir = 2; 
 			}
 
 
 			else if (gc[i].motion_dir == 2) {
-				gc[i].x -= gc[i].x_speed;
-				gc[i].y += gc[i].acc++;
+				gc[i].x -= gc[i].x_speed; gc[i].y += gc[i].acc++; 
 				if (gc[i].y >= 700) {
-					gc[i].motion_dir = 3;
-					gc[i].acc = 0;
+					ch_cat->stop(); ssystem->playSound(cat_hit_ground, 0, false, &ch_cat); 
+					gc[i].motion_dir = 3; gc[i].acc = 0; 
 				}
 			}
 
 			else if (gc[i].motion_dir == 3) {
 				gc[i].x -= gc[i].x_speed - 2;
-				if (gc[i].acc < 12)
-					gc[i].y -= gc[i].acc++;
+				if (gc[i].acc < 12) gc[i].y -= gc[i].acc++; 
 				if (gc[i].acc == 12) {
-					gc[i].motion_dir = 4;
-					gc[i].acc = 0;
+					gc[i].motion_dir = 4; gc[i].acc = 0; 
 				}
 			}
 
 			else if (gc[i].motion_dir == 4) {
-				gc[i].x -= gc[i].x_speed - 2;
-				gc[i].y += gc[i].acc++;
+				gc[i].x -= gc[i].x_speed - 2; gc[i].y += gc[i].acc++; 
 				if (gc[i].y >= 700) {
-					gc[i].motion_dir = -1;
-					gc[i].frame = 0;
+					ch_cat->stop(); ssystem->playSound(cat_stop, 0, false, &ch_cat); 
+					gc[i].motion_dir = -1; gc[i].frame = 0; 
 				}
 			}
 		}
@@ -1699,17 +1742,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				if (ddx > 0) {
 					if (delete_delay < 200) delete_delay++;
 					if (delete_delay == 200) {
-						push_dead(ddx--);
-						delete_delay = 0;
+						push_dead(ddx--); delete_delay = 0; 
 					}
 				}
 
 				//탄피 인덱스 삭제 
 				if (cdx > 5) {
-					if (cat_delete_delay < 10) cat_delete_delay++;
-					if (cat_delete_delay == 10) {
-						cat_delete_delay = 0;
-						push_cat(cdx--);
+					if (GUN_number == mg_42) {
+						if (cat_delete_delay < 3) cat_delete_delay++;
+						if (cat_delete_delay == 3) {
+							cat_delete_delay = 0;  push_cat(cdx--);
+						}
+					}
+					 if (GUN_number != mg_42) {
+						 if (cat_delete_delay < 8) cat_delete_delay++;
+						 if (cat_delete_delay == 8) {
+							 cat_delete_delay = 0; push_cat(cdx--);
+						 }
 					}
 				}
 
@@ -1717,8 +1766,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				if (health < 100) {
 					if(recovery_delay < 100) recovery_delay++;
 					if (recovery_delay == 100) {
-						health++;
-						recovery_delay = 0;
+						health++; recovery_delay = 0; 
+					}
+				}
+
+				//awp의 경우 볼트를 당겨야 탄피가 배출된다.
+				if (cat_ready == 1) {
+					if (awp_cat_delay < 33)awp_cat_delay++;
+					if (awp_cat_delay == 33) {
+						awp_cat_delay = 0; cat_ready = 0; make_cat_awp(); 
 					}
 				}
 			}
@@ -1742,8 +1798,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 
 			if (manager.isGameOver()) {
-				if (death_acc > 0)
-					death_x += death_acc--;
+				if (death_acc > 0) death_x += death_acc--;
 			}
 
 			play_button_sound();
