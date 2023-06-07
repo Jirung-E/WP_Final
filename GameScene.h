@@ -2,7 +2,6 @@
 
 #include "Scene.h"
 #include "Map.h"
-#include "Player.h"
 
 #include <list>
 #include <ctime>
@@ -29,18 +28,12 @@ private:
     clock_t start_time;
     clock_t end_time;
 
-    Player player;
-
 public:
     GameScene();
 
 public:
     void setUp();
     void update(const POINT& point);
-    void updatePlayer(const POINT& point);
-
-    void moveLeft();
-    void moveRight();
 
     void togglePauseState();
     void pause();

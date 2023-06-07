@@ -92,12 +92,6 @@ void GameManager::keyboardInput(const HWND& hWnd, int keycode) {
 				}
 			}
 			break;
-		case L'a': case L'A':
-			game_scene.moveLeft();
-			break;
-		case L'd': case L'D':
-			game_scene.moveRight();
-			break;
 		}
 		break;
 	case Armory:

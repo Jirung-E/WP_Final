@@ -1655,6 +1655,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hdc, mdc;  PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt;
 	static bool left_pressed = false;
 	static bool right_pressed = false;
+	static bool jumping = false;
 
 	switch(uMsg) {
 	case WM_CREATE:
@@ -1704,6 +1705,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					}
 				}
 				break;
+			case VK_SPACE:
+				jumping = true;
+				break;
 			}
 		}
 		manager.keyboardInput(hWnd, wParam);
@@ -1729,6 +1733,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				CM_move_dir = -1;
 			}
 			right_pressed = false;
+			break;
+		case VK_SPACE:
+			jumping = false;
 			break;
 		}
 		break;
@@ -1776,16 +1783,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		case UPDATE: //게임 전체 타이머
 			GetClientRect(hWnd, &rt); manager.update(hWnd);
 
-			// 점프
-			if(GetAsyncKeyState(VK_SPACE) & 0x8000 && space_pressed == 0) {
-				if(space_pressed == 0 && is_zoom == FALSE) {
-					CM_jump = 1; space_pressed = 1;
-					is_zoom = FALSE;
-					ch_jump->stop();
-					ssystem->playSound(jump, 0, false, &ch_jump); //사운드 재생
-				}
-			}
-
 			//메인 화면 브금
 			if (manager.getCurrentSceneID() == Main && main_bgm_on == FALSE) {
 				ch_bgm->stop();
@@ -1816,6 +1813,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 
 			if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
+				// 점프
+				if(jumping && space_pressed == 0) {
+					if(space_pressed == 0 && is_zoom == FALSE) {
+						CM_jump = 1; space_pressed = 1;
+						is_zoom = FALSE;
+						ch_jump->stop();
+						ssystem->playSound(jump, 0, false, &ch_jump); //사운드 재생
+					}
+				}
 				//인 게임 브금
 				if (game_bgm_on == FALSE) {
 					ch_bgm->stop();
