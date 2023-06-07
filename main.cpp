@@ -3,7 +3,6 @@
 #include <atlImage.h>
 #include <math.h>
 #include <random>
-#include <iostream>
 #include "GameManager.h"
 #include "monster_info.h"//몬스터 정보 헤더
 #include "ammo.h"        //총알 정보 헤더
@@ -95,7 +94,7 @@ extern dead_location dl[100];
 extern gun_catridge gc[500];
 
 enum Timer {
-	KEYDOWN, UPDATE
+	UPDATE
 };
 
 //마우스 좌표
@@ -1472,48 +1471,6 @@ void check_monster_attack() {
 	}
 }
 
-
-
-//WM_KEYDOWN
-void wm_keydown() {
-	//좌측 이동
-	if (is_zoom == FALSE) {
-		if (GetAsyncKeyState('A') & 0x8000)  CM_move_dir = 0;
-
-		//우측 이동
-		else if (GetAsyncKeyState('D') & 0x8000)   CM_move_dir = 1;
-	}
-
-	//재장전
-	if (GetAsyncKeyState('R') & 0x8000)
-		if (r_pressed == 0 && reload == 0) {
-			reload = 1; r_pressed = 1;
-			if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
-				ch_reload->stop(); //사운드 정지
-				ssystem->playSound(rifle_reload, 0, false, &ch_reload); //사운드 재생
-			}
-			if (GUN_number == mg_42) {
-				ch_reload->stop(); //사운드 정지
-				ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생
-			}
-			if (GUN_number == awp) {
-				ch_reload->stop();
-				ssystem->playSound(sniper_reload, 0, false, &ch_reload);
-				is_zoom = FALSE; avail_awp = FALSE;
-			}
-		}
-
-	//점프
-	if (GetAsyncKeyState(VK_SPACE) & 0x8000 && space_pressed == 0) {
-		if (space_pressed == 0 && is_zoom == FALSE) {
-			CM_jump = 1; space_pressed = 1;
-			is_zoom = FALSE;
-			ch_jump->stop();
-			ssystem->playSound(jump, 0, false, &ch_jump); //사운드 재생
-		}
-	}
-}
-
 //LBUTTONDOWN
 void wm_lbuttondown() {
 	//awp가 아닌 다른 총은 즉시 발사 가능
@@ -1696,14 +1653,14 @@ void wm_paint(HDC mdc, RECT rt) {
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hdc, mdc;  PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt;
-
+	static bool left_pressed = false;
+	static bool right_pressed = false;
 
 	switch(uMsg) {
 	case WM_CREATE:
 		set_FMOD();						  //FMOD 초기 세팅
 		IMG_FILE_LOAD();                  //이미지 로드 함수
 		CM_x = 700, CM_y = 600;           //초기 플레이어 위치
-		SetTimer(hWnd, KEYDOWN, 0, NULL); //KEYDOWN 전용 타이머, 이 타이머에 키보드 입력을 제외한 어떠한 다른것도 작성하지 말 것!
 		SetTimer(hWnd, UPDATE, 5, NULL);  //게임 전체 타이머, 추후 애니메이션 전용 타이머도 추가 예정
 		break;
 
@@ -1715,11 +1672,66 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_KEYDOWN:
-		manager.keyboardInput(hWnd, wParam); break;
+		if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
+			switch(wParam) {
+			case L'A': case L'a':
+				if(is_zoom == FALSE) {
+					CM_move_dir = 0;
+					left_pressed = true;
+				}
+				break;
+			case L'D': case L'd':
+				if(is_zoom == FALSE) {
+					CM_move_dir = 1;
+					right_pressed = true;
+				}
+				break;
+			case L'R': case L'r':
+				if(r_pressed == 0 && reload == 0) {
+					reload = 1; r_pressed = 1;
+					if(GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
+						ch_reload->stop(); //사운드 정지
+						ssystem->playSound(rifle_reload, 0, false, &ch_reload); //사운드 재생
+					}
+					if(GUN_number == mg_42) {
+						ch_reload->stop(); //사운드 정지
+						ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생
+					}
+					if(GUN_number == awp) {
+						ch_reload->stop();
+						ssystem->playSound(sniper_reload, 0, false, &ch_reload);
+						is_zoom = FALSE; avail_awp = FALSE;
+					}
+				}
+				break;
+			}
+		}
+		manager.keyboardInput(hWnd, wParam);
+		break;
 
 		//정지상태로 변경
 	case WM_KEYUP:
-		CM_move_dir = -1; break;
+		switch(wParam) {
+		case L'A': case L'a':
+			if(right_pressed) {
+				CM_move_dir = 1;
+			}
+			else {
+				CM_move_dir = -1;
+			}
+			left_pressed = false;
+			break;
+		case L'D': case L'd':
+			if(left_pressed) {
+				CM_move_dir = 0;
+			}
+			else {
+				CM_move_dir = -1;
+			}
+			right_pressed = false;
+			break;
+		}
+		break;
 
 	case WM_LBUTTONDOWN:
 		if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver() && can_shoot == TRUE) wm_lbuttondown();
@@ -1761,12 +1773,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_TIMER:
 		switch(wParam) {
-		case KEYDOWN: //키보드 입력 전용 타이머. 이동과 점프를 동시에 할 수 있음.
-			if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) wm_keydown();
-			break;
-
 		case UPDATE: //게임 전체 타이머
 			GetClientRect(hWnd, &rt); manager.update(hWnd);
+
+			// 점프
+			if(GetAsyncKeyState(VK_SPACE) & 0x8000 && space_pressed == 0) {
+				if(space_pressed == 0 && is_zoom == FALSE) {
+					CM_jump = 1; space_pressed = 1;
+					is_zoom = FALSE;
+					ch_jump->stop();
+					ssystem->playSound(jump, 0, false, &ch_jump); //사운드 재생
+				}
+			}
 
 			//메인 화면 브금
 			if (manager.getCurrentSceneID() == Main && main_bgm_on == FALSE) {
@@ -1958,7 +1976,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	WndClass.lpszClassName = lpszClass;
 	WndClass.hIconSm = LoadIcon(NULL, IDI_QUESTION);
 	RegisterClassEx(&WndClass);
-	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_EX_TOPMOST, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
+	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_EX_TOPMOST | WS_SIZEBOX, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
