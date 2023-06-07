@@ -60,6 +60,8 @@ void GameScene::setUp() {
     shoot_delay = 0;
     after_delay = 0;
     var = 0;
+    cat_ready = 0;
+    awp_cat_delay = 0;
 
     // 라운드 초기화
     game_round = 1;

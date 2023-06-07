@@ -9,6 +9,11 @@ extern double CM_x, CM_y;    //플레이어 캐릭터의 위치
 extern bool is_zoom;
 extern bool avail_awp;
 
+//awp는 볼트를 당겨야 탄피가 배출되므로 딜레이를 주어 탄피를 생성한다.
+//오류가 나서 BOOL 대신에 int로 대체
+extern int cat_ready; 
+extern int awp_cat_delay;
+
 extern int health;
 extern int recovery_delay;
 

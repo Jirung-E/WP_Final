@@ -25,6 +25,7 @@ background_image { L"./res/Armory_background(temp).jpg" } {
 }
 
 
+
 void MainScene::draw(const HDC& hdc) const {
     background_image.draw(hdc, valid_area);
 

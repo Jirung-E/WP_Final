@@ -2,10 +2,6 @@
 
 #include "images.h"
 
-//BOOL로 하면 오류가 나서 int로 대체
-int cat_ready = 0;
-int awp_cat_delay = 0;
-
 int Gun::damage(int gun_id) {
     switch(gun_id) {
     case scar_h:

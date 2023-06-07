@@ -77,6 +77,8 @@ static BOOL main_bgm_on = FALSE;
 static BOOL game_bgm_on = FALSE;
 static BOOL gameover_bgm_on = FALSE;
 static BOOL pause_bgm_on = FALSE;
+//수류탄 폭발음 중복 재생 방지
+static BOOL boom_sound = FALSE;
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -103,12 +105,8 @@ enum Timer {
 static double mx, my;
 //마우스 클릭 여부
 static BOOL is_click = FALSE;
-
 //TRUE일 경우 일시정지 화면이 사라지는 애니메이션 재생
 extern BOOL is_resumed;
-
-//수류탄 폭발음 중복 재생 방지
-static BOOL boom_sound = FALSE;
 
 //이미지 파일 로드
 void IMG_FILE_LOAD() {
@@ -258,80 +256,64 @@ void set_FMOD() {
 
 //몬스터 공격 사운드
 void play_attack_sound() {
-	std::random_device rd_sound;
-	std::mt19937 gen(rd_sound());
+	std::random_device rd_sound; std::mt19937 gen(rd_sound()); 
 	std::uniform_int_distribution<int> rand_sound(0, 1);
-
-	if (rand_sound(gen) == 0)
-		ssystem->playSound(mst_attack_sound1, 0, false, &ch_mst_attack_sound);
-
-	else if (rand_sound(gen) == 1)
-		ssystem->playSound(mst_attack_sound2, 0, false, &ch_mst_attack_sound);
+	ch_mst_attack_sound->stop();
+	if (rand_sound(gen) == 0) ssystem->playSound(mst_attack_sound1, 0, false, &ch_mst_attack_sound); 
+	else if (rand_sound(gen) == 1) ssystem->playSound(mst_attack_sound2, 0, false, &ch_mst_attack_sound); 
 }
 
 //몬스터 idle 사운드
 void play_idle_sound() {
-	std::random_device rd_sound;
-	std::mt19937 gen(rd_sound());
-	std::uniform_int_distribution<int> rand_sound(0, 1);
-
-	ch_mst_idle_sound->stop();
-
-	if (rand_sound(gen) == 0)
-		ssystem->playSound(mst_idle_sound1, 0, false, &ch_mst_idle_sound);
-	else if (rand_sound(gen) == 1)
-		ssystem->playSound(mst_idle_sound2, 0, false, &ch_mst_idle_sound);
+	std::random_device rd_sound; std::mt19937 gen(rd_sound()); 
+	std::uniform_int_distribution<int> rand_sound(0, 1); 
+	ch_mst_idle_sound->stop(); 
+	if (rand_sound(gen) == 0) ssystem->playSound(mst_idle_sound1, 0, false, &ch_mst_idle_sound); 
+	else if (rand_sound(gen) == 1) ssystem->playSound(mst_idle_sound2, 0, false, &ch_mst_idle_sound); 
 }
 
 //버튼 사운드
 void play_button_sound() {
+	//일반 버튼 클릭
 	if (button_feed_clickScene == TRUE) {
-		ch_button->stop();
-		ssystem->playSound(button_sound, 0, false, &ch_button);
+		ch_button->stop(); ssystem->playSound(button_sound, 0, false, &ch_button); 
 		button_feed_clickScene = FALSE;
 	}
-
+	//총기 버튼 클릭
 	if (button_feed_armory_button == TRUE) {
-		ch_button->stop();
-		ssystem->playSound(weapon_button, 0, false, &ch_button);
+		ch_button->stop(); ssystem->playSound(weapon_button, 0, false, &ch_button); 
 		button_feed_armory_button = FALSE;
 	}
-
+	//총기 선택 클릭
 	if (button_feed_armory_select == TRUE) {
-		ch_button->stop();
-		ssystem->playSound(weapon_select, 0, false, &ch_button);
+		ch_button->stop(); ssystem->playSound(weapon_select, 0, false, &ch_button); 
 		button_feed_armory_select = FALSE;
 	}
-
+	//시작 버튼 클릭
 	if (button_feed_clickScene_start == TRUE) {
-		ch_button->stop();
-		ssystem->playSound(start_button, 0, false, &ch_button);
+		ch_button->stop(); ssystem->playSound(start_button, 0, false, &ch_button); 
 		button_feed_clickScene_start = FALSE;
 	}
-
+	//나가기 버튼 클릭
 	if (button_feed_clickScene_quit == TRUE) {
-		ch_button->stop();
-		ssystem->playSound(quit_button, 0, false, &ch_button);
+		ch_button->stop(); ssystem->playSound(quit_button, 0, false, &ch_button); 
 		button_feed_clickScene_quit = FALSE;
 	}
-
+	//일시정지 사운드
 	if (to_pause == TRUE) {
-		ch_button->stop();
-		ssystem->playSound(pause, 0, false, &ch_button);
+		ch_button->stop(); ssystem->playSound(pause, 0, false, &ch_button); 
 		to_pause = FALSE;
 	}
-
+	//계속하기 사운드
 	if (to_resume == TRUE) {
-		ch_button->stop();
-		ssystem->playSound(resume, 0, false, &ch_button);
+		ch_button->stop();ssystem->playSound(resume, 0, false, &ch_button); 
 		to_resume = FALSE;
 	}
 }
 
 //광클 방지
 void mouse_fastClick_prevention() {
-	if (after_delay < Gun::shoot_speed(GUN_number))
-		after_delay++;
+	if (after_delay < Gun::shoot_speed(GUN_number))	after_delay++; 
 	if (after_delay == Gun::shoot_speed(GUN_number)) {
 		can_shoot = TRUE; after_delay = 0;
 	}
@@ -352,25 +334,20 @@ void show_target(HDC mdc, int mouse_x, int mouse_y, double var) {
 	MoveToEx(mdc, mouse_x, mouse_y + 12 + var, NULL);
 	LineTo(mdc, mouse_x, mouse_y + 41 + var);
 
-	SelectObject(mdc, oldpen);
-	DeleteObject(hpen);
-
+	SelectObject(mdc, oldpen); DeleteObject(hpen);
+	 
 	hpen = CreatePen(PS_SOLID, 5, RGB(40, 40, 40));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
 	//awp일 경우 관통 범위 표시
 	if (GUN_number == awp) {
 		MoveToEx(mdc, mouse_x - 500, mouse_y - 40, NULL);
-		LineTo(mdc, mouse_x - 500, mouse_y + 40);
-
+		LineTo(mdc, mouse_x - 500, mouse_y + 40); 
 		MoveToEx(mdc, mouse_x + 500, mouse_y - 40, NULL);
 		LineTo(mdc, mouse_x + 500, mouse_y + 40);
-	}
-
-	SelectObject(mdc, oldpen);
-	DeleteObject(hpen);
-
-
+	} 
+	SelectObject(mdc, oldpen); DeleteObject(hpen);
+	 
 	hpen = CreatePen(PS_SOLID, 5, RGB(0, 255, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
@@ -383,9 +360,7 @@ void show_target(HDC mdc, int mouse_x, int mouse_y, double var) {
 	MoveToEx(mdc, mouse_x, mouse_y + 13 + var, NULL);
 	LineTo(mdc, mouse_x, mouse_y + 40 + var);
 
-	SelectObject(mdc, oldpen);
-	DeleteObject(hpen);
-
+	SelectObject(mdc, oldpen); DeleteObject(hpen); 
 }
 
 //히트 포인트 표시
@@ -421,25 +396,14 @@ void show_zoom_complited(HDC mdc) {
 void find_target(int mx, int my) {
 	//마우스 좌표 mx +- 500 범위 내에 몬스터가 있을 시 관통 대상이 된다. 
 	for (int i = 0; i < mdx_r; i++) {
-		if (CM_img_dir == 0 && mst_r[i].x <= mx && mst_r[i].x >= mx - 500 && my >= mst_r[i].y && my <= mst_r[i].y + 100)
-			mst_r[i].targeted = 1;
-
-		else if (CM_img_dir == 1 && mst_r[i].x + 100 >= mx && mst_r[i].x + 100 <= mx + 500 && my >= mst_r[i].y && my <= mst_r[i].y + 100)
-			mst_r[i].targeted = 1;
-
-		else
-			mst_r[i].targeted = 0;
-	}
-
+		if (CM_img_dir == 0 && mst_r[i].x <= mx && mst_r[i].x >= mx - 500 && my >= mst_r[i].y && my <= mst_r[i].y + 100) mst_r[i].targeted = 1; 
+		else if (CM_img_dir == 1 && mst_r[i].x + 100 >= mx && mst_r[i].x + 100 <= mx + 500 && my >= mst_r[i].y && my <= mst_r[i].y + 100) mst_r[i].targeted = 1; 
+		else mst_r[i].targeted = 0; 	
+	} 
 	for (int i = 0; i < mdx_big; i++) {
-		if (CM_img_dir == 0 && mst_big[i].x <= mx && mst_big[i].x >= mx - 500 && my >= mst_big[i].y && my <= mst_big[i].y + 200)
-			mst_big[i].targeted = 1;
-
-		else if (CM_img_dir == 1 && mst_big[i].x + 200 >= mx && mst_big[i].x + 200 <= mx + 500 && my >= mst_big[i].y && my <= mst_big[i].y + 200)
-			mst_big[i].targeted = 1;
-
-		else
-			mst_big[i].targeted = 0;
+		if (CM_img_dir == 0 && mst_big[i].x <= mx && mst_big[i].x >= mx - 500 && my >= mst_big[i].y && my <= mst_big[i].y + 200) mst_big[i].targeted = 1; 
+		else if (CM_img_dir == 1 && mst_big[i].x + 200 >= mx && mst_big[i].x + 200 <= mx + 500 && my >= mst_big[i].y && my <= mst_big[i].y + 200) mst_big[i].targeted = 1; 
+		else mst_big[i].targeted = 0; 	
 	}
 }
 
@@ -447,13 +411,10 @@ void find_target(int mx, int my) {
 void show_awp_targeted(HDC mdc) {
 	//관통 대상이 된 몬스터는 따로 표시된다.
 	for (int i = 0; i < mdx_r; i++) {
-		if (mst_r[i].targeted == 1)
-			zoom_targeted.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y - 90 + ss_x + landing_shake, 100, 100, 0, 0, 100, 100);
-	}
-
+		if (mst_r[i].targeted == 1) zoom_targeted.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y - 90 + ss_x + landing_shake, 100, 100, 0, 0, 100, 100); 
+	} 
 	for (int i = 0; i < mdx_big; i++) {
-		if (mst_big[i].targeted == 1)
-			zoom_targeted.Draw(mdc, mst_big[i].x + 50 + ss_x, mst_big[i].y - 90 + landing_shake, 100, 100, 0, 0, 100, 100);
+		if (mst_big[i].targeted == 1) zoom_targeted.Draw(mdc, mst_big[i].x + 50 + ss_x, mst_big[i].y - 90 + landing_shake, 100, 100, 0, 0, 100, 100); 
 	}
 }
 
@@ -465,51 +426,41 @@ void show_interface(HDC mdc, RECT rt) {
 
 	//수류탄 대기 시간 출력
 	show_gren_time(mdc, ss_x, ss_y, landing_shake, gren_time);
-	if (able_grenade == TRUE)
-		avail_grenade.Draw(mdc, 420 + ss_x, 680 + ss_y + landing_shake, 80, 80, 0, 0, 100, 100);
-	if(able_grenade == FALSE)
-		unavail_grenade.Draw(mdc, 420 + ss_x, 680 + ss_y + landing_shake, 80, 80, 0, 0, 100, 100);
-
-
+	if (able_grenade == TRUE) avail_grenade.Draw(mdc, 420 + ss_x, 680 + ss_y + landing_shake, 80, 80, 0, 0, 100, 100); 
+	if(able_grenade == FALSE) unavail_grenade.Draw(mdc, 420 + ss_x, 680 + ss_y + landing_shake, 80, 80, 0, 0, 100, 100);
+		 
 	//총알 아이콘
 	if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
 		AMO_w = ammo_icon.GetWidth(); AMO_h = ammo_icon.GetHeight();
 		ammo_icon.Draw(mdc, rt.right - 260 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
-	}
-
+	} 
 	if (GUN_number == mg_42) {
 		AMO_w = ammo_lmg_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
 		ammo_lmg_icon.Draw(mdc, rt.right - 230 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
-	}
-
+	} 
 	if (GUN_number == awp) {
 		AMO_w = ammo_sniper_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
 		ammo_sniper_icon.Draw(mdc, rt.right - 200 + ss_x, rt.bottom - 105 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
 	}
-
-
+	 
 	//총 아이콘 및 장탄수 출력
 	switch (GUN_number) {
 	case scar_h:
 		GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetWidth();
 		SCAR_H_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
-		break;
-
+		break; 
 	case m16:
 		GUN_w = M16_right.GetWidth(); GUN_h = M16_right.GetWidth();
 		M16_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
-		break;
-
+		break; 
 	case mp_44:
 		GUN_w = MP44_right.GetWidth(); GUN_h = MP44_right.GetWidth();
 		MP44_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
-		break;
-
+		break; 
 	case mg_42:
 		GUN_w = MG42_right.GetWidth(); GUN_h = MG42_right.GetHeight();
 		MG42_right.Draw(mdc, rt.right - 500 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 250, 150, 0, 0, GUN_w, GUN_h);
-		break;
-
+		break; 
 	case awp:
 		GUN_w = AWP_right.GetWidth(); GUN_h = AWP_right.GetHeight();
 		AWP_right.Draw(mdc, rt.right - 450 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 200, 150, 0, 0, GUN_w, GUN_h);
@@ -517,21 +468,16 @@ void show_interface(HDC mdc, RECT rt) {
 	}
 	//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
 	ammo_indicator(mdc, Gun::max_ammo(GUN_number), ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
-
-
-
+	 
 	//경험치 수치 출력
 	show_exp(mdc, experience, rt.left + 150 + ss_x, rt.top + 80 + ss_y + landing_shake);
 	exp_icon.Draw(mdc, rt.left + 20 + ss_x, rt.top + 110 + ss_y + landing_shake, 100, 50, 0, 0, 100, 50);
 	show_exp_add(mdc, prev_up, exp_x + ss_x, rt.top + 170 + ss_y + landing_shake);
-
-
+	 
 	//재장전 게이지 출력
 	if (reload == 1)
 		reload_indicator(mdc, CM_x + ss_x, CM_y - 30 + landing_shake + ss_y, CM_x + reload_x + ss_x, CM_y - 10 + landing_shake + ss_y, CM_x + ss_x, CM_y - 30 + landing_shake + ss_y, CM_x + 100 + ss_x, CM_y - 10 + landing_shake + ss_y);
-
-
-
+	 
 	//몬스터 체력 게이지 출력
 	for (int i = 0; i < mdx_r; i++)
 		monster_hp_ind(mdc, mst_r[i].x + ss_x, mst_r[i].y - 30 + landing_shake + ss_y, mst_r[i].x + mst_r[i].hp * 2 + ss_x, mst_r[i].y - 15 + landing_shake + ss_y,
@@ -561,8 +507,7 @@ void show_player(HDC mdc) {
 			if (is_zoom == TRUE) {
 				CM_w = commando_zoom_left.GetWidth(); CM_h = commando_zoom_left.GetHeight();
 				commando_zoom_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h);
-			}
-
+			} 
 			else {
 				if (is_draw == TRUE) {
 					CM_w = commando_fire_left.GetWidth(); CM_h = commando_fire_left.GetHeight();
@@ -573,8 +518,7 @@ void show_player(HDC mdc) {
 					commando_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
 				}
 			}
-		}
-
+		} 
 		else if (CM_jump == 1 || CM_jump == 2) {
 			if (is_draw == TRUE) {
 				CM_w = commando_jump_fire_left.GetWidth(); CM_h = commando_jump_fire_left.GetHeight();
@@ -591,23 +535,19 @@ void show_player(HDC mdc) {
 		case scar_h:
 			GUN_w = SCAR_H_left.GetWidth(); GUN_h = SCAR_H_left.GetHeight();
 			SCAR_H_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
-			break;
-
+			break; 
 		case m16:
 			GUN_w = M16_left.GetWidth(); GUN_h = M16_left.GetHeight();
 			M16_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
-			break;
-
+			break; 
 		case mp_44:
 			GUN_w = MP44_left.GetWidth(); GUN_h = MP44_left.GetHeight();
 			MP44_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
-			break;
-
+			break; 
 		case mg_42:
 			GUN_w = MG42_left.GetWidth(); GUN_h = MG42_left.GetHeight();
 			MG42_left.Draw(mdc, CM_x - 120 + ss_x, CM_y + landing_shake + ss_y, 200, 100, 0, 0, GUN_w, GUN_h);
-			break;
-
+			break; 
 		case awp:
 			GUN_w = AWP_left.GetWidth(); GUN_h = AWP_left.GetHeight();
 			AWP_left.Draw(mdc, CM_x - 80 +ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
@@ -616,11 +556,9 @@ void show_player(HDC mdc) {
 
 		//불꽃 좌측
 		if (is_draw == TRUE && GUN_number != mg_42 && GUN_number != awp)
-			flame_left.Draw(mdc, CM_x - 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
-
+			flame_left.Draw(mdc, CM_x - 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100); 
 		if (is_draw == TRUE && GUN_number == mg_42)
-			flame_left.Draw(mdc, CM_x - 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
-
+			flame_left.Draw(mdc, CM_x - 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100); 
 		if (is_draw == TRUE && GUN_number == awp)
 			flame_left.Draw(mdc, CM_x - 170 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
 
@@ -703,8 +641,7 @@ void make_monster(RECT rt) {
 		if (mdx_r < 99) {
 			spawn_monster_regular(mdx_r, BG_scanner, rt); mdx_r++;
 		}
-	}
-
+	}  
 	//대형 몬스터
 	spawn_timer_big--;
 	if (spawn_timer_big == 0) {
@@ -712,8 +649,7 @@ void make_monster(RECT rt) {
 		if (mdx_big < 99) {
 			spawn_monster_big(mdx_big, BG_scanner, rt); mdx_big++;
 		}
-	}
-
+	} 
 	//공중 몬스터
 	spawn_timer_air--;
 	if (spawn_timer_air == 0) {
@@ -729,67 +665,50 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 	//죽은 몬스터 출력
 	for (int i = 0; i < ddx; i++) {
 		if (dl[i].monster_type == 1) {
-			if(dl[i].dir == 0)
-				monster_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100);
-			else if(dl[i].dir == 1)
-				monster_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100);
+			if(dl[i].dir == 0) monster_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100); 
+			else if(dl[i].dir == 1) monster_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100); 
 		}
-		if (dl[i].monster_type == 2) {
-			if(dl[i].dir == 0)
-				monster_big_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200);
-			else if (dl[i].dir == 1)
-				monster_big_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200);
+		else if (dl[i].monster_type == 2) {
+			if(dl[i].dir == 0) monster_big_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200); 
+			else if (dl[i].dir == 1) monster_big_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200); 
 		}
-		if (dl[i].monster_type == 3)
-			monster_air_dead.Draw(mdc, dl[i].x + ss_x, dl[i].y  + ss_y + landing_shake, 150, 60, 0, 0, 150, 60);
-	}
-
+		else if (dl[i].monster_type == 3) monster_air_dead.Draw(mdc, dl[i].x + ss_x, dl[i].y  + ss_y + landing_shake, 150, 60, 0, 0, 150, 60); 
+	} 
 	//일반 몬스터 출력
 	for (int i = 0; i < mdx_r; i++) {
 		switch (mst_r[i].img_dir) {
 		case 0:
-			MST_w = monster_left.GetWidth();
-			MST_h = monster_left.GetHeight();
+			MST_w = monster_left.GetWidth(); MST_h = monster_left.GetHeight(); 
 			monster_left.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y + ss_y + landing_shake, 100, mst_r[i].height, 0, 0, MST_w, MST_h);
-			break;
-
+			break; 
 		case 1:
-			MST_w = monster_right.GetWidth();
-			MST_h = monster_right.GetHeight();
+			MST_w = monster_right.GetWidth(); MST_h = monster_right.GetHeight(); 
 			monster_right.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y + ss_y + landing_shake, 100, mst_r[i].height, 0, 0, MST_w, MST_h);
 			break;
 		}
-	}
-
+	} 
 	//대형 몬스터 출력
 	for (int i = 0; i < mdx_big; i++) {
 		switch (mst_big[i].img_dir) {
 		case 0:
-			MST_big_w = monster_big_left.GetWidth();
-			MST_big_h = monster_big_left.GetHeight();
+			MST_big_w = monster_big_left.GetWidth(); MST_big_h = monster_big_left.GetHeight(); 
 			monster_big_left.Draw(mdc, mst_big[i].x + ss_x, mst_big[i].y + ss_y + landing_shake, 200, mst_big[i].height, 0, 0, MST_big_w, MST_big_h);
-			break;
-
+			break; 
 		case 1:
-			MST_big_w = monster_big_right.GetWidth();
-			MST_big_h = monster_big_right.GetHeight();
+			MST_big_w = monster_big_right.GetWidth(); MST_big_h = monster_big_right.GetHeight(); 
 			monster_big_right.Draw(mdc, mst_big[i].x + ss_x, mst_big[i].y + ss_y + landing_shake, 200, mst_big[i].height , 0, 0, MST_big_w, MST_big_h);
 			break;
 		}
-	}
-
+	} 
 	//공중 몬스터 출력
 	for (int i = 0; i < mdx_air; i++) {
 		switch (mst_air[i].img_dir) {
 		case 0:
-			MST_air_w = monster_air_left[air].GetWidth();
-			MST_air_h = monster_air_left[air].GetHeight();
+			MST_air_w = monster_air_left[air].GetWidth(); MST_air_h = monster_air_left[air].GetHeight(); 
 			monster_air_left[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, mst_air[i].height, 0, 0, MST_air_w, MST_air_h);
-			break;
-
+			break; 
 		case 1:
-			MST_air_w = monster_air_right[air].GetWidth();
-			MST_air_h = monster_air_right[air].GetHeight();
+			MST_air_w = monster_air_right[air].GetWidth(); MST_air_h = monster_air_right[air].GetHeight(); 
 			monster_air_right[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, mst_air[i].height, 0, 0, MST_air_w, MST_air_h);
 			break;
 		}
@@ -798,9 +717,8 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 
 //탄피 출력
 void show_catridge(HDC mdc, int ss_x, int ss_y, int landing_shake) {
-	for (int i = cdx - 1; i >= 0; i--) {
+	for (int i = cdx - 1; i >= 0; i--)
 		catridge[gc[i].frame].Draw(mdc, gc[i].x + ss_x, gc[i].y + ss_y + landing_shake, 20, 20, 0, 0, 20, 20);
-	}
 }
 
 //수류탄 출력
@@ -813,10 +731,9 @@ void show_grenade(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 
 //플레이어 이미지 방향 업데이트
 void update_player_direction(int mouse_x) {
-	if(mouse_x < CM_x + 50) //마우스 좌표가 플레이어보다 왼쪽에 있으면 왼쪽을 바라보고, 오른쪽에 있으면 오른쪽을 바라봄
-		CM_img_dir = 0;
-	if(mouse_x > CM_x + 50)
-		CM_img_dir = 1;
+	if(mouse_x < CM_x + 50) CM_img_dir = 0; 
+	if(mouse_x > CM_x + 50) CM_img_dir = 1; 
+	//마우스 좌표가 플레이어보다 왼쪽에 있으면 왼쪽을 바라보고, 오른쪽에 있으면 오른쪽을 바라봄
 }
 
 //플레이어 위치 업데이트
@@ -833,11 +750,9 @@ void update_player_position(RECT rt) {
 		if (CM_jump_acc == 29) { //땅에 닿으면
 			CM_jump_acc = 28; CM_jump = 0; space_pressed = 0; //플레이어는 땅에 착지하고 VK_SPACE 입력을 받을 준비를 함
 			is_land = 1;
-			ch_land->stop(); //사운드 정지
-			ssystem->playSound(land_sound, 0, false, &ch_land); //사운드 재생
+			ch_land->stop(); ssystem->playSound(land_sound, 0, false, &ch_land); //사운드 재생 
 		}
-	}
-
+	} 
 	if (is_land == 1) { //점프 후 착지 시 화면에 흔들림 발생
 		if (shake_reduce == 0) {
 			landing_shake = 30; shake_reduce = 1; //화면 전체가 30씩 내려간다.
@@ -845,74 +760,47 @@ void update_player_position(RECT rt) {
 		if (shake_reduce == 1) {
 			landing_shake -= 2;                   //시간이 지나면서 점차 원래대로 돌아온다
 			if (landing_shake == 0) {
-				is_land = 0;
-				shake_reduce = 0;
+				is_land = 0; shake_reduce = 0; 
 			}
 		}
-	}
-	
+	} 
 //좌우 이동
 	if (CM_move_dir == 0) { //좌측 이동
-		if (BG_scanner >= 10 && CM_x == 700) {  //배경 인식 좌표가 10보다 크고 플레이어 x 좌표가 700이면
-			BG_scanner -= 15;					//배경이 움직인다
-			for (int i = 0; i < mdx_r; i++)		//몬스터의 위치도 움직인다
-				mst_r[i].x += 15;
-			for (int i = 0; i < mdx_big; i++)		
-				mst_big[i].x += 15;
-			for (int i = 0; i < mdx_air; i++)
-				mst_air[i].x += 15;
-			for (int i = 0; i < ddx; i++)
-				dl[i].x += 15;
-			for (int i = 0; i < cdx; i++)
-				gc[i].x += 15;
-			gren_x += 15;
-		}
-
-		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) //배경 인식 좌표가 10이되고 플레이어가 다시 가운데로 이동할 때까지
-			CM_x -= 15;                       //플레이어만 움직인다
-
-		if (CM_x <= rt.left)  //벽에 닿으면
-			CM_x += 15;                 //이동 중지
-	}
-
+		if (BG_scanner >= 10 && CM_x == 700) {  //배경 인식 좌표가 10보다 크고 플레이어 x 좌표가 700이면 배경이 움직임
+			for (int i = 0; i < mdx_r; i++)	mst_r[i].x += 15; //나머지 모든 오브젝트들도 따라 움직임
+			for (int i = 0; i < mdx_big; i++) mst_big[i].x += 15; 
+			for (int i = 0; i < mdx_air; i++) mst_air[i].x += 15; 
+			for (int i = 0; i < ddx; i++) dl[i].x += 15; 
+			for (int i = 0; i < cdx; i++) gc[i].x += 15; 
+			gren_x += 15; BG_scanner -= 15;
+		} 
+		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) CM_x -= 15;   
+			//배경 인식 좌표가 10이되고 플레이어가 다시 가운데로 이동할 때까지 플레이어만 움직임 
+		if (CM_x <= rt.left) CM_x += 15;  
+			//벽에 닿으면 이동 중지      
+	} 
 	else if (CM_move_dir == 1) { //우측 이동
-		if (BG_scanner <= 2990 && CM_x == 700) {
-			BG_scanner += 15;
-			for (int i = 0; i < mdx_r; i++)
-				mst_r[i].x -= 15;
-			for (int i = 0; i < mdx_big; i++)
-				mst_big[i].x -= 15;
-			for (int i = 0; i < mdx_air; i++)
-				mst_air[i].x -= 15;
-			for (int i = 0; i < ddx; i++)
-				dl[i].x -= 15;
-			for (int i = 0; i < cdx; i++)
-				gc[i].x -= 15;
-			gren_x -= 15;
-		}
-
-		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700))
-			CM_x += 15;
-
-		if (CM_x + 100 >= rt.right) 
-			CM_x -= 15;
-	}
-	
+		if (BG_scanner <= 2990 && CM_x == 700) { 
+			for (int i = 0; i < mdx_r; i++) mst_r[i].x -= 15; 
+			for (int i = 0; i < mdx_big; i++) mst_big[i].x -= 15; 
+			for (int i = 0; i < mdx_air; i++) mst_air[i].x -= 15; 
+			for (int i = 0; i < ddx; i++) dl[i].x -= 15; 
+			for (int i = 0; i < cdx; i++) gc[i].x -= 15; 
+			gren_x -= 15; BG_scanner += 15;
+		} 
+		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) CM_x += 15; 
+		if (CM_x + 100 >= rt.right) CM_x -= 15; 
+	} 
 }
 
 //몬스터 이미지 방향 업데이트
 void update_monster_direction(double CM_x) {
 	//일반 몬스터
-	for (int i = mdx_r - 1; i >= 0; i--) 
-		update_monster_dir_r(mst_r[i].x + ss_x, CM_x + ss_x, i);
-
+	for (int i = mdx_r - 1; i >= 0; i--) update_monster_dir_r(mst_r[i].x + ss_x, CM_x + ss_x, i); 
 	//대형 몬스터
-	for (int i = mdx_big - 1; i >= 0; i--) 
-		update_monster_dir_big(mst_big[i].x + ss_x, CM_x + ss_x, i);
-
+	for (int i = mdx_big - 1; i >= 0; i--) update_monster_dir_big(mst_big[i].x + ss_x, CM_x + ss_x, i); 
 	//공중 몬스터
-	for (int i = mdx_air - 1; i >= 0; i--) 
-		update_monster_dir_air(mst_air[i].x + ss_x, CM_x + ss_x, i);
+	for (int i = mdx_air - 1; i >= 0; i--) update_monster_dir_air(mst_air[i].x + ss_x, CM_x + ss_x, i); 
 }
 
 //몬스터 위치 업데이트
@@ -923,16 +811,14 @@ void update_monster_position() {
 			if (mst_r[i].img_dir == 0) mst_r[i].x -= 5; 
 			else if (mst_r[i].img_dir == 1) mst_r[i].x += 5; 
 		}
-	}
-
+	} 
 	//대형 몬스터 위치
 	for (int i = mdx_big - 1; i >= 0; i--) {
 		if (mst_big[i].x + 50 > CM_x + 4 || mst_big[i].x + 50 < CM_x - 4) {
 			if (mst_big[i].img_dir == 0) mst_big[i].x -= 3; 
 			else if (mst_big[i].img_dir == 1) mst_big[i].x += 3;
 		}
-	}
-
+	} 
 	//공중 몬스터 위치
 	for (int i = mdx_air - 1; i >= 0; i--) {
 		if (mst_air[i].x + 25 > CM_x + 4 || mst_air[i].x + 25 < CM_x - 4) {
@@ -959,8 +845,7 @@ void check_hit_awp() {
 			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
 			is_hit = TRUE;
 		}
-	}
-
+	} 
 	//관통 대상이 된 몬스터들은 모두 대미지를 입는다
 	for (int i = mdx_r - 1; i >= 0; i--) {
 		if (is_hit == TRUE && mst_r[i].targeted == 1) {
@@ -982,8 +867,7 @@ void check_hit_awp() {
 				is_kill_r = 0;
 			}
 		}
-	}
-
+	} 
 	for (int i = mdx_big - 1; i >= 0; i--) {
 		if (is_hit == TRUE && mst_big[i].targeted == 1) {
 			mst_big[i].hp = cal_damage(mst_big[i].hp, GUN_number);
@@ -1004,8 +888,7 @@ void check_hit_awp() {
 				is_kill_big = 0;
 			}
 		}
-	}
-
+	} 
 	//공중 몬스터 히트 판정 //관통 대상에서 제외
 	for (int i = mdx_air - 1; i >= 0; i--) {
 		if (hit_x >= mst_air[i].x && hit_x <= mst_air[i].x + 150 && hit_y >= mst_air[i].y && hit_y <= mst_air[i].y + 60) {
@@ -1066,8 +949,7 @@ void check_hit() {
 				is_kill = 0;
 			}
 		}
-	}
-
+	} 
 	//대형 몬스터 히트 판정
 	for (int i = mdx_big - 1; i >= 0; i --) {
 		if (hit_x >= mst_big[i].x && hit_x <= mst_big[i].x + 200 && hit_y >= mst_big[i].y && hit_y <= mst_big[i].y + 200) {
@@ -1096,8 +978,7 @@ void check_hit() {
 				is_kill = 0;
 			}
 		}
-	}
-
+	} 
 	//공중 몬스터 히트 판정
 	for (int i = mdx_air - 1; i >= 0; i --) {
 		if (hit_x >= mst_air[i].x && hit_x <= mst_air[i].x + 150 && hit_y >= mst_air[i].y && hit_y <= mst_air[i].y + 60) {
@@ -1129,8 +1010,7 @@ void check_hit() {
 
 //사격 시 화면 흔들림 생성
 void make_shake(int shake_acc, int shake_end) {
-	std::random_device rd_shake;
-	std::mt19937 gen(rd_shake());
+	std::random_device rd_shake; std::mt19937 gen(rd_shake()); 
 	std::uniform_int_distribution<int> shake_x(-shake_acc, shake_acc); //숫자가 클 수록 반동이 커 화면 흔들림이 격해짐
 	std::uniform_int_distribution<int> shake_y(-shake_acc, shake_acc); //짧은 순간에 ss_x, ss_y에 랜덤한 값을 넣어 흔들림 표현
 	ss_x = shake_x(gen); ss_y = shake_y(gen);
@@ -1146,24 +1026,20 @@ void make_shake(int shake_acc, int shake_end) {
 void make_rand_ammo(int ammo, int max_ammo) {
 	if (ammo + 1 == max_ammo) empty = 1;							//총알 소모가 정히진 값에 도달하면 더 이상 발사되지 않는다
 
-	std::random_device rd_ammo;
-	std::mt19937 gen(rd_ammo());
+	std::random_device rd_ammo; std::mt19937 gen(rd_ammo()); 
 	std::uniform_int_distribution<int> x(mx - (10 + var), mx + (10 + var)); //분산도가 넓어질수록 정확도가 떨어지게됨
 	std::uniform_int_distribution<int> y(my - (10 + var), my + (10 + var));
 	hit_x = x(gen); hit_y = y(gen);									//이 좌표가 몬스터의 이미지 안쪽에 위치해야 대미지 판정을 받는다.
 	angle = atan2(y(gen) - (CM_y + 60), x(gen) - (CM_x + 50));      //atan2 함수로 총알이 그려지는 각도를 계산한다.
 	ammo_x1 = CM_x + 50; ammo_y1 = CM_y + 60;
-	ammo_x2 = ammo_x1 + (1500 * cos(angle));
-	ammo_y2 = ammo_y1 + (1500 * sin(angle));
-
+	ammo_x2 = ammo_x1 + (1500 * cos(angle)); ammo_y2 = ammo_y1 + (1500 * sin(angle));
+	 
 	//히트 판정
-	if(GUN_number != awp)
-		check_hit();
-
+	if(GUN_number != awp) check_hit();
+		 
 	//AWP일 경우 전용 히트 판정 함수 사용
-	if (GUN_number == awp)
-		check_hit_awp();
-
+	if (GUN_number == awp) check_hit_awp();
+		 
 	is_draw = TRUE; draw_hit = TRUE; //그리기 시작
 	ind_effect = 1; shake_effect = 1; //각각 인터페이스 이펙트, 흔들림 이펙트
 	shoot_delay = 0;	//딜레이는 0이되어 다시 딜레이가 증가하기 시작
@@ -1180,8 +1056,7 @@ void shoot() {
 			make_rand_ammo(ammo, Gun::max_ammo(GUN_number)); //최대 장탄수를 오른쪽 인수에 적는다
 			var += Gun::recoil(GUN_number); ammo++;
 			is_zoom = FALSE; avail_awp = FALSE;
-			ch_gun->stop(); //사운드 정지
-			ch_gun2->stop();
+			ch_gun->stop(); ch_gun2->stop(); 
 			switch(GUN_number) {
 			case scar_h:
 				ssystem->playSound(scar_shoot, 0, false, &ch_gun); //사운드 재생
@@ -1201,38 +1076,28 @@ void shoot() {
 				break;
 			case awp:
 				ssystem->playSound(awp_shoot, 0, false, &ch_gun);
-				ssystem->playSound(awp_distance, 0, false, &ch_gun2); //사운드 재생
-				ch_reload->stop();
+				ssystem->playSound(awp_distance, 0, false, &ch_gun2); //사운드 재생 
 				//볼트 작동 소리도 같이 출력
-				ssystem->playSound(sniper_bolt, 0, false, &ch_reload);
-				is_click = FALSE;
-				//탄피를 배출할 준비를 한다.
-				cat_ready = 1;
+				ch_reload->stop(); ssystem->playSound(sniper_bolt, 0, false, &ch_reload);
+				is_click = FALSE; cat_ready = 1;
+				//탄피를 배출할 준비를 한다. 
 				break;
 			}
 
 			if (GUN_number != awp) {
-				if (CM_img_dir == 0)
-					gc[cdx].x = CM_x + 10;
-
-				else if (CM_img_dir == 1)
-					gc[cdx].x = CM_x + 90;
-
+				if (CM_img_dir == 0) gc[cdx].x = CM_x + 10; 
+				else if (CM_img_dir == 1) gc[cdx].x = CM_x + 90;
+					 
 				gc[cdx].y = CM_y + 50; gc[cdx].frame = 1;
-				std::random_device rd_cat;
-				std::mt19937 gen(rd_cat());
-
+				std::random_device rd_cat; std::mt19937 gen(rd_cat());
+				 
 				//탄피 랜덤 속도 생성
-				std::uniform_int_distribution<int> cat_rand(6, 12);
-				gc[cdx].acc = cat_rand(gen);
-				std::uniform_int_distribution<int> speed_rand(10, 15);
-				gc[cdx].x_speed = speed_rand(gen);
-
+				std::uniform_int_distribution<int> cat_rand(6, 12); gc[cdx].acc = cat_rand(gen); 
+				std::uniform_int_distribution<int> speed_rand(10, 15); gc[cdx].x_speed = speed_rand(gen);
+				 
 				gc[cdx].motion_dir = 1; //1: up 2: down
-				if (CM_img_dir == 0)
-					gc[cdx++].dir = 0;
-				else if (CM_img_dir == 1)
-					gc[cdx++].dir = 1;
+				if (CM_img_dir == 0) gc[cdx++].dir = 0; 
+				else if (CM_img_dir == 1) gc[cdx++].dir = 1; 
 			}
 		}
 		//is_hit 다시 초기화
@@ -1242,40 +1107,28 @@ void shoot() {
 
 //awp 탄피 생성
 void make_cat_awp() {
-	if (CM_img_dir == 0)
-		gc[cdx].x = CM_x + 10;
-
-	else if (CM_img_dir == 1)
-		gc[cdx].x = CM_x + 90;
-
+	if (CM_img_dir == 0) gc[cdx].x = CM_x + 10; 
+	else if (CM_img_dir == 1) gc[cdx].x = CM_x + 90;
+		 
 	gc[cdx].y = CM_y + 50; gc[cdx].frame = 1;
-	std::random_device rd_cat;
-	std::mt19937 gen(rd_cat());
-
+	std::random_device rd_cat; std::mt19937 gen(rd_cat());
+	 
 	//탄피 랜덤 속도 생성
-	std::uniform_int_distribution<int> cat_rand(6, 12);
-	gc[cdx].acc = cat_rand(gen);
-	std::uniform_int_distribution<int> speed_rand(10, 15);
-	gc[cdx].x_speed = speed_rand(gen);
-
+	std::uniform_int_distribution<int> cat_rand(6, 12); gc[cdx].acc = cat_rand(gen); 
+	std::uniform_int_distribution<int> speed_rand(10, 15); gc[cdx].x_speed = speed_rand(gen);
+	 
 	gc[cdx].motion_dir = 1; //1: up 2: down
-	if (CM_img_dir == 0)
-		gc[cdx++].dir = 0;
-	else if (CM_img_dir == 1)
-		gc[cdx++].dir = 1;
+	if (CM_img_dir == 0) gc[cdx++].dir = 0; 
+	else if (CM_img_dir == 1) gc[cdx++].dir = 1; 
 }
 
 //수류탄 폭발 판정
 void check_explode_damage() {
 	//범위 안에 있는 몬스터는 무조건 사망
 	if (is_boom == TRUE) {
-		int is_kill_r = 0;
-		int is_kill_big = 0;
+		int is_kill_r = 0; int is_kill_big = 0; 
 		for (int i = mdx_r - 1; i >= 0; i--) {
-			if (mst_r[i].x + 50 >= (gren_x - 180) - 400 && mst_r[i].x + 50 <= (gren_x - 180) + 400) {
-				mst_r[i].hp -= 150;
-			}
-
+			if (mst_r[i].x + 50 >= (gren_x - 90) - 400 && mst_r[i].x + 50 <= (gren_x - 90) + 400) mst_r[i].hp -= 150; 
 			if (mst_r[i].hp <= 0) {
 				if (i < mdx_r - 1 && is_kill_r == 0) {
 					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
@@ -1289,15 +1142,12 @@ void check_explode_damage() {
 					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
 					init_exp_animation(); is_kill_r = 1;
 				}
-				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp);
-				is_kill_r = 0;
+				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); is_kill_r = 0; 
 			}
 		}
 
 		for (int i = mdx_big - 1; i >= 0; i--) {
-			if (mst_big[i].x + 100 >= (gren_x - 180) - 400 && mst_big[i].x + 50 <= (gren_x - 180) + 400) {
-				mst_big[i].hp -= 150;
-			}
+			if (mst_big[i].x + 100 >= (gren_x - 90) - 400 && mst_big[i].x + 50 <= (gren_x - 90) + 400) mst_big[i].hp -= 150; 
 			if (mst_big[i].hp <= 0) {
 				if (i < mdx_big - 1 && is_kill_big == 0) {
 					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
@@ -1311,27 +1161,19 @@ void check_explode_damage() {
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
 					init_exp_animation(); is_kill_big = 1;
 				}
-				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
-				is_kill_big = 0;
-			}
+				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); is_kill_big = 0;
+			} 
 		}
 	}
 }
 
 //수류탄 생성
 void make_grenade() {
-	gren_dir = CM_img_dir;
-	gren_motion_dir = 1;
-	gren_x = CM_x + 50;
-	gren_y = CM_y + 50;
-	gren_acc = 10;
-	g_frame = 0;
-	gren_time = 30;
-	is_throw = TRUE;
-	able_grenade = FALSE;
-	boom_sound = FALSE;
-	ex_frame = 0;
-	ex_frame_delay = 0;
+	gren_dir = CM_img_dir; gren_motion_dir = 1;
+	gren_x = CM_x + 50; gren_y = CM_y + 50;
+	gren_acc = 10; g_frame = 0; gren_time = 30;
+	ex_frame = 0; ex_frame_delay = 0;
+	is_throw = TRUE; able_grenade = FALSE; boom_sound = FALSE; 
 }
 
 //사격 관련 애니메이션 업데이트
@@ -1369,8 +1211,7 @@ void update_shoot_animation() {
 	if (shake_effect == 1) make_shake(Gun::shake(GUN_number), Gun::shake_time(GUN_number));
 
 	if (shake_effect == 3) make_shake(30, 50);
-	
-		
+	 
 	//아주 짧은 시간동안 총알의 궤적을 그린다.
 	if (is_draw == TRUE) { 
 		draw_timer++;
@@ -1395,15 +1236,13 @@ void update_shoot_animation() {
 
 		//인터페이스 애니메이션 활성화
 		if (ind_effect == 1) {
-			ind_ani = 1; ind_size = 150; ind_x = 1335; ind_y = 625;
-			ind_effect = 0;
+			ind_ani = 1; ind_size = 150; ind_x = 1335; ind_y = 625; ind_effect = 0; 
 		}
 	}
 
 	//장탄수, 재장전 인디케이터 애니메이션
 	if (ind_ani == 1) {
-		ind_size -= 10; ind_x += 5; ind_y += 5;
-
+		ind_size -= 10; ind_x += 5; ind_y += 5; 
 		if (ind_size == 100) ind_ani = 0;
 	}
 
@@ -1411,8 +1250,7 @@ void update_shoot_animation() {
 	if (reload == 1) { 
 		if(reload_delay < Gun::reload_delay(GUN_number)) reload_delay++;
 		if(reload_delay == Gun::reload_delay(GUN_number)) {
-			reload_delay = 0; 
-			reload_x += Gun::reload_speed(GUN_number);
+			reload_delay = 0; reload_x += Gun::reload_speed(GUN_number); 
 			if(reload_x + CM_x >= CM_x + 100) {
 				ammo = 0;  reload = 0;  r_pressed = 0; reload_x = 0; empty = 0;
 				reload_delay = 0;
@@ -1447,23 +1285,19 @@ void update_shoot_animation() {
 			if (gc[i].dir == 0) {
 				if (gc[i].frame < 3) gc[i].frame++; 
 				if (gc[i].frame == 3) gc[i].frame = 0; 
-			}
-
+			} 
 			else if (gc[i].dir == 1) {
 				if (gc[i].frame > 0) gc[i].frame --; 
 				if (gc[i].frame == 0) gc[i].frame = 3; 
 			}
-		}
-	
-
+		} 
 		if (gc[i].dir == 0) { 
 			//탄피가 총 밖으로 배출되며 살짝 올라간다
 			if (gc[i].motion_dir == 1) {
 				gc[i].x += gc[i].x_speed;
 				if (gc[i].acc > 0) gc[i].y -= gc[i].acc--; 
 				if (gc[i].acc == 0) gc[i].motion_dir = 2; 
-			}
-			
+			} 
 			//탄피가 땅으로 떨어진다
 			else if (gc[i].motion_dir == 2) {
 				gc[i].x += gc[i].x_speed; gc[i].y += gc[i].acc++; 
@@ -1471,8 +1305,7 @@ void update_shoot_animation() {
 					ch_cat->stop(); ssystem->playSound(cat_hit_ground, 0, false, &ch_cat); 
 					gc[i].motion_dir = 3; gc[i].acc = 0; 
 				}
-			}
-			
+			} 
 			//탄피가 땅에 튕긴다
 			else if (gc[i].motion_dir == 3) {
 				gc[i].x += gc[i].x_speed - 2;
@@ -1480,8 +1313,7 @@ void update_shoot_animation() {
 				if (gc[i].acc == 12) {
 					gc[i].motion_dir = 4; gc[i].acc = 0; 
 				}
-			}
-
+			} 
 			//탄피는 더 이상 튕기지 않는다
 			else if (gc[i].motion_dir == 4) {
 				gc[i].x += gc[i].x_speed - 2; gc[i].y += gc[i].acc++; 
@@ -1490,32 +1322,27 @@ void update_shoot_animation() {
 					gc[i].motion_dir = -1; gc[i].frame = 0; 
 				}
 			}
-		}
-
+		} 
 		else if (gc[i].dir == 1) {
 			if (gc[i].motion_dir == 1) {
 				gc[i].x -= gc[i].x_speed;
 				if (gc[i].acc > 0) gc[i].y -= gc[i].acc--; 
 				if (gc[i].acc == 0) gc[i].motion_dir = 2; 
-			}
-
-
+			} 
 			else if (gc[i].motion_dir == 2) {
 				gc[i].x -= gc[i].x_speed; gc[i].y += gc[i].acc++; 
 				if (gc[i].y >= 700) {
 					ch_cat->stop(); ssystem->playSound(cat_hit_ground, 0, false, &ch_cat); 
 					gc[i].motion_dir = 3; gc[i].acc = 0; 
 				}
-			}
-
+			} 
 			else if (gc[i].motion_dir == 3) {
 				gc[i].x -= gc[i].x_speed - 2;
 				if (gc[i].acc < 12) gc[i].y -= gc[i].acc++; 
 				if (gc[i].acc == 12) {
 					gc[i].motion_dir = 4; gc[i].acc = 0; 
 				}
-			}
-
+			} 
 			else if (gc[i].motion_dir == 4) {
 				gc[i].x -= gc[i].x_speed - 2; gc[i].y += gc[i].acc++; 
 				if (gc[i].y >= 700) {
@@ -1529,31 +1356,26 @@ void update_shoot_animation() {
 	//수류탄 던지고 날아가는 애니메이션
 	if (is_throw == TRUE) { //방향에 따라 수류탄이 회전하는 방향이 달라짐
 		if (gren_dir == 1) {
-			if (g_frame < 7)
-				g_frame++;
-			if (g_frame == 7)
-				g_frame = 0;
+			if (g_frame < 7) g_frame++; 
+			if (g_frame == 7) g_frame = 0; 
 		}
 		else if (gren_dir == 0) { 
-			if (g_frame > 0)
-				g_frame--;
-			if (g_frame == 0)
-				g_frame = 7;
-		}
-
-		if (gren_dir == 1) { //수류탄을 던져서 날아감
+			if (g_frame > 0) g_frame--; 
+			if (g_frame == 0) g_frame = 7; 
+		} 
+		//수류탄을 던져서 날아감
+		if (gren_dir == 1) { 
 			if (gren_motion_dir == 1) {
 				gren_x += 15;
 				if (gren_y > 0) gren_y -= gren_acc--;
 				if (gren_acc == 0) gren_motion_dir = 2;
 			}
-			else if (gren_motion_dir == 2) { //떨어지기 시작
-				gren_x += 15;
-				gren_y += gren_acc++;
-				if (gren_y >= 650) { //땅에 닿으면 점화 시작
+			//떨어지기 시작
+			else if (gren_motion_dir == 2) {
+				gren_x += 15; gren_y += gren_acc++; 
+				if (gren_y >= 650) { //땅에 닿으면 점화 시작 
+					set_grenade = TRUE; is_throw = FALSE;
 					gren_motion_dir = 0;
-					set_grenade = TRUE;
-					is_throw = FALSE;
 				}
 			}
 		}
@@ -1564,29 +1386,22 @@ void update_shoot_animation() {
 				if (gren_acc == 0) gren_motion_dir = 2;
 			}
 			else if (gren_motion_dir == 2) {
-				gren_x -= 15;
-				gren_y += gren_acc++;
-				if (gren_y >= 650) {
+				gren_x -= 15; gren_y += gren_acc++; 
+				if (gren_y >= 650) { 
+					set_grenade = TRUE; is_throw = FALSE;
 					gren_motion_dir = 0;
-					set_grenade = TRUE;
-					is_throw = FALSE;
 				}
 			}
 		}
-	}
-
+	} 
 	//폭발 화염 애니매이션
 	if (is_boom == TRUE) {
 		check_explode_damage(); //몬스터 폭발 대미지 판정
-		if (ex_frame_delay < 3)
-			ex_frame_delay++;
+		if (ex_frame_delay < 3) ex_frame_delay++; 
 		if (ex_frame_delay == 3) {
-			if (ex_frame < 6)
-				ex_frame++;
-
+			if (ex_frame < 6) ex_frame++; 
 			if (ex_frame == 6) { 
-				is_boom = FALSE;
-				set_grenade = FALSE;
+				is_boom = FALSE; set_grenade = FALSE; 
 			}
 			ex_frame_delay = 0;
 		}
@@ -1611,8 +1426,7 @@ void check_monster_attack() {
 		}
 		else
 			mst_r[i].attack_timer = 0;
-	}
-
+	} 
 	//대형 몬스터 공격 판정
 	for (int i = mdx_big - 1; i >= 0; i--) {
 		if (fabs((mst_big[i].x + 100) - (CM_x + 50)) <= 170 && CM_y + 100 >= mst_big[i].y + 100) {
@@ -1628,10 +1442,8 @@ void check_monster_attack() {
 			}
 		}
 		else 
-			mst_big[i].attack_timer = 0;
-		
-	}
-
+			mst_big[i].attack_timer = 0; 
+	} 
 	//공중 몬스터는 점프 방해가 주 목적이므로 접촉하면 즉시 대미지를 입는다.
 	for (int i = mdx_air - 1; i >= 0; i--) {
 		if (CM_x + 50 >= mst_air[i].x && CM_x + 50 <= mst_air[i].x + 150 && CM_y <= mst_air[i].y + 60) {
@@ -1644,15 +1456,11 @@ void check_monster_attack() {
 				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
 				shake_effect = 2;
 			}
-		}
-
+		} 
 		else
 			mst_air[i].attack_timer = 50;
 	}
 }
-
-
-
 
 
 
@@ -1663,8 +1471,7 @@ void wm_lbuttondown() {
 
 	//awp 정조준 안할 시 총이 나가지 않고 빈 총 소리만 남
 	if (GUN_number == awp && ((avail_awp == FALSE && is_zoom == TRUE) || (avail_awp == FALSE && is_zoom == FALSE))) {
-		ch_dry->stop();
-		ssystem->playSound(dry_fire, 0, false, &ch_dry);
+		ch_dry->stop(); ssystem->playSound(dry_fire, 0, false, &ch_dry); 
 	}
 
 	//awp는 정조준이 완료되어야 발사 가능
@@ -1673,34 +1480,26 @@ void wm_lbuttondown() {
 	if (empty == 1 && reload == 0) {
 		reload = 1;
 		if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
-			ch_reload->stop(); //사운드 정지
-			ssystem->playSound(rifle_reload, 0, false, &ch_reload); //사운드 재생
+			ch_reload->stop(); ssystem->playSound(rifle_reload, 0, false, &ch_reload); //사운드 재생 
 		}
 		if (GUN_number == mg_42) {
-			ch_reload->stop(); //사운드 정지
-			ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생
+			ch_reload->stop(); ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생 
 		}
 		if (GUN_number == awp) {
-			ch_reload->stop();
-			ssystem->playSound(sniper_reload, 0, false, &ch_reload);
+			ch_reload->stop(); ssystem->playSound(sniper_reload, 0, false, &ch_reload); 
 		}
 	}
 
 	//연사력이 높을수록 딜레이 수치는 낮음
-	if(GUN_number != awp)
-		shoot_delay = Gun::shoot_speed(GUN_number);
-
-	if(GUN_number == awp && avail_awp == TRUE)
-		shoot_delay = Gun::shoot_speed(GUN_number);
+	if(GUN_number != awp) shoot_delay = Gun::shoot_speed(GUN_number); 
+	if(GUN_number == awp && avail_awp == TRUE) shoot_delay = Gun::shoot_speed(GUN_number); 
 }
 
 //WM_RBUTTONDOWN
 void wm_rbuttondown() {
 	if (reload == 0 && r_pressed == 0 && empty == 0) {
-		is_zoom = TRUE;
-		CM_move_dir = -1;
-		ch_zoom->stop();
-		ssystem->playSound(zoom_sound, 0, false, &ch_zoom);
+		is_zoom = TRUE; CM_move_dir = -1;
+		ch_zoom->stop(); ssystem->playSound(zoom_sound, 0, false, &ch_zoom); 
 	}
 }
 
@@ -1725,45 +1524,36 @@ void monster_animation() {
 	//몬스터 공격 애니메이션
 	for (int i = mdx_r - 1; i >= 0; i--) {
 		if (mst_r[i].y < 600) {
-			mst_r[i].y += mst_r[i].motion_acc;
-			mst_r[i].height -= mst_r[i].motion_acc--;
+			mst_r[i].y += mst_r[i].motion_acc; mst_r[i].height -= mst_r[i].motion_acc--; 
 		}
 	}
 	for (int i = mdx_big - 1; i >= 0; i--) {
 		if (mst_big[i].y < 500) {
-			mst_big[i].y += mst_big[i].motion_acc;
-			mst_big[i].height -= mst_big[i].motion_acc--;
+			mst_big[i].y += mst_big[i].motion_acc; mst_big[i].height -= mst_big[i].motion_acc--; 
 		}
 	}
 	for (int i = mdx_air - 1; i >= 0; i--) {
 		if (mst_air[i].y < 200) {
-			mst_air[i].y += mst_air[i].motion_acc;
-			mst_air[i].height -= mst_air[i].motion_acc--;
+			mst_air[i].y += mst_air[i].motion_acc; mst_air[i].height -= mst_air[i].motion_acc--; 
 		}
 	}
 
 	//몬스터에게 대미지를 받으면 화면이 흔들린다.
 	if (shake_effect == 2) make_shake(15, 10);
-
-	
+	 
 	for (int i = ddx - 1; i >= 0; i--) {
 		//공중 몬스터 시체는 하늘에서 떨어진다.
-		if (dl[i].monster_type == 3 && dl[i].acc < 30)
-			dl[i].y += dl[i].acc++;
-
+		if (dl[i].monster_type == 3 && dl[i].acc < 30) dl[i].y += dl[i].acc++;
+			 
 		//지상 몬스터 사망 애니메이션
 		if (dl[i].monster_type == 1 || dl[i].monster_type == 2) {
 			if (dl[i].motion_dir == 1) {
-				if (dl[i].acc > -1)
-					dl[i].y -= dl[i].acc--;
-				if (dl[i].acc == -1)
-					dl[i].motion_dir = 2;
+				if (dl[i].acc > -1) dl[i].y -= dl[i].acc--; 
+				if (dl[i].acc == -1) dl[i].motion_dir = 2; 
 			}
 			if (dl[i].motion_dir == 2) {
-				if (dl[i].acc < 21)
-					dl[i].y += dl[i].acc++;
-				if (dl[i].acc == 21)
-					dl[i].motion_dir = -1;
+				if (dl[i].acc < 21)	dl[i].y += dl[i].acc++; 
+				if (dl[i].acc == 21) dl[i].motion_dir = -1; 
 			}
 		}
 	}
@@ -1778,8 +1568,7 @@ void wm_paint(HDC mdc, RECT rt) {
 
 	//정조준 완료 시에 관통 대상 표시
 	if (GUN_number == awp && is_zoom == TRUE && empty == 0 && reload == 0 && r_pressed == 0) {
-		find_target(mx, my);
-		show_awp_targeted(mdc);
+		find_target(mx, my); show_awp_targeted(mdc); 
 	}
 
 	//awp 정조준 완료 표시
@@ -1798,9 +1587,8 @@ void wm_paint(HDC mdc, RECT rt) {
 	show_catridge(mdc, ss_x, ss_y, landing_shake);
 
 	//수류탄 이미지 출력
-	if(is_throw == TRUE || set_grenade == TRUE)
-		show_grenade(mdc, ss_x, ss_y, landing_shake);
-
+	if(is_throw == TRUE || set_grenade == TRUE) show_grenade(mdc, ss_x, ss_y, landing_shake);
+		 
 	//히트 포인트 그리기
 	if (draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2);
 
@@ -1820,39 +1608,24 @@ void wm_paint(HDC mdc, RECT rt) {
 	if (manager.isGameOver()) {
 		HBRUSH hbrush, oldbrush;
 		hbrush = CreateSolidBrush(RGB(0, 0, 0));
-		oldbrush = (HBRUSH)SelectObject(mdc, hbrush);
-
-		Rectangle(mdc, rt.left, rt.top, rt.right, rt.bottom);
-
-		SelectObject(mdc, oldbrush);
-		DeleteObject(hbrush);
-
+		oldbrush = (HBRUSH)SelectObject(mdc, hbrush); 
+		Rectangle(mdc, rt.left, rt.top, rt.right, rt.bottom); 
+		SelectObject(mdc, oldbrush); DeleteObject(hbrush); 
 		CM_dead.Draw(mdc, death_x, 200, 500, 500, 0, 0, 500, 500);
 	}
-
-
-	//인덱스 테스트
-	/*
-	TCHAR out[20];
-	SetTextColor(mdc, RGB(0, 0, 0));
-	wsprintf(out, L"mdx_r: %d", mdx_r);
-	TextOut(mdc, 0, 0, out, lstrlen(out));
-	*/
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hdc, mdc;  PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt;
-	static bool left_pressed = false;
-	static bool right_pressed = false;
-	static bool jumping = false;
-	static bool shift_pressed = false;
-
+	static bool left_pressed = false; static bool right_pressed = false;
+	static bool jumping = false; static bool shift_pressed = false;
+	 
 	switch(uMsg) {
 	case WM_CREATE:
-		set_FMOD();						  //FMOD 초기 세팅
-		IMG_FILE_LOAD();                  //이미지 로드 함수
+		set_FMOD(); IMG_FILE_LOAD();  //초기 세팅
 		CM_x = 700, CM_y = 600;           //초기 플레이어 위치
 		SetTimer(hWnd, UPDATE, 5, NULL);  //게임 전체 타이머, 추후 애니메이션 전용 타이머도 추가 예정
+		
 		break;
 
 	case WM_ACTIVATE:
@@ -1867,45 +1640,37 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			switch(wParam) {
 			case L'A': case L'a':
 				if(is_zoom == FALSE) {
-					CM_move_dir = 0;
-					left_pressed = true;
-				}
-				break;
+					CM_move_dir = 0; left_pressed = true; 
+				} break;
+				 
 			case L'D': case L'd':
 				if(is_zoom == FALSE) {
-					CM_move_dir = 1;
-					right_pressed = true;
-				}
-				break;
+					CM_move_dir = 1; right_pressed = true; 
+				} break;
+				 
 			case L'R': case L'r':
 				if(r_pressed == 0 && reload == 0) {
 					reload = 1; r_pressed = 1;
 					if(GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
-						ch_reload->stop(); //사운드 정지
-						ssystem->playSound(rifle_reload, 0, false, &ch_reload); //사운드 재생
+						ch_reload->stop(); ssystem->playSound(rifle_reload, 0, false, &ch_reload); //사운드 재생 
 					}
 					if(GUN_number == mg_42) {
-						ch_reload->stop(); //사운드 정지
-						ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생
+						ch_reload->stop(); ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생 
 					}
 					if(GUN_number == awp) {
-						ch_reload->stop();
-						ssystem->playSound(sniper_reload, 0, false, &ch_reload);
-						is_zoom = FALSE; avail_awp = FALSE;
+						ch_reload->stop(); ssystem->playSound(sniper_reload, 0, false, &ch_reload);
+						is_zoom = FALSE; avail_awp = FALSE; 
 					}
-				}
-				break;
-			case VK_SPACE:
-				jumping = true;
-				break;
-
+				} break;
+				 
 			case VK_SHIFT: //수류탄 던지기
 				if (able_grenade == TRUE) {
-					make_grenade();
-					ch_explode->stop();
-					ssystem->playSound(pin_sound, 0, false, &ch_explode);
-					shift_pressed = true;
-				}
+					make_grenade(); shift_pressed = true;
+					ch_explode->stop(); ssystem->playSound(pin_sound, 0, false, &ch_explode); 
+				} break;
+			 
+			case VK_SPACE:
+				jumping = true;
 				break;
 			}
 		}
@@ -1916,21 +1681,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_KEYUP:
 		switch(wParam) {
 		case L'A': case L'a':
-			if(right_pressed) {
-				CM_move_dir = 1;
-			}
-			else {
-				CM_move_dir = -1;
-			}
+			if(right_pressed) CM_move_dir = 1;
+			else CM_move_dir = -1;
 			left_pressed = false;
 			break;
+
 		case L'D': case L'd':
-			if(left_pressed) {
-				CM_move_dir = 0;
-			}
-			else {
-				CM_move_dir = -1;
-			}
+			if(left_pressed) CM_move_dir = 0; 
+			else CM_move_dir = -1; 
 			right_pressed = false;
 			break;
 
@@ -1962,20 +1720,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_RBUTTONUP:
-		is_zoom = FALSE;
-		avail_awp = FALSE;
+		is_zoom = FALSE; avail_awp = FALSE; 
 		if (GUN_number == awp && reload == 0 && r_pressed == 0 && empty == 0) {
-			ch_zoom->stop();
-			ssystem->playSound(unzoom_sound, 0, false, &ch_zoom);
-			for (int i = 0; i < mdx_r; i++)
-				mst_r[i].targeted = 0;
-			for (int i = 0; i < mdx_big; i++)
-				mst_big[i].targeted = 0;
+			ch_zoom->stop(); ssystem->playSound(unzoom_sound, 0, false, &ch_zoom); 
+			for (int i = 0; i < mdx_r; i++) mst_r[i].targeted = 0; 
+			for (int i = 0; i < mdx_big; i++) mst_big[i].targeted = 0; 
 		}
 		break;
-
-
-	
 
 	case WM_MOUSEMOVE:
 		mx = LOWORD(lParam); my = HIWORD(lParam);
@@ -1985,63 +1736,53 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_TIMER:
 		switch(wParam) {
 		case UPDATE: //게임 전체 타이머
-			GetClientRect(hWnd, &rt); manager.update(hWnd);
-
+			GetClientRect(hWnd, &rt); manager.update(hWnd); 
 			//메인 화면 브금
 			if (manager.getCurrentSceneID() == Main && main_bgm_on == FALSE) {
-				ch_bgm->stop();
-				ssystem->playSound(main_bgm, 0, false, &ch_bgm);
-				main_bgm_on = TRUE;
-				gameover_bgm_on = FALSE;
-				game_bgm_on = FALSE;
-			}
-
+				ch_bgm->stop(); ssystem->playSound(main_bgm, 0, false, &ch_bgm);
+				main_bgm_on = TRUE; gameover_bgm_on = FALSE; game_bgm_on = FALSE; 
+			} 
 			//게임 오버 브금
 			if (manager.isGameOver()) {
 				if (gameover_bgm_on == FALSE) {
-					ch_bgm->stop();
-					ssystem->playSound(gameover_bgm, 0, false, &ch_bgm);
-					gameover_bgm_on = TRUE;
-					game_bgm_on = FALSE;
+					ch_bgm->stop(); ssystem->playSound(gameover_bgm, 0, false, &ch_bgm);
+					gameover_bgm_on = TRUE; game_bgm_on = FALSE; 
 				}
-			}
-
+			} 
 			//일시 정지 브금
 			if (manager.isPaused()) {
 				if (pause_bgm_on == FALSE) {
-					ch_bgm->stop();
-					ssystem->playSound(pause_bgm, 0, false, &ch_bgm);
-					game_bgm_on = FALSE;
-					pause_bgm_on = TRUE;
+					ch_bgm->stop(); ssystem->playSound(pause_bgm, 0, false, &ch_bgm);
+					game_bgm_on = FALSE; pause_bgm_on = TRUE; 
 				}
-			}
+			} 
 
 			if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
-				// 점프
-				if(jumping && space_pressed == 0) {
-					if(space_pressed == 0 && is_zoom == FALSE) {
-						CM_jump = 1; space_pressed = 1;
-						is_zoom = FALSE;
-						ch_jump->stop();
-						ssystem->playSound(jump, 0, false, &ch_jump); //사운드 재생
-					}
-				}
 				//인 게임 브금
 				if (game_bgm_on == FALSE) {
-					ch_bgm->stop();
-					ssystem->playSound(game_bgm, 0, false, &ch_bgm);
-					main_bgm_on = FALSE;
-					pause_bgm_on = FALSE;
-					game_bgm_on = TRUE;
+					ch_bgm->stop(); ssystem->playSound(game_bgm, 0, false, &ch_bgm);
+					main_bgm_on = FALSE; pause_bgm_on = FALSE; game_bgm_on = TRUE;
+				} 
+				// 점프 사운드
+				if (jumping && space_pressed == 0) {
+					if (space_pressed == 0 && is_zoom == FALSE) {
+						CM_jump = 1; space_pressed = 1; is_zoom = FALSE;
+						ch_jump->stop(); ssystem->playSound(jump, 0, false, &ch_jump); //사운드 재생 
+					}
 				}
-				update_player_position(rt);
-				shoot();
-				update_shoot_animation();
-				update_monster_direction(CM_x);
-				update_monster_position();     
-				make_monster(rt);  
-				monster_animation();
-				check_monster_attack();
+				
+				update_monster_direction(CM_x); update_player_position(rt); 
+				update_monster_position();      update_shoot_animation();
+				check_monster_attack();         monster_animation();
+				make_monster(rt);               shoot(); 
+
+				//체력이 100보다 낮을 경우 자가 회복
+				if (health < 100) {
+					if (recovery_delay < 100) recovery_delay++;
+					if (recovery_delay == 100) {
+						health++; recovery_delay = 0;
+					}
+				} 
 
 				//지상형 몬스터가 1마리 이상 있을 경우 랜덤으로 소리 2가지 중 하나를 재생한다.
 				if (mdx_r > 0 || mdx_big > 0){
@@ -2049,7 +1790,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					if (monster_sound_delay == 300) {
 						play_idle_sound(); monster_sound_delay = 0;
 					}
-				}
+				} 
 
 				//시체 인덱스 삭제
 				if (ddx > 0) {
@@ -2057,7 +1798,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					if (delete_delay == 100) {
 						push_dead(ddx--); delete_delay = 0; 
 					}
-				}
+				} 
 
 				//탄피 인덱스 삭제 
 				if (cdx > 5) {
@@ -2072,16 +1813,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 						 if (cat_delete_delay == 8) {
 							 cat_delete_delay = 0; push_cat(cdx--);
 						 }
-					}
-				}
-
-				//체력이 100보다 낮을 경우 자가 회복
-				if (health < 100) {
-					if(recovery_delay < 100) recovery_delay++;
-					if (recovery_delay == 100) {
-						health++; recovery_delay = 0; 
-					}
-				}
+					 }
+				} 
 
 				//awp의 경우 볼트를 당겨야 탄피가 배출된다.
 				if (cat_ready == 1) {
@@ -2089,36 +1822,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					if (awp_cat_delay == 33) {
 						awp_cat_delay = 0; cat_ready = 0; make_cat_awp(); 
 					}
-				}
+				} 
 
 				//수류탄 대기시간이 1초에 1씩 줄어든다.
 				if (able_grenade == FALSE) {
-					if (gren_time == 0)
-						able_grenade = TRUE;
-					if(gren_delay < 65)
-					gren_delay++;
+					if (gren_time == 0) able_grenade = TRUE; 
+					if(gren_delay < 65) gren_delay++; 
 					if (gren_delay == 65) {
-						gren_time--;
-						gren_delay = 0;
+						gren_time--; gren_delay = 0; 
 					}
-				}
+				}  
 
 				//수류탄이 땅에 떨어지면 점화가 시작된다.
 				if (set_grenade == TRUE && is_boom == FALSE) {
-					if (boom_delay < 100)
-						boom_delay++;
+					if (boom_delay < 100) boom_delay++; 
 					if (boom_delay == 100) { //점화가 끝나면 폭발한다.
-						is_boom = TRUE;
-						boom_delay = 0;
+						is_boom = TRUE; boom_delay = 0; 
 					}
-				}
+				} 
 
 				//수류탄 폭발음
-				if (is_boom == TRUE && boom_sound == FALSE) {
-					shake_effect = 3;
-					ch_explode->stop();
-					ssystem->playSound(ex_sound, 0, false, &ch_explode);
-					boom_sound = TRUE;
+				if (is_boom == TRUE && boom_sound == FALSE) { 
+					ch_explode->stop(); ssystem->playSound(ex_sound, 0, false, &ch_explode);
+					boom_sound = TRUE; shake_effect = 3; 
 				}
 			}
 
@@ -2141,31 +1867,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					CM_paused_y += cm_pause_acc--; cm_pause_acc -= 4; 
 				}
 				if (pause_acc == 0) is_resumed = FALSE; 
-			}
+			} 
 
 			//연사 속도가 느린 총을 마우스 광클로 빨리 쏘는 꼼수 방지
-			if (can_shoot == FALSE) mouse_fastClick_prevention();
+			if (can_shoot == FALSE) mouse_fastClick_prevention(); 
 
 			//걷는 소리
 			if ((CM_move_dir == 1 || CM_move_dir == 0) && CM_jump == 0) {
 				if (walk_sound_delay < 25) walk_sound_delay++;
 				if (walk_sound_delay == 25) {
 					walk_sound_delay = 0;
-					ch_walk->stop(); //사운드 정지
-					ssystem->playSound(walk, 0, false, &ch_walk); //사운드 재생
+					ch_walk->stop(); ssystem->playSound(walk, 0, false, &ch_walk); //사운드 재생 
 				}
-			}
+			} 
 
 			//플레이어가 죽을 경우 죽는 소리가 재생
 			if (health <= 0) {
 				ch_dead->stop(); ssystem->playSound(dead, 0, false, &ch_dead);
-			}
+			} 
 
 			//게임 오버 화면 애니메이션
 			if (manager.isGameOver()) {
 				if (death_acc > 0) death_x += death_acc--;
-			}
+			} 
 
+			//버튼 사운드
 			play_button_sound();
 
 			break;
