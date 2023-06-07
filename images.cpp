@@ -14,6 +14,9 @@ CImage CM_dead;
 CImage monster_dead_left, monster_dead_right, monster_big_dead_left, monster_big_dead_right, monster_air_dead;
 CImage catridge[4];
 CImage BG_paused, CM_paused;
+CImage grenade[8];
+CImage avail_grenade, unavail_grenade;
+CImage explode[7];
 
 gun_catridge gc[500];
 
@@ -26,7 +29,27 @@ int pause_acc;
 int CM_paused_y = 850;
 int cm_pause_acc;
 
-//아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
+//수류탄 프레임
+int g_frame = 0;
+//수류탄 위치
+int gren_x, gren_y = 0;
+int gren_dir = 0;
+int gren_motion_dir = 0; //1 up 2 down
+int gren_acc = 0;
+//폭발 여부
+BOOL is_boom = FALSE;
+BOOL is_throw = FALSE;
+BOOL set_grenade = FALSE;
+BOOL able_grenade = TRUE;
+int boom_delay = 0;
+int gren_delay = 0;
+int gren_time = 0;
+
+//폭발 화염 프레임
+int ex_frame = 0;
+int ex_frame_delay = 0;
+
+
 //_right: 우측 이미지, _left: 좌측 이미지
 
 //배경 이미지 관련 (background)

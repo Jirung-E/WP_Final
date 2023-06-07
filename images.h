@@ -14,6 +14,9 @@ extern CImage CM_dead;
 extern CImage monster_dead_left, monster_dead_right, monster_big_dead_left, monster_big_dead_right, monster_air_dead;
 extern CImage catridge[4];
 extern CImage BG_paused, CM_paused;
+extern CImage grenade[8];
+extern CImage avail_grenade, unavail_grenade;
+extern CImage explode[7];
 
 struct gun_catridge {
     double x, y;
@@ -32,6 +35,26 @@ extern int CM_paused_y;
 extern int pause_y;
 extern int pause_acc;
 extern int cm_pause_acc;
+
+//수류탄 프레임
+extern int g_frame;
+//수류탄 위치
+extern int gren_x, gren_y;
+extern int gren_dir;
+extern int gren_motion_dir; //1 up 2 down
+extern int gren_acc;
+
+//폭발 여부
+extern BOOL is_boom;
+extern BOOL is_throw;
+extern BOOL set_grenade;
+extern BOOL able_grenade;
+extern int boom_delay;
+extern int gren_delay;
+extern int gren_time;
+
+extern int ex_frame;
+extern int ex_frame_delay;
 
 //아직은 개발 테스트용 이미지로, 완료 직전에 좀 더 다듬은 이미지로 교체 예정
 //_right: 우측 이미지, _left: 좌측 이미지

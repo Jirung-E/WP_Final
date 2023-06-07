@@ -13,3 +13,4 @@ extern int health;
 extern int recovery_delay;
 
 void player_health(HDC mdc, RECT rt, double ss_x, double ss_y, double landing_shake, int health);
+void show_gren_time(HDC mdc, double ss_x, double ss_y, double landing_shake, int gren_time);

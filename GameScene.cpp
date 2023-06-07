@@ -89,7 +89,13 @@ void GameScene::setUp() {
     death_x = -500;
     death_acc = 54;
 
-    //일시정시 씬 초기화
+    //수류탄 초기화
+    is_throw = FALSE;
+    is_boom = FALSE;
+    set_grenade = FALSE;
+    able_grenade = TRUE;
+    gren_time = 0;
+    gren_delay = 0;
 }
 
 

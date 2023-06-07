@@ -19,7 +19,7 @@ FMOD::System* ssystem;
 FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot, *dry_fire;
 FMOD::Sound* scar_distance, * m16_distance, * mp44_distance, *mg42_distance, * awp_distance;
 FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
-FMOD::Sound* hurt, *dead, *cat_hit_ground, *cat_stop;
+FMOD::Sound* hurt, *dead, *cat_hit_ground, *cat_stop, *ex_sound, *pin_sound;
 FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound, *weapon_select, *weapon_button, *start_button, *quit_button;
 FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm;
 
@@ -57,6 +57,8 @@ FMOD::Channel* ch_button = 0;
 FMOD::Channel* ch_cat = 0;
 //main bgm
 FMOD::Channel* ch_bgm = 0;
+//explode
+FMOD::Channel* ch_explode = 0;
 
 FMOD_RESULT result;
 void* extradriverdata = 0;
@@ -104,6 +106,9 @@ static BOOL is_click = FALSE;
 
 //TRUE일 경우 일시정지 화면이 사라지는 애니메이션 재생
 extern BOOL is_resumed;
+
+//수류탄 폭발음 중복 재생 방지
+static BOOL boom_sound = FALSE;
 
 //이미지 파일 로드
 void IMG_FILE_LOAD() {
@@ -166,6 +171,26 @@ void IMG_FILE_LOAD() {
 	catridge[1].Load(L".\\res\\catridge\\catridge2.png");
 	catridge[2].Load(L".\\res\\catridge\\catridge3.png");
 	catridge[3].Load(L".\\res\\catridge\\catridge4.png");
+
+	grenade[0].Load(L".\\res\\grenade\\grenade1.png");
+	grenade[1].Load(L".\\res\\grenade\\grenade2.png");
+	grenade[2].Load(L".\\res\\grenade\\grenade3.png");
+	grenade[3].Load(L".\\res\\grenade\\grenade4.png");
+	grenade[4].Load(L".\\res\\grenade\\grenade5.png");
+	grenade[5].Load(L".\\res\\grenade\\grenade6.png");
+	grenade[6].Load(L".\\res\\grenade\\grenade7.png");
+	grenade[7].Load(L".\\res\\grenade\\grenade8.png");
+
+	avail_grenade.Load(L".\\res\\grenade_able_icon.png");
+	unavail_grenade.Load(L".\\res\\grenade_unable_icon.png");
+
+	explode[0].Load(L".\\res\\explode\\ex1.png");
+	explode[1].Load(L".\\res\\explode\\ex2.png");
+	explode[2].Load(L".\\res\\explode\\ex3.png");
+	explode[3].Load(L".\\res\\explode\\ex4.png");
+	explode[4].Load(L".\\res\\explode\\ex5.png");
+	explode[5].Load(L".\\res\\explode\\ex6.png");
+	explode[6].Load(L".\\res\\explode\\ex7.png");
 } 
 
 //FMOD 세팅
@@ -227,6 +252,8 @@ void set_FMOD() {
 
 	ssystem->createSound(".\\res\\sounds\\paused.wav", FMOD_DEFAULT, 0, &pause);
 	ssystem->createSound(".\\res\\sounds\\resume.wav", FMOD_DEFAULT, 0, &resume);
+	ssystem->createSound(".\\res\\sounds\\explode.wav", FMOD_DEFAULT, 0, &ex_sound);
+	ssystem->createSound(".\\res\\sounds\\throw.wav", FMOD_DEFAULT, 0, &pin_sound);
 }
 
 //몬스터 공격 사운드
@@ -435,6 +462,14 @@ void show_interface(HDC mdc, RECT rt) {
 	//장탄수 표시기 배경
 	IND_w = indicator_back.GetWidth(); IND_h = indicator_back.GetHeight();
 	indicator_back.Draw(mdc, rt.right - 600 + ss_x, rt.bottom - 110 + landing_shake + ss_y, 600, 110, 0, 0, IND_w, IND_h);
+
+	//수류탄 대기 시간 출력
+	show_gren_time(mdc, ss_x, ss_y, landing_shake, gren_time);
+	if (able_grenade == TRUE)
+		avail_grenade.Draw(mdc, 420 + ss_x, 680 + ss_y + landing_shake, 80, 80, 0, 0, 100, 100);
+	if(able_grenade == FALSE)
+		unavail_grenade.Draw(mdc, 420 + ss_x, 680 + ss_y + landing_shake, 80, 80, 0, 0, 100, 100);
+
 
 	//총알 아이콘
 	if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
@@ -768,6 +803,14 @@ void show_catridge(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 	}
 }
 
+//수류탄 출력
+void show_grenade(HDC mdc, int ss_x, int ss_y, int landing_shake) {
+	if(is_throw == TRUE || (set_grenade == TRUE && is_boom == FALSE))
+		grenade[g_frame].Draw(mdc, gren_x + ss_x, gren_y + ss_y + landing_shake, 60, 60, 0, 0, 60, 60);
+	if (is_boom == TRUE)
+		explode[ex_frame].Draw(mdc, (gren_x - 180) + ss_x, (gren_y - 250) + ss_y + landing_shake, 400, 400, 0, 0, 100, 100);
+}
+
 //플레이어 이미지 방향 업데이트
 void update_player_direction(int mouse_x) {
 	if(mouse_x < CM_x + 50) //마우스 좌표가 플레이어보다 왼쪽에 있으면 왼쪽을 바라보고, 오른쪽에 있으면 오른쪽을 바라봄
@@ -822,6 +865,7 @@ void update_player_position(RECT rt) {
 				dl[i].x += 15;
 			for (int i = 0; i < cdx; i++)
 				gc[i].x += 15;
+			gren_x += 15;
 		}
 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) //배경 인식 좌표가 10이되고 플레이어가 다시 가운데로 이동할 때까지
@@ -844,6 +888,7 @@ void update_player_position(RECT rt) {
 				dl[i].x -= 15;
 			for (int i = 0; i < cdx; i++)
 				gc[i].x -= 15;
+			gren_x -= 15;
 		}
 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700))
@@ -1220,6 +1265,79 @@ void make_cat_awp() {
 		gc[cdx++].dir = 1;
 }
 
+//수류탄 폭발 판정
+void check_explode_damage() {
+	//범위 안에 있는 몬스터는 무조건 사망
+	if (is_boom == TRUE) {
+		int is_kill_r = 0;
+		int is_kill_big = 0;
+		for (int i = mdx_r - 1; i >= 0; i--) {
+			if (mst_r[i].x + 50 >= (gren_x - 180) - 500 && mst_r[i].x + 50 <= (gren_x - 180) + 500) {
+				dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
+				dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
+				mst_r[i].hp -= 150;
+			}
+
+			if (mst_r[i].hp <= 0) {
+				if (i < mdx_r - 1 && is_kill_r == 0) {
+					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
+					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
+					monster_array_push_r(i, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
+					init_exp_animation(); is_kill_r = 1;
+				}
+				else if (i == mdx_r - 1 && is_kill_r == 0) {
+					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
+					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
+					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
+					init_exp_animation(); is_kill_r = 1;
+				}
+				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp);
+				is_kill_r = 0;
+			}
+		}
+
+		for (int i = mdx_big - 1; i >= 0; i--) {
+			if (mst_big[i].x + 100 >= (gren_x - 180) - 500 && mst_r[i].x + 50 <= (gren_x - 180) + 500) {
+				dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
+				dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
+				mst_big[i].hp -= 150;
+			}
+			if (mst_big[i].hp <= 0) {
+				if (i < mdx_big - 1 && is_kill_big == 0) {
+					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
+					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
+					monster_array_push_big(i, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
+					init_exp_animation(); is_kill_big = 1;
+				}
+				else if (i == mdx_big - 1 && is_kill_big == 0) {
+					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
+					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
+					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
+					init_exp_animation(); is_kill_big = 1;
+				}
+				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
+				is_kill_big = 0;
+			}
+		}
+	}
+}
+
+//수류탄 생성
+void make_grenade() {
+	gren_dir = CM_img_dir;
+	gren_motion_dir = 1;
+	gren_x = CM_x + 50;
+	gren_y = CM_y + 50;
+	gren_acc = 10;
+	g_frame = 0;
+	gren_time = 30;
+	is_throw = TRUE;
+	able_grenade = FALSE;
+	boom_sound = FALSE;
+	ex_frame = 0;
+	ex_frame_delay = 0;
+}
+
 //사격 관련 애니메이션 업데이트
 void update_shoot_animation() {
 	//awp 정조준
@@ -1253,6 +1371,8 @@ void update_shoot_animation() {
 	//사격 시 화면 흔들림
 	//좌측 값: 흔들리는 정도, 오른쪽 값: 흔들리는 시간
 	if (shake_effect == 1) make_shake(Gun::shake(GUN_number), Gun::shake_time(GUN_number));
+
+	if (shake_effect == 3) make_shake(30, 50);
 	
 		
 	//아주 짧은 시간동안 총알의 궤적을 그린다.
@@ -1329,13 +1449,13 @@ void update_shoot_animation() {
 		//motion_dir가 -1이 된 탄피는 더 이상 회전하지 않음
 		if (gc[i].motion_dir != -1) {
 			if (gc[i].dir == 0) {
-				if (gc[i].frame < 4) gc[i].frame++; 
-				if (gc[i].frame == 4) gc[i].frame = 0; 
+				if (gc[i].frame < 3) gc[i].frame++; 
+				if (gc[i].frame == 3) gc[i].frame = 0; 
 			}
 
 			else if (gc[i].dir == 1) {
 				if (gc[i].frame > 0) gc[i].frame --; 
-				if (gc[i].frame == 0) gc[i].frame = 4; 
+				if (gc[i].frame == 0) gc[i].frame = 3; 
 			}
 		}
 	
@@ -1409,6 +1529,72 @@ void update_shoot_animation() {
 			}
 		}
 	}
+
+	//수류탄 던지고 날아가는 애니메이션
+	if (is_throw == TRUE) { //방향에 따라 수류탄이 회전하는 방향이 달라짐
+		if (gren_dir == 1) {
+			if (g_frame < 7)
+				g_frame++;
+			if (g_frame == 7)
+				g_frame = 0;
+		}
+		else if (gren_dir == 0) { 
+			if (g_frame > 0)
+				g_frame--;
+			if (g_frame == 0)
+				g_frame = 7;
+		}
+
+		if (gren_dir == 1) { //수류탄을 던져서 날아감
+			if (gren_motion_dir == 1) {
+				gren_x += 15;
+				if (gren_y > 0) gren_y -= gren_acc--;
+				if (gren_acc == 0) gren_motion_dir = 2;
+			}
+			else if (gren_motion_dir == 2) { //떨어지기 시작
+				gren_x += 15;
+				gren_y += gren_acc++;
+				if (gren_y >= 650) { //땅에 닿으면 점화 시작
+					gren_motion_dir = 0;
+					set_grenade = TRUE;
+					is_throw = FALSE;
+				}
+			}
+		}
+		else if (gren_dir == 0) {
+			if (gren_motion_dir == 1) {
+				gren_x -= 15;
+				if (gren_y > 0) gren_y -= gren_acc--;
+				if (gren_acc == 0) gren_motion_dir = 2;
+			}
+			else if (gren_motion_dir == 2) {
+				gren_x -= 15;
+				gren_y += gren_acc++;
+				if (gren_y >= 650) {
+					gren_motion_dir = 0;
+					set_grenade = TRUE;
+					is_throw = FALSE;
+				}
+			}
+		}
+	}
+
+	//폭발 화염 애니매이션
+	if (is_boom == TRUE) {
+		check_explode_damage(); //몬스터 폭발 대미지 판정
+		if (ex_frame_delay < 3)
+			ex_frame_delay++;
+		if (ex_frame_delay == 3) {
+			if (ex_frame < 6)
+				ex_frame++;
+
+			if (ex_frame == 6) { 
+				is_boom = FALSE;
+				set_grenade = FALSE;
+			}
+			ex_frame_delay = 0;
+		}
+	}
 }
 
 //몬스터 공격 판정
@@ -1468,6 +1654,11 @@ void check_monster_attack() {
 			mst_air[i].attack_timer = 50;
 	}
 }
+
+
+
+
+
 
 //LBUTTONDOWN
 void wm_lbuttondown() {
@@ -1610,6 +1801,10 @@ void wm_paint(HDC mdc, RECT rt) {
 	//탄피 이미지 출력
 	show_catridge(mdc, ss_x, ss_y, landing_shake);
 
+	//수류탄 이미지 출력
+	if(is_throw == TRUE || set_grenade == TRUE)
+		show_grenade(mdc, ss_x, ss_y, landing_shake);
+
 	//히트 포인트 그리기
 	if (draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2);
 
@@ -1654,6 +1849,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	static bool left_pressed = false;
 	static bool right_pressed = false;
 	static bool jumping = false;
+	static bool shift_pressed = false;
 
 	switch(uMsg) {
 	case WM_CREATE:
@@ -1706,6 +1902,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			case VK_SPACE:
 				jumping = true;
 				break;
+
+			case VK_SHIFT: //수류탄 던지기
+				if (able_grenade == TRUE) {
+					make_grenade();
+					ch_explode->stop();
+					ssystem->playSound(pin_sound, 0, false, &ch_explode);
+					shift_pressed = true;
+				}
+				break;
 			}
 		}
 		manager.keyboardInput(hWnd, wParam);
@@ -1732,8 +1937,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 			right_pressed = false;
 			break;
+
 		case VK_SPACE:
 			jumping = false;
+			break;
+
+		case VK_SHIFT:
+			shift_pressed = false;
 			break;
 		}
 		break;
@@ -1883,6 +2093,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					if (awp_cat_delay == 33) {
 						awp_cat_delay = 0; cat_ready = 0; make_cat_awp(); 
 					}
+				}
+
+				//수류탄 대기시간이 1초에 1씩 줄어든다.
+				if (able_grenade == FALSE) {
+					if (gren_time == 0)
+						able_grenade = TRUE;
+					if(gren_delay < 65)
+					gren_delay++;
+					if (gren_delay == 65) {
+						gren_time--;
+						gren_delay = 0;
+					}
+				}
+
+				//수류탄이 땅에 떨어지면 점화가 시작된다.
+				if (set_grenade == TRUE && is_boom == FALSE) {
+					if (boom_delay < 100)
+						boom_delay++;
+					if (boom_delay == 100) { //점화가 끝나면 폭발한다.
+						is_boom = TRUE;
+						boom_delay = 0;
+					}
+				}
+
+				//수류탄 폭발음
+				if (is_boom == TRUE && boom_sound == FALSE) {
+					shake_effect = 3;
+					ch_explode->stop();
+					ssystem->playSound(ex_sound, 0, false, &ch_explode);
+					boom_sound = TRUE;
 				}
 			}
 
