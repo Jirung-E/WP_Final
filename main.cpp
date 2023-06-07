@@ -1090,12 +1090,10 @@ void make_shake(int shake_acc, int shake_end) {
 	std::uniform_int_distribution<int> shake_y(-shake_acc, shake_acc); //짧은 순간에 ss_x, ss_y에 랜덤한 값을 넣어 흔들림 표현
 	ss_x = shake_x(gen); ss_y = shake_y(gen);
 	shake_count++;          //몇 번 카운트를 세냐에 따라 화면 흔들리는 시간이 달라진다. 많이 세면 샐 수록 흔들리는 시간이 길어진다.
-	shake_acc -= 2;          //변경되는 좌표의 크기가 점차 줄면서 좀 더 자연스러운 흔들림을 만듬
 	if (shake_count >= shake_end) { //특정 횟수가 되면
 		shake_count = 0;    //카운트 초기화
 		ss_x = 0; ss_y = 0; //화면 좌표는 원래대로 돌아온다
 		shake_effect = 0;   //더 이상 흔들리지 않는다.
-		shake_acc = 10;     //흔들림 가속값 다시 초기화
 	}
 }
 
