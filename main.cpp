@@ -1272,9 +1272,7 @@ void check_explode_damage() {
 		int is_kill_r = 0;
 		int is_kill_big = 0;
 		for (int i = mdx_r - 1; i >= 0; i--) {
-			if (mst_r[i].x + 50 >= (gren_x - 180) - 500 && mst_r[i].x + 50 <= (gren_x - 180) + 500) {
-				dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
-				dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
+			if (mst_r[i].x + 50 >= (gren_x - 180) - 400 && mst_r[i].x + 50 <= (gren_x - 180) + 400) {
 				mst_r[i].hp -= 150;
 			}
 
@@ -1297,9 +1295,7 @@ void check_explode_damage() {
 		}
 
 		for (int i = mdx_big - 1; i >= 0; i--) {
-			if (mst_big[i].x + 100 >= (gren_x - 180) - 500 && mst_r[i].x + 50 <= (gren_x - 180) + 500) {
-				dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
-				dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
+			if (mst_big[i].x + 100 >= (gren_x - 180) - 400 && mst_big[i].x + 50 <= (gren_x - 180) + 400) {
 				mst_big[i].hp -= 150;
 			}
 			if (mst_big[i].hp <= 0) {
