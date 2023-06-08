@@ -211,7 +211,7 @@ void GameScene::draw(const HDC& hdc) const {
 
 //인게임 UI 통일성을 위해 변경
 void GameScene::drawScore(const HDC& hdc) const {
-    if (!game_over) {
+    if (!game_over && !is_paused) {
         TCHAR lpout[100];
         HFONT hfont, oldfont;
         hfont = CreateFont(round_size, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("맑은 고딕"));

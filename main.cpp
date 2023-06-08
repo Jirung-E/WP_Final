@@ -105,6 +105,9 @@ enum Timer {
 static double mx, my;
 //마우스 클릭 여부
 static BOOL is_click = FALSE;
+//키보드 키 검사
+static bool left_pressed = false; static bool right_pressed = false;
+static bool jumping = false; static bool shift_pressed = false;
 
 //TRUE일 경우 일시정지 화면이 사라지는 애니메이션 재생
 extern BOOL is_resumed;
@@ -267,11 +270,18 @@ void play_attack_sound() {
 
 //몬스터 idle 사운드
 void play_idle_sound() {
-	std::random_device rd_sound; std::mt19937 gen(rd_sound()); 
-	std::uniform_int_distribution<int> rand_sound(0, 1); 
-	ch_mst_idle_sound->stop(); 
-	if (rand_sound(gen) == 0) ssystem->playSound(mst_idle_sound1, 0, false, &ch_mst_idle_sound); 
-	else if (rand_sound(gen) == 1) ssystem->playSound(mst_idle_sound2, 0, false, &ch_mst_idle_sound); 
+	std::random_device rd_sound; std::mt19937 gen(rd_sound());
+	//지상형 몬스터가 1마리 이상 있을 경우 랜덤으로 소리 2가지 중 하나를 재생한다.
+	if (mdx_r > 0 || mdx_big > 0) {
+		if (monster_sound_delay < 300) monster_sound_delay++;
+		if (monster_sound_delay == 300) {
+			monster_sound_delay = 0;
+			std::uniform_int_distribution<int> rand_sound(0, 1);
+			ch_mst_idle_sound->stop();
+			if (rand_sound(gen) == 0) ssystem->playSound(mst_idle_sound1, 0, false, &ch_mst_idle_sound);
+			else if (rand_sound(gen) == 1) ssystem->playSound(mst_idle_sound2, 0, false, &ch_mst_idle_sound);
+		}
+	}
 }
 
 //버튼 사운드
@@ -1179,6 +1189,32 @@ void make_grenade() {
 	is_throw = TRUE; able_grenade = FALSE; boom_sound = FALSE; 
 }
 
+//수류탄 작동
+void grenade_process() {
+	//수류탄 대기시간이 1초에 1씩 줄어든다.
+	if (able_grenade == FALSE) {
+		if (gren_time == 0) able_grenade = TRUE;
+		if (gren_delay < 65) gren_delay++;
+		if (gren_delay == 65) {
+			gren_time--; gren_delay = 0;
+		}
+	}
+
+	//수류탄이 땅에 떨어지면 점화가 시작된다.
+	if (set_grenade == TRUE && is_boom == FALSE) {
+		if (boom_delay < 100) boom_delay++;
+		if (boom_delay == 100) { //점화가 끝나면 폭발한다.
+			is_boom = TRUE; boom_delay = 0;
+		}
+	}
+
+	//수류탄 폭발음
+	if (is_boom == TRUE && boom_sound == FALSE) {
+		ch_explode->stop(); ssystem->playSound(ex_sound, 0, false, &ch_explode);
+		boom_sound = TRUE; shake_effect = 3;
+	}
+}
+
 //사격 관련 애니메이션 업데이트
 void update_shoot_animation() {
 	//awp 정조준
@@ -1409,6 +1445,25 @@ void update_shoot_animation() {
 			ex_frame_delay = 0;
 		}
 	}
+
+	//라운드 업 애니매이션
+	if (round_up == TRUE) {
+		if (round_size > 70) {
+			round_size -= 5;
+			round_x += 7;
+		}
+		if (round_size == 70)
+			round_up = FALSE;
+	}
+
+
+	//awp의 경우 볼트를 당겨야 탄피가 배출된다.
+	if (cat_ready == 1) {
+		if (awp_cat_delay < 33)awp_cat_delay++;
+		if (awp_cat_delay == 33) {
+			awp_cat_delay = 0; cat_ready = 0; make_cat_awp();
+		}
+	}
 }
 
 //몬스터 공격 판정
@@ -1465,7 +1520,143 @@ void check_monster_attack() {
 	}
 }
 
+//인덱스 삭제
+void index_auto_delete() {
+	//시체 인덱스 삭제
+	if (ddx > 0) {
+		if (delete_delay < 100) delete_delay++;
+		if (delete_delay == 100) {
+			push_dead(ddx--); delete_delay = 0;
+		}
+	}
+	//탄피 인덱스 삭제 
+	if (cdx > 5) {  //mg42는 연사 속도가 빨라 다른 총들보다 더 빨리 삭제함
+		if (GUN_number == mg_42) {
+			if (cat_delete_delay < 3) cat_delete_delay++;
+			if (cat_delete_delay == 3) {
+				cat_delete_delay = 0;  push_cat(cdx--);
+			}
+		}
+		if (GUN_number != mg_42) {
+			if (cat_delete_delay < 8) cat_delete_delay++;
+			if (cat_delete_delay == 8) {
+				cat_delete_delay = 0; push_cat(cdx--);
+			}
+		}
+	}
+}
 
+//플레이어 사운드
+void play_player_sound() {
+	// 점프 사운드
+	if (jumping && space_pressed == 0) {
+		if (space_pressed == 0 && is_zoom == FALSE) {
+			CM_jump = 1; space_pressed = 1; is_zoom = FALSE;
+			ch_jump->stop(); ssystem->playSound(jump, 0, false, &ch_jump); //사운드 재생 
+		}
+	}
+	//걷는 소리
+	if ((CM_move_dir == 1 || CM_move_dir == 0) && CM_jump == 0) {
+		if (walk_sound_delay < 25) walk_sound_delay++;
+		if (walk_sound_delay == 25) {
+			walk_sound_delay = 0;
+			ch_walk->stop(); ssystem->playSound(walk, 0, false, &ch_walk); //사운드 재생 
+		}
+	}
+	//플레이어가 죽을 경우 죽는 소리가 재생
+	if (health <= 0) {
+		ch_dead->stop(); ssystem->playSound(dead, 0, false, &ch_dead);
+	}
+}
+
+//몬스터 애니메이션
+void monster_animation() {
+	//공중 몬스터 idle 애니메이션
+	if (up_down == 1) {
+		Fdelay_air++;
+		if (Fdelay_air == 7) {
+			air++; Fdelay_air = 0;
+			if (air == 2)  up_down = 0;
+		}
+	}
+	else if (up_down == 0) {
+		Fdelay_air++;
+		if (Fdelay_air == 7) {
+			air--; Fdelay_air = 0;
+			if (air == 0) up_down = 1;
+		}
+	}
+
+	//몬스터 공격 애니메이션
+	for (int i = mdx_r - 1; i >= 0; i--) {
+		if (mst_r[i].y < 600) {
+			mst_r[i].y += mst_r[i].motion_acc; mst_r[i].height -= mst_r[i].motion_acc--;
+		}
+	}
+	for (int i = mdx_big - 1; i >= 0; i--) {
+		if (mst_big[i].y < 500) {
+			mst_big[i].y += mst_big[i].motion_acc; mst_big[i].height -= mst_big[i].motion_acc--;
+		}
+	}
+	for (int i = mdx_air - 1; i >= 0; i--) {
+		if (mst_air[i].y < 200) {
+			mst_air[i].y += mst_air[i].motion_acc; mst_air[i].height -= mst_air[i].motion_acc--;
+		}
+	}
+
+	//몬스터에게 대미지를 받으면 화면이 흔들린다.
+	if (shake_effect == 2) make_shake(15, 10);
+
+	for (int i = ddx - 1; i >= 0; i--) {
+		//공중 몬스터 시체는 하늘에서 떨어진다.
+		if (dl[i].monster_type == 3 && dl[i].acc < 30) dl[i].y += dl[i].acc++;
+
+		//지상 몬스터 사망 애니메이션
+		if (dl[i].monster_type == 1 || dl[i].monster_type == 2) {
+			if (dl[i].motion_dir == 1) {
+				if (dl[i].acc > -1) dl[i].y -= dl[i].acc--;
+				if (dl[i].acc == -1) dl[i].motion_dir = 2;
+			}
+			if (dl[i].motion_dir == 2) {
+				if (dl[i].acc < 21)	dl[i].y += dl[i].acc++;
+				if (dl[i].acc == 21) dl[i].motion_dir = -1;
+			}
+		}
+	}
+}
+
+
+
+
+
+//UI 애니메이션
+void UI_animation() {
+	//일시정지 화면 애니메이션
+	if (manager.isPaused()) {
+		if (pause_acc > 0) {
+			pause_y -= pause_acc; pause_acc -= 4;
+		}
+		if (pause_acc == 0) {
+			if (cm_pause_acc > 0) {
+				CM_paused_y -= cm_pause_acc; cm_pause_acc -= 4;
+			}
+		}
+	}
+	if (!manager.isPaused() && is_resumed == TRUE) {
+		if (pause_acc > 0) {
+			pause_y += pause_acc--; pause_acc -= 4;
+		}
+		if (cm_pause_acc > 0) {
+			CM_paused_y += cm_pause_acc--; cm_pause_acc -= 4;
+		}
+		if (pause_acc == 0) is_resumed = FALSE;
+	}
+
+	//게임 오버 화면 애니메이션
+	if (manager.isGameOver()) {
+		if (death_acc > 0) death_x += death_acc--;
+	}
+}
 
 //LBUTTONDOWN
 void wm_lbuttondown() {
@@ -1503,62 +1694,6 @@ void wm_rbuttondown() {
 	if (reload == 0 && r_pressed == 0 && empty == 0) {
 		is_zoom = TRUE; CM_move_dir = -1;
 		ch_zoom->stop(); ssystem->playSound(zoom_sound, 0, false, &ch_zoom); 
-	}
-}
-
-//몬스터 애니메이션
-void monster_animation() {
-	//공중 몬스터 idle 애니메이션
-	if (up_down == 1) {
-		Fdelay_air++;
-		if (Fdelay_air == 7) {
-			air++; Fdelay_air = 0;
-			if (air == 2)  up_down = 0;
-		}
-	}
-	else if (up_down == 0) {
-		Fdelay_air++;
-		if (Fdelay_air == 7) {
-			air--; Fdelay_air = 0;
-			if (air == 0) up_down = 1;
-		}
-	}
-
-	//몬스터 공격 애니메이션
-	for (int i = mdx_r - 1; i >= 0; i--) {
-		if (mst_r[i].y < 600) {
-			mst_r[i].y += mst_r[i].motion_acc; mst_r[i].height -= mst_r[i].motion_acc--; 
-		}
-	}
-	for (int i = mdx_big - 1; i >= 0; i--) {
-		if (mst_big[i].y < 500) {
-			mst_big[i].y += mst_big[i].motion_acc; mst_big[i].height -= mst_big[i].motion_acc--; 
-		}
-	}
-	for (int i = mdx_air - 1; i >= 0; i--) {
-		if (mst_air[i].y < 200) {
-			mst_air[i].y += mst_air[i].motion_acc; mst_air[i].height -= mst_air[i].motion_acc--; 
-		}
-	}
-
-	//몬스터에게 대미지를 받으면 화면이 흔들린다.
-	if (shake_effect == 2) make_shake(15, 10);
-	 
-	for (int i = ddx - 1; i >= 0; i--) {
-		//공중 몬스터 시체는 하늘에서 떨어진다.
-		if (dl[i].monster_type == 3 && dl[i].acc < 30) dl[i].y += dl[i].acc++;
-			 
-		//지상 몬스터 사망 애니메이션
-		if (dl[i].monster_type == 1 || dl[i].monster_type == 2) {
-			if (dl[i].motion_dir == 1) {
-				if (dl[i].acc > -1) dl[i].y -= dl[i].acc--; 
-				if (dl[i].acc == -1) dl[i].motion_dir = 2; 
-			}
-			if (dl[i].motion_dir == 2) {
-				if (dl[i].acc < 21)	dl[i].y += dl[i].acc++; 
-				if (dl[i].acc == 21) dl[i].motion_dir = -1; 
-			}
-		}
 	}
 }
 
@@ -1620,8 +1755,6 @@ void wm_paint(HDC mdc, RECT rt) {
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hdc, mdc;  PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt;
-	static bool left_pressed = false; static bool right_pressed = false;
-	static bool jumping = false; static bool shift_pressed = false;
 	 
 	switch(uMsg) {
 	case WM_CREATE:
@@ -1737,47 +1870,44 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_TIMER:
-		switch(wParam) {
+		switch (wParam) {
 		case UPDATE: //게임 전체 타이머
-			GetClientRect(hWnd, &rt); manager.update(hWnd); 
-			//메인 화면 브금
-			if (manager.getCurrentSceneID() == Main && main_bgm_on == FALSE) {
-				ch_bgm->stop(); ssystem->playSound(main_bgm, 0, false, &ch_bgm);
-				main_bgm_on = TRUE; gameover_bgm_on = FALSE; game_bgm_on = FALSE; 
-			} 
-			//게임 오버 브금
-			if (manager.isGameOver()) {
-				if (gameover_bgm_on == FALSE) {
-					ch_bgm->stop(); ssystem->playSound(gameover_bgm, 0, false, &ch_bgm);
-					gameover_bgm_on = TRUE; game_bgm_on = FALSE; 
+			GetClientRect(hWnd, &rt); manager.update(hWnd);
+			//bgm
+			{
+				//메인 화면 브금
+				if (manager.getCurrentSceneID() == Main && main_bgm_on == FALSE) {
+					ch_bgm->stop(); ssystem->playSound(main_bgm, 0, false, &ch_bgm);
+					main_bgm_on = TRUE; gameover_bgm_on = FALSE; game_bgm_on = FALSE;
 				}
-			} 
-			//일시 정지 브금
-			if (manager.isPaused()) {
-				if (pause_bgm_on == FALSE) {
-					ch_bgm->stop(); ssystem->playSound(pause_bgm, 0, false, &ch_bgm);
-					game_bgm_on = FALSE; pause_bgm_on = TRUE; 
-				}
-			} 
-
-			if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
 				//인 게임 브금
-				if (game_bgm_on == FALSE) {
+				if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver() && game_bgm_on == FALSE) {
 					ch_bgm->stop(); ssystem->playSound(game_bgm, 0, false, &ch_bgm);
 					main_bgm_on = FALSE; pause_bgm_on = FALSE; game_bgm_on = TRUE;
-				} 
-				// 점프 사운드
-				if (jumping && space_pressed == 0) {
-					if (space_pressed == 0 && is_zoom == FALSE) {
-						CM_jump = 1; space_pressed = 1; is_zoom = FALSE;
-						ch_jump->stop(); ssystem->playSound(jump, 0, false, &ch_jump); //사운드 재생 
-					}
 				}
-				
-				update_monster_direction(CM_x); update_player_position(rt); 
+				//게임 오버 브금
+				if (manager.isGameOver() && gameover_bgm_on == FALSE) {
+					ch_bgm->stop(); ssystem->playSound(gameover_bgm, 0, false, &ch_bgm);
+					gameover_bgm_on = TRUE; game_bgm_on = FALSE;
+				}
+				//일시 정지 브금
+				if (manager.isPaused() && pause_bgm_on == FALSE) {
+					ch_bgm->stop(); ssystem->playSound(pause_bgm, 0, false, &ch_bgm);
+					game_bgm_on = FALSE; pause_bgm_on = TRUE;
+				}
+			}
+
+			//인 게임
+			if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
+				update_monster_direction(CM_x); update_player_position(rt);
 				update_monster_position();      update_shoot_animation();
 				check_monster_attack();         monster_animation();
-				make_monster(rt);               shoot(); 
+				make_monster(rt);               shoot();
+				index_auto_delete();			grenade_process();
+				play_idle_sound();				play_player_sound();
+
+				//연사 속도가 느린 총을 마우스 광클로 빨리 쏘는 꼼수 방지
+				if (can_shoot == FALSE) mouse_fastClick_prevention();
 
 				//체력이 100보다 낮을 경우 자가 회복
 				if (health < 100) {
@@ -1785,126 +1915,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					if (recovery_delay == 100) {
 						health++; recovery_delay = 0;
 					}
-				} 
-
-				//지상형 몬스터가 1마리 이상 있을 경우 랜덤으로 소리 2가지 중 하나를 재생한다.
-				if (mdx_r > 0 || mdx_big > 0){
-					if (monster_sound_delay < 300) monster_sound_delay++;
-					if (monster_sound_delay == 300) {
-						play_idle_sound(); monster_sound_delay = 0;
-					}
-				} 
-
-				//시체 인덱스 삭제
-				if (ddx > 0) {
-					if (delete_delay < 100) delete_delay++;
-					if (delete_delay == 100) {
-						push_dead(ddx--); delete_delay = 0; 
-					}
-				} 
-
-				//탄피 인덱스 삭제 
-				if (cdx > 5) {  //mg42는 연사 속도가 빨라 다른 총들보다 더 빨리 삭제함
-					if (GUN_number == mg_42) {
-						if (cat_delete_delay < 3) cat_delete_delay++;
-						if (cat_delete_delay == 3) {
-							cat_delete_delay = 0;  push_cat(cdx--);
-						}
-					}
-					 if (GUN_number != mg_42) {
-						 if (cat_delete_delay < 8) cat_delete_delay++;
-						 if (cat_delete_delay == 8) {
-							 cat_delete_delay = 0; push_cat(cdx--);
-						 }
-					 }
-				} 
-
-				//awp의 경우 볼트를 당겨야 탄피가 배출된다.
-				if (cat_ready == 1) {
-					if (awp_cat_delay < 33)awp_cat_delay++;
-					if (awp_cat_delay == 33) {
-						awp_cat_delay = 0; cat_ready = 0; make_cat_awp(); 
-					}
-				} 
-
-				//수류탄 대기시간이 1초에 1씩 줄어든다.
-				if (able_grenade == FALSE) {
-					if (gren_time == 0) able_grenade = TRUE; 
-					if(gren_delay < 65) gren_delay++; 
-					if (gren_delay == 65) {
-						gren_time--; gren_delay = 0; 
-					}
-				}  
-
-				//수류탄이 땅에 떨어지면 점화가 시작된다.
-				if (set_grenade == TRUE && is_boom == FALSE) {
-					if (boom_delay < 100) boom_delay++; 
-					if (boom_delay == 100) { //점화가 끝나면 폭발한다.
-						is_boom = TRUE; boom_delay = 0; 
-					}
-				} 
-
-				//수류탄 폭발음
-				if (is_boom == TRUE && boom_sound == FALSE) { 
-					ch_explode->stop(); ssystem->playSound(ex_sound, 0, false, &ch_explode);
-					boom_sound = TRUE; shake_effect = 3; 
-				}
-
-				//라운드 업 애니매이션
-				if (round_up == TRUE) {
-					if (round_size > 70) {
-						round_size -= 5;
-						round_x += 7;
-					}
-					if (round_size == 70)
-						round_up = FALSE;
 				}
 			}
 
-			//일시정지 화면 애니메이션
-			if (manager.isPaused()) {
-				if (pause_acc > 0) {
-					pause_y -= pause_acc; pause_acc -= 4;
-				}
-				if (pause_acc == 0) {
-					if (cm_pause_acc > 0) {
-						CM_paused_y -= cm_pause_acc; cm_pause_acc -= 4;
-					}
-				}
-			}
-			if (!manager.isPaused() && is_resumed == TRUE) {
-				if (pause_acc > 0) {
-					pause_y += pause_acc--; pause_acc -= 4; 
-				}
-				if (cm_pause_acc > 0) {
-					CM_paused_y += cm_pause_acc--; cm_pause_acc -= 4; 
-				}
-				if (pause_acc == 0) is_resumed = FALSE; 
-			} 
+			//UI 애니메이션
+			UI_animation();
 
-			//연사 속도가 느린 총을 마우스 광클로 빨리 쏘는 꼼수 방지
-			if (can_shoot == FALSE) mouse_fastClick_prevention(); 
-
-			//걷는 소리
-			if ((CM_move_dir == 1 || CM_move_dir == 0) && CM_jump == 0) {
-				if (walk_sound_delay < 25) walk_sound_delay++;
-				if (walk_sound_delay == 25) {
-					walk_sound_delay = 0;
-					ch_walk->stop(); ssystem->playSound(walk, 0, false, &ch_walk); //사운드 재생 
-				}
-			} 
-
-			//플레이어가 죽을 경우 죽는 소리가 재생
-			if (health <= 0) {
-				ch_dead->stop(); ssystem->playSound(dead, 0, false, &ch_dead);
-			} 
-
-			//게임 오버 화면 애니메이션
-			if (manager.isGameOver()) {
-				if (death_acc > 0) death_x += death_acc--;
-			} 
-
-			//버튼 사운드
+			//게임 버튼 사운드
 			play_button_sound();
 
 			break;
