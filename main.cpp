@@ -1850,17 +1850,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_RBUTTONDOWN:
 		manager.clickScene(hWnd, { LOWORD(lParam), HIWORD(lParam) }, Right);
-		if (GUN_number == awp) wm_rbuttondown();
+		if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
+			if(GUN_number == awp) wm_rbuttondown();
+		}
 
 		InvalidateRect(hWnd, NULL, FALSE);
 		break;
 
 	case WM_RBUTTONUP:
 		is_zoom = FALSE; avail_awp = FALSE; 
-		if (GUN_number == awp && reload == 0 && r_pressed == 0 && empty == 0) {
-			ch_zoom->stop(); ssystem->playSound(unzoom_sound, 0, false, &ch_zoom); 
-			for (int i = 0; i < mdx_r; i++) mst_r[i].targeted = 0; 
-			for (int i = 0; i < mdx_big; i++) mst_big[i].targeted = 0; 
+		if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
+			if(GUN_number == awp && reload == 0 && r_pressed == 0 && empty == 0) {
+				ch_zoom->stop(); ssystem->playSound(unzoom_sound, 0, false, &ch_zoom);
+				for(int i = 0; i < mdx_r; i++) mst_r[i].targeted = 0;
+				for(int i = 0; i < mdx_big; i++) mst_big[i].targeted = 0;
+			}
 		}
 		break;
 
