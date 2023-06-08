@@ -9,8 +9,16 @@ monster_info_big mst_big[100];
 monster_info_air mst_air[100];
 dead_location dl[100];
 
+//라운드 업 애니메이션을 재생하기 위한 변수
+BOOL round_up = FALSE;
+int kill_count = 0;
+int round_size = 70;
+int round_x = 630;
+
+//최초 라운드1
 int game_round = 1;			// 스폰 주기를 결정함
 
+//몬스터 시체 인덱스
 int ddx = 0;
 int delete_delay = 0;  //특정 수치가 되면 시체 인덱스를 하나씩 삭제한다.
 
@@ -26,6 +34,7 @@ int mdx_air = 0;				  //공중 몬스터 수
 int spawn_timer_air = 10;		// 600
 const int spawn_timer_air_max = 300;
 
+//awp한정 몬스터를 명중 했는지를 나타내는 변수
 BOOL is_hit = FALSE;
 
 int calc_spawn_timer(int spawn_timer_max) {

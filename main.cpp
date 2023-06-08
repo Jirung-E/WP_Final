@@ -105,8 +105,10 @@ enum Timer {
 static double mx, my;
 //마우스 클릭 여부
 static BOOL is_click = FALSE;
+
 //TRUE일 경우 일시정지 화면이 사라지는 애니메이션 재생
 extern BOOL is_resumed;
+
 
 //이미지 파일 로드
 void IMG_FILE_LOAD() {
@@ -470,9 +472,9 @@ void show_interface(HDC mdc, RECT rt) {
 	ammo_indicator(mdc, Gun::max_ammo(GUN_number), ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
 	 
 	//경험치 수치 출력
-	show_exp(mdc, experience, rt.left + 150 + ss_x, rt.top + 80 + ss_y + landing_shake);
-	exp_icon.Draw(mdc, rt.left + 20 + ss_x, rt.top + 110 + ss_y + landing_shake, 100, 50, 0, 0, 100, 50);
-	show_exp_add(mdc, prev_up, exp_x + ss_x, rt.top + 170 + ss_y + landing_shake);
+	show_exp(mdc, experience, rt.left + 130 + ss_x, rt.top + 3 + ss_y + landing_shake);
+	exp_icon.Draw(mdc, rt.left + 20 + ss_x, rt.top + 15 + ss_y + landing_shake, 100, 50, 0, 0, 100, 50);
+	show_exp_add(mdc, prev_up, exp_x + ss_x, rt.top + 70 + ss_y + landing_shake);
 	 
 	//재장전 게이지 출력
 	if (reload == 1)
@@ -494,6 +496,7 @@ void show_interface(HDC mdc, RECT rt) {
 	monster_hp_ind(mdc, (rt.left + 10) + ss_x, (rt.bottom - 30) + landing_shake + ss_y, (rt.left + 10) + (health * 3) + ss_x, (rt.bottom - 10) + landing_shake + ss_y,
 	(rt.left + 10) + ss_x, (rt.bottom - 30) + landing_shake + ss_y, (rt.left + 10) + 300 + ss_x, (rt.bottom - 10) + landing_shake + ss_y);
 
+	//플레이어 체력 숫자 표시
 	player_health(mdc, rt, ss_x, ss_y, landing_shake, health);
 }
 
@@ -855,13 +858,13 @@ void check_hit_awp() {
 					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
 					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					monster_array_push_r(i, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
-					init_exp_animation(); is_kill_r = 1;
+					init_exp_animation(); is_kill_r = 1; kill_count++;
 				}
 				else if (i == mdx_r - 1 && is_kill_r == 0) {
 					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
 					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
-					init_exp_animation(); is_kill_r = 1;
+					init_exp_animation(); is_kill_r = 1; kill_count++;
 				}
 				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp);
 				is_kill_r = 0;
@@ -876,14 +879,14 @@ void check_hit_awp() {
 					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
 					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					monster_array_push_big(i, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
-					init_exp_animation(); is_kill_big = 1;
+					init_exp_animation(); is_kill_big = 1; kill_count++;
 				}
 				else if (i == mdx_big - 1 && is_kill_big == 0) {
 					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
 					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
-					init_exp_animation(); is_kill_big = 1;
-				}
+					init_exp_animation(); is_kill_big = 1; kill_count++;
+				} 
 				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
 				is_kill_big = 0;
 			}
@@ -901,12 +904,12 @@ void check_hit_awp() {
 				if (hit < mdx_air - 1 && is_kill_air == 0) {
 					dl[ddx].x = mst_air[hit].x; dl[ddx].y = mst_air[hit].y; dl[ddx].monster_type = 3; dl[ddx++].acc = 0;
 					monster_array_push_air(hit, mdx_air--); experience += 3; prev_up = 3; exp_up = TRUE;
-					init_exp_animation(); is_kill_air = 1;
+					init_exp_animation(); is_kill_air = 1; kill_count++;
 				}
 				else if (hit == mdx_air - 1 && is_kill_air == 0) {
 					dl[ddx].x = mst_air[hit].x; dl[ddx].y = mst_air[hit].y; dl[ddx].monster_type = 3; dl[ddx++].acc = 0;
 					mdx_air--; experience += 3; prev_up = 3; exp_up = TRUE;
-					init_exp_animation(); is_kill_air = 1;
+					init_exp_animation(); is_kill_air = 1; kill_count++;
 				}
 				ch_exp->stop();	ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
 				is_kill_air = 0;
@@ -937,13 +940,13 @@ void check_hit() {
 					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[hit].img_dir;  
 					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					monster_array_push_r(hit, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
-					init_exp_animation(); is_kill = 1;
+					init_exp_animation(); is_kill = 1; kill_count++;
 				}
 				else if (hit == mdx_r - 1 && is_kill == 0) {
 					dl[ddx].x = mst_r[hit].x; dl[ddx].y = mst_r[hit].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[hit].img_dir;
 					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
-					init_exp_animation(); is_kill = 1;
+					init_exp_animation(); is_kill = 1; kill_count++;
 				}
 				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
 				is_kill = 0;
@@ -966,13 +969,13 @@ void check_hit() {
 					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[hit].img_dir;
 					dl[ddx].acc = 20;  dl[ddx++].motion_dir = 1;
 					monster_array_push_big(hit, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
-					init_exp_animation(); is_kill = 1;
+					init_exp_animation(); is_kill = 1; kill_count++;
 				}
 				else if (hit == mdx_big - 1 && is_kill == 0) {
 					dl[ddx].x = mst_big[hit].x; dl[ddx].y = mst_big[hit].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[hit].img_dir;
 					dl[ddx].acc = 20;  dl[ddx++].motion_dir = 1;
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
-					init_exp_animation(); is_kill = 1;
+					init_exp_animation(); is_kill = 1; kill_count++;
 				}
 				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
 				is_kill = 0;
@@ -994,12 +997,12 @@ void check_hit() {
 				if (hit < mdx_air - 1 && is_kill == 0) {
 					dl[ddx].x = mst_air[hit].x; dl[ddx].y = mst_air[hit].y; dl[ddx].monster_type = 3; dl[ddx++].acc = 0;
 					monster_array_push_air(hit, mdx_air--); experience += 3; prev_up = 3; exp_up = TRUE;
-					init_exp_animation(); is_kill = 1;
+					init_exp_animation(); is_kill = 1; kill_count++;
 				}
 				else if (hit == mdx_air - 1 && is_kill == 0) {
 					dl[ddx].x = mst_air[hit].x; dl[ddx].y = mst_air[hit].y; dl[ddx].monster_type = 3; dl[ddx++].acc = 0;
 					mdx_air--; experience += 3; prev_up = 3; exp_up = TRUE;
-					init_exp_animation(); is_kill = 1;
+					init_exp_animation(); is_kill = 1; kill_count++;
 				}
 				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); //사운드 재생
 				is_kill = 0;
@@ -1134,13 +1137,13 @@ void check_explode_damage() {
 					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
 					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					monster_array_push_r(i, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
-					init_exp_animation(); is_kill_r = 1;
+					init_exp_animation(); is_kill_r = 1; kill_count++;
 				}
 				else if (i == mdx_r - 1 && is_kill_r == 0) {
 					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
 					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
-					init_exp_animation(); is_kill_r = 1;
+					init_exp_animation(); is_kill_r = 1; kill_count++;
 				}
 				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); is_kill_r = 0; 
 			}
@@ -1153,13 +1156,13 @@ void check_explode_damage() {
 					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
 					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					monster_array_push_big(i, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
-					init_exp_animation(); is_kill_big = 1;
+					init_exp_animation(); is_kill_big = 1; kill_count++;
 				}
 				else if (i == mdx_big - 1 && is_kill_big == 0) {
 					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
 					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
-					init_exp_animation(); is_kill_big = 1;
+					init_exp_animation(); is_kill_big = 1; kill_count++;
 				}
 				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); is_kill_big = 0;
 			} 
@@ -1801,7 +1804,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				} 
 
 				//탄피 인덱스 삭제 
-				if (cdx > 5) {
+				if (cdx > 5) {  //mg42는 연사 속도가 빨라 다른 총들보다 더 빨리 삭제함
 					if (GUN_number == mg_42) {
 						if (cat_delete_delay < 3) cat_delete_delay++;
 						if (cat_delete_delay == 3) {
@@ -1845,6 +1848,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				if (is_boom == TRUE && boom_sound == FALSE) { 
 					ch_explode->stop(); ssystem->playSound(ex_sound, 0, false, &ch_explode);
 					boom_sound = TRUE; shake_effect = 3; 
+				}
+
+				//라운드 업 애니매이션
+				if (round_up == TRUE) {
+					if (round_size > 70) {
+						round_size -= 5;
+						round_x += 7;
+					}
+					if (round_size == 70)
+						round_up = FALSE;
 				}
 			}
 
@@ -1942,7 +1955,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	WndClass.lpszClassName = lpszClass;
 	WndClass.hIconSm = LoadIcon(NULL, IDI_QUESTION);
 	RegisterClassEx(&WndClass);
-	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_EX_TOPMOST | WS_SIZEBOX, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
+	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_EX_TOPMOST, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 

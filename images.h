@@ -105,4 +105,7 @@ extern int ypos_zc_acc;
 extern int death_x;
 extern int death_acc;
 
+//새 게임 시작 시 인트로 애니메이션 재생(예정)
+extern BOOL is_intro;
+
 void push_cat(int idx);

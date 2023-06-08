@@ -40,10 +40,17 @@ struct dead_location {
 	int motion_dir;
 };
 
-extern int ddx; //dead-index
-extern int delete_delay;
+//라운드 올라갈 시 라운드 업 애니메이션을 재생하기 위한 변수
+extern int round_size;
+extern int round_x;
+extern int kill_count;
+extern BOOL round_up; //이 변수가 TRUE가 되면 애니메이션을 재생한다.
 
 extern int game_round;			// 스폰 주기를 결정함
+
+//몬스터 시체 인덱스
+extern int ddx; //dead-index
+extern int delete_delay;
 
 extern int mdx_r;                 //일반 몬스터 수 (monster - index_regular)
 extern int spawn_timer_r;   //라운드가 올라갈 수록 스폰 주기가 빨라진다. -> 수치가 낮아진다. 기본 수치는 500부터 시작

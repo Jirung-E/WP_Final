@@ -16,7 +16,7 @@ int exp_out_delay;
 void show_exp(HDC mdc, int experience, int x, int y) {
 	HFONT hfont, oldfont;
 	TCHAR exp_tchar[1000] = { 0 };
-	hfont = CreateFont(100, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
+	hfont = CreateFont(70, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
 	oldfont = (HFONT)SelectObject(mdc, hfont);
 	SetBkMode(mdc, TRANSPARENT);
 	SetTextColor(mdc, RGB(0, 0, 0));

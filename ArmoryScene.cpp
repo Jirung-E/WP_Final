@@ -7,10 +7,11 @@
 BOOL button_feed_armory_button = FALSE;
 BOOL button_feed_armory_select = FALSE;
 
+//폰트 두께 통일
 ArmoryScene::ArmoryScene() : Scene { Armory }, 
-quit_button { Quit, L"Quit", { 15, 15 }, 80, 40 },
-equip_button { Equip, L"Equip", { 0, 0 }, 0, 0 },
-unlock_button { Unlock, L"Unlock", { 0, 0 }, 0, 0 },
+quit_button{ Quit, L"[←", { 40, 15 }, 80, 80 },
+equip_button { Equip, L"EQUIP", { 0, 0 }, 0, 0 },
+unlock_button { Unlock, L"UNLOCK", { 0, 0 }, 0, 0 },
 selected_weapon_button_index { -1 },
 background_image { L"./res/Armory_background(temp).jpg" },
 player_preview { L"./res/commando_right.png" },
@@ -19,19 +20,19 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
     quit_button.border_width = 2;
     quit_button.background_color = LightGray;
     quit_button.absolute = true;
-    //quit_button.bold = 1;
+    quit_button.bold = 4;
 
     equip_button.border_color = Gray;
     equip_button.border_width = 2;
     equip_button.background_color = LightGray;
     equip_button.absolute = true;
-    //equip_button.bold = 1;
+    equip_button.bold = 4;
 
     unlock_button.border_color = Gray;
     unlock_button.border_width = 2;
     unlock_button.background_color = LightGray;
     unlock_button.absolute = true;
-    //unlock_button.bold = 1;
+    unlock_button.bold = 4;
 
     weapon_buttons.reserve(5);              // 장비가 추가될때마다 이 숫자 증가
     weapon_buttons.push_back(Button { Weapon0, L"SCAR-H", { }, 0, 0 });
@@ -60,7 +61,7 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
         e.border_width = 2;
         e.absolute = true;
         e.padding = 5; 
-        //e.bold = 1;
+        e.bold = 4;
     }
 
     for(auto& e : unlocked) {
@@ -69,7 +70,7 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
     unlocked[scar_h-1] = true;
 }
 
-
+//폰트 두께 통일
 void ArmoryScene::draw(const HDC& hdc) const {
     background_image.draw(hdc, valid_area);
 
@@ -131,46 +132,60 @@ void ArmoryScene::draw(const HDC& hdc) const {
     RECT info_area = rectToSquare(preview_area);
     int font_size = percentOf(info_area.right - info_area.left, 5);
 
-    TextBox current_exp_text { L"EXP", { 0, 0 }, 25, 10 };
-    TextBox current_exp_value { std::to_wstring(experience), { 25, 0 }, 25, 10 };
+    TextBox current_exp_text { L"EXP", { 25, -8 }, 25, 12 };
+    TextBox current_exp_value { std::to_wstring(experience), { 50, -8 }, 25, 12 };
     current_exp_text.font_size = font_size;
     current_exp_value.font_size = font_size;
+    current_exp_text.bold = 4;
+    current_exp_value.bold = 4;
     current_exp_text.background_color = LightGray;
     current_exp_value.background_color = brighter(LightGray, 20);
     current_exp_text.show(hdc, preview_area);
     current_exp_value.show(hdc, preview_area);
+    
 
-    TextBox damage_text { L"Damage", { 0, 80 }, 25, 10 };
+    TextBox damage_text { L"DAMAGE", { 0, 80 }, 25, 10 };
     TextBox damage_value { std::to_wstring(Gun::damage(idx)), { 25, 80 }, 25, 10 };
     damage_text.font_size = font_size;
     damage_value.font_size = font_size;
+    damage_text.bold = 4;
+    damage_value.bold = 4;
     damage_text.background_color = LightGray;
     damage_value.background_color = brighter(LightGray, 20);
     damage_text.show(hdc, preview_area);
     damage_value.show(hdc, preview_area);
 
-    TextBox speed_text { L"Speed", { 50, 80 }, 25, 10 };
+    TextBox speed_text { L"SPEED", { 50, 80 }, 25, 10 };
     TextBox speed_value { std::to_wstring(100-Gun::shoot_speed(idx)/2), { 75, 80 }, 25, 10 };
     speed_text.font_size = font_size;
     speed_value.font_size = font_size;
+    speed_text.bold = 4;
+    speed_value.bold = 4;
+
     speed_text.background_color = LightGray;
     speed_value.background_color = brighter(LightGray, 20);
     speed_text.show(hdc, preview_area);
     speed_value.show(hdc, preview_area);
 
-    TextBox ammo_text { L"Ammo", { 0, 90 }, 25, 10 };
+    TextBox ammo_text { L"BULLETS", { 0, 90 }, 25, 10 };
     TextBox ammo_value { std::to_wstring(Gun::max_ammo(idx)), { 25, 90 }, 25, 10 };
     ammo_text.font_size = font_size;
     ammo_value.font_size = font_size;
+    ammo_text.bold = 4;
+    ammo_value.bold = 4;
+
     ammo_text.background_color = LightGray;
     ammo_value.background_color = brighter(LightGray, 20);
     ammo_text.show(hdc, preview_area);
     ammo_value.show(hdc, preview_area);
 
-    TextBox price_text { L"Price", { 50, 90 }, 25, 10 };
+    TextBox price_text { L"COST", { 50, 90 }, 25, 10 };
     TextBox price_value { std::to_wstring(Gun::price(idx)), { 75, 90 }, 25, 10 };
     price_text.font_size = font_size;
     price_value.font_size = font_size;
+    price_text.bold = 4;
+    price_value.bold = 4;
+
     if(unlocked[idx-1]) {
         price_text.text = L"-";
         price_value.text = L"-";

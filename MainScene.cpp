@@ -2,11 +2,11 @@
 
 #include "Util.h"
 
-
+//추후 메인에 로고를 넣기 위한 버튼 크기 조정
 MainScene::MainScene() : Scene { Main }, 
-start_button { Start, L"▶", { 25, 25 }, 50, 50 }, 
-quit_button { Quit, L"→]", { 80, 30 }, 40, 40 },
-armory_button { Armory, L"Armory", { -20, 30 }, 40, 40 },
+start_button{ Start, L"▶", { 30, 50 }, 40, 40 },
+quit_button{ Quit, L"→]", { 80, 55 }, 30, 30 },
+armory_button{ Armory, L"ARMS", { -10, 55 }, 30, 30 },
 background_image { L"./res/Armory_background(temp).jpg" } {
     start_button.border_color = Gray;
     start_button.border_width = 10;

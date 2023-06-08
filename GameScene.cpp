@@ -11,8 +11,8 @@
 
 GameScene::GameScene() : Scene { Game }, score { 0 }, player_exp_first { 0 },
 map { 16, 9 },      // 좌표계.  전체화면비율인 16:9에 맞춥니다.
-resume_button { Resume, L"▶", { 20, 30 }, 60, 15 }, quit_button { Quit, L"→]", { 20, 60 }, 60, 15 },
-game_over_message { L"You Died!", { 0, 25 }, 100, 20 } {
+resume_button { Resume, L"▶", { 20, 30 }, 60, 15 }, quit_button { Quit, L"→]", { 20, 70 }, 60, 15 },
+game_over_message { L"DEAD", { 0, 25 }, 100, 20 } {
     setUp();
     resume_button.border_color = Gray;
     resume_button.border_width = 3;
@@ -53,6 +53,7 @@ void GameScene::setUp() {
     CM_jump = 0; 
     space_pressed = 0;
     is_land = 1;
+    kill_count = 0;
 
     // 총 상태 초기화
     is_zoom = FALSE;
@@ -98,6 +99,9 @@ void GameScene::setUp() {
     able_grenade = TRUE;
     gren_time = 0;
     gren_delay = 0;
+
+    //새 게임 인트로 화면 초기화
+    is_intro = FALSE;
 }
 
 
@@ -130,15 +134,19 @@ void GameScene::update(const POINT& point) {
         return;
     }
     if(!game_over) {
-        end_time = clock();
-        play_time += end_time - start_time;
-        start_time = clock();
-        //game_round = int(play_time/1000) / 10 + 1;
-        score += experience - player_exp_first;
-        player_exp_first = experience;
-        if(score >= game_round * 10) {
-            score -= game_round * 10;
+        //end_time = clock();
+        //play_time += end_time - start_time;
+        //start_time = clock();
+
+        //EXP 대신 킬 수로 라운드 증가
+        //라운드 * 5보다 킬 수가 많아지면 다음 라운드로 올라간다.
+        if(kill_count >= game_round * 5) {
+            kill_count = 0;
             game_round++;
+            //라운드 증가 시 WM_TIMER에서 라운드 업 애니매이션 재생
+            round_up = TRUE;
+            round_size = 120;
+            round_x = 550;
         }
         if(health <= 0) {
             game_over = true;
@@ -201,36 +209,44 @@ void GameScene::draw(const HDC& hdc) const {
     }
 }
 
+//인게임 UI 통일성을 위해 변경
 void GameScene::drawScore(const HDC& hdc) const {
-    TextBox score { L"", { 0, 0 }, 50, 5 };
-    score.transparent_background = true;
-    score.transparent_border = true;
-    score.align = DT_LEFT;
-    score.square = false;
-    score.bold = 4;
-    score.italic = true;
+    if (!game_over) {
+        TCHAR lpout[100];
+        HFONT hfont, oldfont;
+        hfont = CreateFont(round_size, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("맑은 고딕"));
+        oldfont = (HFONT)SelectObject(hdc, hfont);
+        SetBkMode(hdc, TRANSPARENT);
+        SetTextColor(hdc, RGB(0, 0, 0));
 
-    tstring text;
-    std::basic_stringstream<TCHAR> ss;
+        //라운드 출력
+        wsprintf(lpout, L"ROUND %d", game_round);
+        for (int i = -3; i <= 3; i++)
+            for (int j = -4; j <= 4; j++)
+                TextOut(hdc, ss_x + round_x + i, ss_y + landing_shake + 5 + j, lpout, lstrlen(lpout));
+        if (round_up == FALSE)  SetTextColor(hdc, RGB(255, 255, 255));
+        else if (round_up == TRUE) SetTextColor(hdc, RGB(0, 255, 0));
+        TextOut(hdc, round_x + ss_x, 5 + ss_y + landing_shake, lpout, lstrlen(lpout));
 
-    // 킬 수 출력
-    // ...
+        SelectObject(hdc, oldfont);
+        DeleteObject(hfont);
 
-    // 라운드 출력
-    ss << L"ROUND" << game_round << " [" << this->score << "/" << game_round * 10 << "]";
-    text = ss.str();
-    score.text = ss.str();
-    score.position.y += 5;
-    score.show(hdc, valid_area);
-    ss.str(L"");
+        hfont = CreateFont(40, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("맑은 고딕"));
+        oldfont = (HFONT)SelectObject(hdc, hfont);
+        SetBkMode(hdc, TRANSPARENT);
+        SetTextColor(hdc, RGB(0, 0, 0));
 
-    //// (테스트용) 몬스터 수 출력
-    //ss << L"Monsters: " << (mdx_r + mdx_big + mdx_air);
-    //text = ss.str();
-    //score.text = ss.str();
-    //score.position.y += 5;
-    //score.show(hdc, valid_area);
-    //ss.str(L"");
+        //앞으로 필요한 킬 수 출력
+        wsprintf(lpout, L"%d KILLS to GO", game_round * 5 - kill_count);
+        for (int i = -3; i <= 3; i++)
+            for (int j = -3; j <= 3; j++)
+                TextOut(hdc, ss_x + 350 + i, ss_y + landing_shake + 10 + j, lpout, lstrlen(lpout));
+        SetTextColor(hdc, RGB(255, 255, 255));
+        TextOut(hdc, 350 + ss_x, 10 + ss_y + landing_shake, lpout, lstrlen(lpout));
+
+        SelectObject(hdc, oldfont);
+        DeleteObject(hfont);
+    }
 }
 
 void GameScene::drawPauseScene(const HDC& hdc) const {
@@ -238,25 +254,55 @@ void GameScene::drawPauseScene(const HDC& hdc) const {
     quit_button.show(hdc, valid_area);
 }
 
+//게임 오버 시 최종 라운드를 표시 하는 것으로 변경
 void GameScene::drawGameOverScene(const HDC& hdc) const {
     game_over_message.show(hdc, valid_area);
     quit_button.show(hdc, valid_area);
 
+    //최종 라운드 숫자의 위치
+    double xpos = 0, ypos = 0;
+
+    //라운드 자릿수에 따라 위치가 조금씩 다름
+    //1자릿수
+    if (game_round < 10) {
+        xpos = 38; ypos = 45;
+    }
+    //2자릿수
+    if (game_round >= 10) {
+        xpos = 37, ypos = 45;
+    }
+
     TextBox score { L"", { 0, 45 }, 100, 7 };
+    //최종 라운드 숫자 출력하는 위치 및 크기
+    TextBox score2{ L"", { xpos, ypos }, 25, 25 };
     score.transparent_background = true;
     score.transparent_border = true;
     score.bold = 4;
     score.text_color = White;
 
-    tstring text;
-    std::basic_stringstream<TCHAR> ss;
+    //라운드 숫자
+    score2.transparent_background = true;
+    score2.transparent_border = true;
+    score2.bold = 4;
+    score2.text_color = White;
 
-    // 라운드 출력
-    ss << L"ROUND" << game_round << " [" << this->score << "/" << game_round * 10 << "]";
+    tstring text, text2;
+    std::basic_stringstream<TCHAR> ss;
+    std::basic_stringstream<TCHAR> ss2;
+
+    // 'TOTAL ROUNDS' 출력
+    ss << L"TOTAL ROUNDS";
     text = ss.str();
     score.text = ss.str();
     score.show(hdc, valid_area);
     ss.str(L"");
+    
+    //최종 라운드 출력
+    ss2 << game_round;
+    text2 = ss2.str();
+    score2.text = ss2.str();
+    score2.show(hdc, valid_area);
+    ss2.str(L"");
 }
 
 

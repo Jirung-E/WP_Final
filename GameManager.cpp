@@ -12,8 +12,9 @@ BOOL button_feed_clickScene_start = FALSE;
 BOOL button_feed_clickScene_quit = FALSE;
 BOOL to_resume = FALSE;
 BOOL to_pause = FALSE;
-
 BOOL is_resumed = FALSE;
+
+BOOL is_intro = FALSE;
 
 GameManager::GameManager() : main_scene { }, game_scene { }, armory_scene { },
 current_scene { &main_scene }, mouse_position { 0, 0 } {
@@ -113,6 +114,8 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 			switch(buttonClicked(point)) {
 			case MainScene::Start:
 				button_feed_clickScene_start = TRUE;
+				//게임 시작 인트로 애니메이션 재생(예정)
+				is_intro = TRUE;
 				gameStart(hWnd);
 				break;
 			case MainScene::Quit:
