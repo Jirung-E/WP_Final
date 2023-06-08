@@ -1,10 +1,6 @@
 #pragma once
-#include <windows.h>
-#include "Scene.h"
-#include "Map.h"
 
-#include <list>
-#include <ctime>
+#include "Scene.h"
 
 
 class GameScene : public Scene {
@@ -14,19 +10,11 @@ public:
     };
 
 private:
-    Map map;
     Button resume_button;
     Button quit_button;
     bool is_paused;
     TextBox game_over_message;
     bool game_over;
-
-    int score;          // 라운드를 결정하는 변수.
-    int player_exp_first;          // 게임 시작 시점의 플레이어 경험치
-
-    double play_time;
-    clock_t start_time;
-    clock_t end_time;
 
 public:
     GameScene();
@@ -41,7 +29,6 @@ public:
 
     bool isPaused() const;
     bool isGameOver() const;
-    double getPlayTime() const;
 
 protected:
     void draw(const HDC& hdc) const;

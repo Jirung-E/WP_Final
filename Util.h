@@ -45,36 +45,8 @@ enum Direction {
 	Right, Down, Left, Up, None
 };
 
-Direction& operator++(Direction& dir);
-Direction operator++(Direction& dir, int);
-Direction& operator--(Direction& dir);
-Direction operator--(Direction& dir, int);
-
 POINT getCenterOf(const RECT& rect);
 RECT rectToSquare(const RECT& rect, const Direction& bias = None);
 RECT convertRatio(const RECT& rect, double width, double height, const Direction& bias = None);
 RECT expandRatio(const RECT& rect, double width, double height, const Direction& bias = None);
 RECT expand(const RECT& rect, int percentage);
-int fps(int frame);
-
-class RectSize {
-public:
-	double width;
-	double height;
-
-public:
-	RectSize& operator*=(double n);
-	RectSize& operator+=(double n);
-	RectSize& operator-=(double n);
-	RectSize operator/(double n);
-	RectSize operator+(double n);
-	RectSize operator+(const RectSize& rs);
-	RectSize operator-(const RectSize& rs);
-	RectSize& operator-=(const RectSize& rs);
-
-public:
-	RectSize expand(int percentage) const;
-	RectSize square() const;
-};
-
-RECT& operator%=(RECT& rect, double per);

@@ -14,10 +14,6 @@ private:
     Scene* current_scene;
     POINT mouse_position;
 
-    enum Timer {
-        Display, UpdateGame
-    };
-
 public:
     GameManager();
     ~GameManager();
@@ -33,15 +29,11 @@ public:
 
     void quit(const HWND& hWnd);
 
-    void setTimers(const HWND& hWnd);
-    void timer(const HWND& hWnd, int id);
-
     void interrupt();
 
     SceneID getCurrentSceneID() const;
     bool isPaused() const;
     bool isGameOver() const;
-    double getPlayTime() const;
 
 private:
     void gameStart(const HWND& hWnd);

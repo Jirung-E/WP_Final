@@ -9,8 +9,7 @@
 
 #include <sstream>
 
-GameScene::GameScene() : Scene { Game }, score { 0 }, player_exp_first { 0 },
-map { 16, 9 },      // 좌표계.  전체화면비율인 16:9에 맞춥니다.
+GameScene::GameScene() : Scene { Game },
 resume_button { Resume, L"▶", { 20, 30 }, 60, 15 }, quit_button { Quit, L"→]", { 20, 70 }, 60, 15 },
 game_over_message { L"DEAD", { 0, 25 }, 100, 20 } {
     setUp();
@@ -32,9 +31,6 @@ game_over_message { L"DEAD", { 0, 25 }, 100, 20 } {
 void GameScene::setUp() {
     is_paused = false;
     game_over = false;
-    play_time = 0.0;
-    start_time = 0;
-    end_time = 0;
     health = 100;
 
     //흔들림 초기화
@@ -66,10 +62,6 @@ void GameScene::setUp() {
 
     // 라운드 초기화
     game_round = 1;
-
-    // 스코어 초기화
-    score = 0;
-    player_exp_first = experience;
 
     // 스폰된 몬스터 초기화
     mdx_r = 0;
@@ -134,10 +126,6 @@ void GameScene::update(const POINT& point) {
         return;
     }
     if(!game_over) {
-        //end_time = clock();
-        //play_time += end_time - start_time;
-        //start_time = clock();
-
         //EXP 대신 킬 수로 라운드 증가
         //라운드 * 5보다 킬 수가 많아지면 다음 라운드로 올라간다.
         if(kill_count >= game_round * 5) {
@@ -179,8 +167,6 @@ void GameScene::pause() {
 void GameScene::resume() {
     if(!game_over) {
         is_paused = false;
-        end_time = clock();
-        start_time = clock();
     }
     ShowCursor(false);                //커서 대신 조준점 보이기
 }
@@ -191,10 +177,6 @@ bool GameScene::isPaused() const {
 
 bool GameScene::isGameOver() const {
     return game_over;
-}
-
-double GameScene::getPlayTime() const {
-    return play_time/1000;
 }
 
 
@@ -259,50 +241,29 @@ void GameScene::drawGameOverScene(const HDC& hdc) const {
     game_over_message.show(hdc, valid_area);
     quit_button.show(hdc, valid_area);
 
-    //최종 라운드 숫자의 위치
-    double xpos = 0, ypos = 0;
-
-    //라운드 자릿수에 따라 위치가 조금씩 다름
-    //1자릿수
-    if (game_round < 10) {
-        xpos = 38; ypos = 45;
-    }
-    //2자릿수
-    if (game_round >= 10) {
-        xpos = 37, ypos = 45;
-    }
-
-    TextBox score { L"", { 0, 45 }, 100, 7 };
+    TextBox score_text { L"TOTAL ROUNDS", { 0, 45 }, 100, 7 };
     //최종 라운드 숫자 출력하는 위치 및 크기
-    TextBox score2{ L"", { xpos, ypos }, 25, 25 };
-    score.transparent_background = true;
-    score.transparent_border = true;
-    score.bold = 4;
-    score.text_color = White;
+    score_text.transparent_background = true;
+    score_text.transparent_border = true;
+    score_text.bold = 4;
+    score_text.text_color = White;
 
+    TextBox score_number { L"", { 0, 45 }, 100, 25 };
     //라운드 숫자
-    score2.transparent_background = true;
-    score2.transparent_border = true;
-    score2.bold = 4;
-    score2.text_color = White;
-
-    tstring text, text2;
-    std::basic_stringstream<TCHAR> ss;
-    std::basic_stringstream<TCHAR> ss2;
+    score_number.transparent_background = true;
+    score_number.transparent_border = true;
+    score_number.bold = 4;
+    score_number.text_color = White;
 
     // 'TOTAL ROUNDS' 출력
-    ss << L"TOTAL ROUNDS";
-    text = ss.str();
-    score.text = ss.str();
-    score.show(hdc, valid_area);
-    ss.str(L"");
+    score_text.show(hdc, valid_area);
     
     //최종 라운드 출력
-    ss2 << game_round;
-    text2 = ss2.str();
-    score2.text = ss2.str();
-    score2.show(hdc, valid_area);
-    ss2.str(L"");
+    std::basic_stringstream<TCHAR> ss;
+    ss << game_round;
+    score_number.text = ss.str();
+    score_number.show(hdc, valid_area);
+    ss.str(L"");
 }
 
 

@@ -192,23 +192,6 @@ void GameManager::quit(const HWND& hWnd) {
 	}
 }
 
-
-void GameManager::setTimers(const HWND& hWnd) {
-	SetTimer(hWnd, Display, fps(60), NULL);
-	SetTimer(hWnd, UpdateGame, fps(60), NULL);
-}
-
-void GameManager::timer(const HWND& hWnd, int id) {
-	switch(id) {
-	case Display:
-		InvalidateRect(hWnd, NULL, FALSE);
-		break;
-	case UpdateGame:
-		update(hWnd);
-		break;
-	}
-}
-
 void GameManager::interrupt() {
 	releaseCursor();
 	switch(current_scene->getID()) {
@@ -238,11 +221,6 @@ bool GameManager::isGameOver() const {
 	}
 	return false;
 }
-
-double GameManager::getPlayTime() const {
-	return game_scene.getPlayTime();
-}
-
 
 void GameManager::gameStart(const HWND& hWnd) {
 	fixCursor(hWnd);
