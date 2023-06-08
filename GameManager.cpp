@@ -14,6 +14,7 @@ BOOL to_resume = FALSE;
 BOOL to_pause = FALSE;
 BOOL is_resumed = FALSE;
 
+//이 변수가 TRUE가 되면 새 게임 인트로 재생
 BOOL is_intro = FALSE;
 
 GameManager::GameManager() : main_scene { }, game_scene { }, armory_scene { },
