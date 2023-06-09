@@ -4,6 +4,14 @@
 #include "MainScene.h"
 #include "ArmoryScene.h"
 
+//버튼 사운드 재생 유무 //TRUE일시 버튼 클릭음 재생
+extern BOOL button_feed_clickScene;
+extern BOOL button_feed_armory_button;
+extern BOOL button_feed_armory_select;
+extern BOOL button_feed_clickScene_start;
+extern BOOL button_feed_clickScene_quit;
+extern BOOL to_resume;
+extern BOOL to_pause;
 
 // 장면전환, 버튼이 눌렸는지 등 관리
 class GameManager {

@@ -9,6 +9,8 @@
 
 #include <sstream>
 
+BOOL round_up_sound = FALSE;
+
 GameScene::GameScene() : Scene { Game },
 resume_button { Resume, L"▶", { 20, 30 }, 60, 15 }, quit_button { Quit, L"→]", { 20, 70 }, 60, 15 },
 game_over_message { L"DEAD", { 0, 25 }, 100, 20 } {
@@ -133,6 +135,7 @@ void GameScene::update(const POINT& point) {
             game_round++;
             //라운드 증가 시 WM_TIMER에서 라운드 업 애니매이션 재생
             round_up = TRUE;
+            round_up_sound = TRUE;
             round_size = 120;
             round_x = 550;
         }

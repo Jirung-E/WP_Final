@@ -2,6 +2,8 @@
 
 #include "Scene.h"
 
+//라운드 업 사운드 재생 유무
+extern BOOL round_up_sound;
 
 class GameScene : public Scene {
 public:

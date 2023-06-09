@@ -21,7 +21,7 @@ FMOD::Sound* scar_distance, * m16_distance, * mp44_distance, *mg42_distance, * a
 FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
 FMOD::Sound* hurt, *dead, *cat_hit_ground, *cat_stop, *ex_sound, *pin_sound;
 FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound, *weapon_select, *weapon_button, *start_button, *quit_button;
-FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm;
+FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm, *next_round;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -39,6 +39,8 @@ FMOD::Channel* ch_jump = 0;
 FMOD::Channel* ch_land = 0;
 //exp_get
 FMOD::Channel* ch_exp = 0;
+//next_round
+FMOD::Channel* ch_round = 0;
 //awp_zoom
 FMOD::Channel* ch_zoom = 0;
 //awp_no_zoom
@@ -62,15 +64,6 @@ FMOD::Channel* ch_explode = 0;
 
 FMOD_RESULT result;
 void* extradriverdata = 0;
-
-//버튼 사운드 재생 유무 //TRUE일시 버튼 클릭음 재생
-extern BOOL button_feed_clickScene; 
-extern BOOL button_feed_armory_button;
-extern BOOL button_feed_armory_select;
-extern BOOL button_feed_clickScene_start;
-extern BOOL button_feed_clickScene_quit;
-extern BOOL to_resume;
-extern BOOL to_pause;
 
 //브금 중복 재생 방지
 static BOOL main_bgm_on = FALSE;
@@ -238,6 +231,7 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\exp_get.ogg", FMOD_DEFAULT, 0, &exp_get);
 	ssystem->createSound(".\\res\\sounds\\hurt.mp3", FMOD_DEFAULT, 0, &hurt);
 	ssystem->createSound(".\\res\\sounds\\player_dead.wav", FMOD_DEFAULT, 0, &dead);
+	ssystem->createSound(".\\res\\sounds\\next_round.wav", FMOD_DEFAULT, 0, &next_round);
 
 	ssystem->createSound(".\\res\\sounds\\monster_sound1.ogg", FMOD_DEFAULT, 0, &mst_idle_sound1);
 	ssystem->createSound(".\\res\\sounds\\monster_sound2.ogg", FMOD_DEFAULT, 0, &mst_idle_sound2);
@@ -1452,8 +1446,7 @@ void update_shoot_animation() {
 			round_size -= 5;
 			round_x += 7;
 		}
-		if (round_size == 70)
-			round_up = FALSE;
+		if (round_size == 70) round_up = FALSE;
 	}
 
 
@@ -1471,8 +1464,8 @@ void check_monster_attack() {
 	//일반 몬스터 공격 판정
 	for (int i = mdx_r - 1; i >= 0; i --) {
 		if (fabs((mst_r[i].x + 50) - (CM_x + 50)) <= 120 && CM_y + 100 >= mst_r[i].y + 50) {
-			if(mst_r[i].attack_timer < 20) mst_r[i].attack_timer++;
-			if (mst_r[i].attack_timer == 20) {
+			if(mst_r[i].attack_timer < 10) mst_r[i].attack_timer++;
+			if (mst_r[i].attack_timer == 10) {
 			    health -= 20;
 				mst_r[i].attack_timer = 0; mst_r[i].motion_acc = 10;
 				mst_r[i].height = 155; mst_r[i].y = 545;
@@ -1505,8 +1498,8 @@ void check_monster_attack() {
 	//공중 몬스터는 점프 방해가 주 목적이므로 접촉하면 즉시 대미지를 입는다.
 	for (int i = mdx_air - 1; i >= 0; i--) {
 		if (CM_x + 50 >= mst_air[i].x && CM_x + 50 <= mst_air[i].x + 150 && CM_y <= mst_air[i].y + 60) {
-			if (mst_air[i].attack_timer < 50) mst_air[i].attack_timer++;
-			if (mst_air[i].attack_timer == 50) {
+			if (mst_air[i].attack_timer < 60) mst_air[i].attack_timer++;
+			if (mst_air[i].attack_timer == 60) {
 				health -= 10;
 				mst_air[i].attack_timer = 0; mst_air[i].height = 115;
 				mst_air[i].y = 145; mst_air[i].motion_acc = 10;
@@ -1516,7 +1509,7 @@ void check_monster_attack() {
 			}
 		} 
 		else
-			mst_air[i].attack_timer = 50;
+			mst_air[i].attack_timer = 60;
 	}
 }
 
@@ -1919,6 +1912,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					if (recovery_delay == 100) {
 						health++; recovery_delay = 0;
 					}
+				}
+				//라운드 업 사운드
+				if (round_up_sound == TRUE) {
+					ch_round->stop();
+					ssystem->playSound(next_round, 0, false, &ch_round);
+					round_up_sound = FALSE;
 				}
 			}
 
