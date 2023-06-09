@@ -126,8 +126,8 @@ static int intro_time = 500;
 //배경 변수
 static int ellipse_size = 0;
 static int ellipse_acc = 0;
-//팀 로고 변수
 static double r = 255, g = 255, b = 255;
+//팀 로고 변수
 static int intro_logo_x = 400;
 static int intro_logo_y = 850;
 static int intro_logo_acc = 35;

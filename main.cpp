@@ -1678,12 +1678,14 @@ void UI_animation() {
 
 //intro 애니메이션
 void intro_animation() {
+	//인트로 음악
 	if (intro_sound == FALSE) {
 		ch_bgm->stop();
 		ssystem->playSound(intro, 0, false, &ch_bgm);
 		intro_sound = TRUE;
 	}
 
+	//인트로 애니메이션
 	if (intro_time > 0) intro_time--;
 	if (intro_time == 0) is_intro = FALSE;
 	if (intro_time <= 500 && intro_time >= 410) ellipse_size++;
@@ -1691,13 +1693,13 @@ void intro_animation() {
 	if (intro_time < 300) {
 		if (intro_logo_acc > 0) intro_logo_y -= intro_logo_acc--; 
 	}
+	//배경이 점차 어두워진다
 	if (intro_time < 150) {
 		if (r > 0) {
 			r -= 2.5; g -= 2.5; b -= 2.5; 
 		}
 	}
 }
-
 
 //LBUTTONDOWN
 void wm_lbuttondown() {
