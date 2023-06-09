@@ -17,6 +17,10 @@ extern CImage BG_paused, CM_paused;
 extern CImage grenade[8];
 extern CImage avail_grenade, unavail_grenade;
 extern CImage explode[7];
+extern CImage logo, background_main;
+
+//메인 백그라운드 스크롤
+extern int Scanner_main;
 
 struct gun_catridge {
     double x, y;

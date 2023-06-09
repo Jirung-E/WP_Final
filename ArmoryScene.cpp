@@ -71,8 +71,9 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
 }
 
 //폰트 두께 통일
+//여기도 배경 껐습니다
 void ArmoryScene::draw(const HDC& hdc) const {
-    background_image.draw(hdc, valid_area);
+   // background_image.draw(hdc, valid_area);
 
     //// current equipment layout
     //Rectangle(hdc, preview_area.left, preview_area.top, 

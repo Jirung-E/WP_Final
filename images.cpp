@@ -17,8 +17,12 @@ CImage BG_paused, CM_paused;
 CImage grenade[8];
 CImage avail_grenade, unavail_grenade;
 CImage explode[7];
+CImage logo, background_main;
 
 gun_catridge gc[500];
+
+//메인 화면 백그라운드 스크롤
+int Scanner_main;
 
 int cdx = 0; // 탄피 인덱스 (catridge-index)
 int cat_delete_delay; //탄피 삭제 딜레이

@@ -111,6 +111,8 @@ void IMG_FILE_LOAD() {
 	BackGround.Load(L".\\res\\BackGround_wide.png");
 	BG_paused.Load(L".\\res\\BackGround_paused.png");
 	CM_paused.Load(L".\\res\\commando_paused.png");
+	logo.Load(L".\\res\\logo.png");
+	background_main.Load(L".\\res\\background_main.png");
 
 	commando_right.Load(L".\\res\\commando_right.png");
 	commando_left.Load(L".\\res\\commando_left.png");
@@ -1644,10 +1646,16 @@ void UI_animation() {
 		}
 		if (pause_acc == 0) is_resumed = FALSE;
 	}
-
 	//게임 오버 화면 애니메이션
 	if (manager.isGameOver()) {
 		if (death_acc > 0) death_x += death_acc--;
+	}
+	//메인화면 및 아머리씬 배경 스크롤 애니메이션
+	if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory) {
+		if (Scanner_main < 1500)
+			Scanner_main += 5;
+		if (Scanner_main == 1500)
+			Scanner_main = 0;
 	}
 }
 
@@ -1743,7 +1751,7 @@ void wm_paint(HDC mdc, RECT rt) {
 		Rectangle(mdc, rt.left, rt.top, rt.right, rt.bottom); 
 		SelectObject(mdc, oldbrush); DeleteObject(hbrush); 
 		CM_dead.Draw(mdc, death_x, 200, 500, 500, 0, 0, 500, 500);
-	}
+	} 
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -1941,7 +1949,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 			if (manager.getCurrentSceneID() == Game) wm_paint(mdc, rt);
 
+			//메인 로고 및 스크롤 백그라운드
+			if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory) 
+				background_main.Draw(mdc, rt.left, rt.top, rt.right, rt.bottom, Scanner_main, 0, 1500, 800);
+				
+			if (manager.getCurrentSceneID() == Main)
+				logo.Draw(mdc, 450, 50, 600, 300, 0, 0, 600, 300);
+
 			manager.syncSize(hWnd); manager.show(mdc);
+			
 			
 			BitBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, SRCCOPY);
 		
