@@ -96,6 +96,11 @@ void GameScene::setUp() {
 
     //새 게임 인트로 화면 초기화
     is_intro = FALSE;
+
+    //메인 로고 위치 초기화
+    armory_to_main = FALSE;
+    logo_acc = 0; //로고 애니메이션 값 초기화
+    logo_y = 50;
 }
 
 

@@ -1466,8 +1466,8 @@ void check_monster_attack() {
 	//일반 몬스터 공격 판정
 	for (int i = mdx_r - 1; i >= 0; i --) {
 		if (fabs((mst_r[i].x + 50) - (CM_x + 50)) <= 120 && CM_y + 100 >= mst_r[i].y + 50) {
-			if(mst_r[i].attack_timer < 10) mst_r[i].attack_timer++;
-			if (mst_r[i].attack_timer == 10) {
+			if(mst_r[i].attack_timer < 15) mst_r[i].attack_timer++;
+			if (mst_r[i].attack_timer == 15) {
 			    health -= 20;
 				mst_r[i].attack_timer = 0; mst_r[i].motion_acc = 10;
 				mst_r[i].height = 155; mst_r[i].y = 545;
@@ -1486,7 +1486,7 @@ void check_monster_attack() {
 			if (mst_big[i].attack_timer < 20) mst_big[i].attack_timer++;
 			if (mst_big[i].attack_timer == 20) {
 				health -= 30;
-				mst_big[i].attack_timer = 0; mst_big[i].height = 255;
+				mst_big[i].attack_timer = 20; mst_big[i].height = 255;
 				mst_big[i].y = 445;	mst_big[i].motion_acc = 10;
 				
 				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
@@ -1656,6 +1656,20 @@ void UI_animation() {
 			Scanner_main += 5;
 		if (Scanner_main == 1500)
 			Scanner_main = 0;
+	}
+
+	if (manager.getCurrentSceneID() == Armory && main_to_armory == TRUE) {
+		if (logo_acc > 0) {
+			logo_y -= logo_acc--;
+		}
+		if (logo_acc == 0) main_to_armory = FALSE;  
+	}
+
+	if (manager.getCurrentSceneID() == Main && armory_to_main == TRUE) {
+		if (logo_acc > 0) {
+			logo_y += logo_acc--;
+		}
+		if (logo_acc == 0) armory_to_main = FALSE; 
 	}
 }
 
@@ -1950,12 +1964,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			if (manager.getCurrentSceneID() == Game) wm_paint(mdc, rt);
 
 			//메인 스크롤 백그라운드
-			if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory) 
+			if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory) {
 				background_main.Draw(mdc, rt.left, rt.top, rt.right, rt.bottom, Scanner_main, 0, 1500, 800);
+				logo.Draw(mdc, 450, logo_y, 600, 300, 0, 0, 600, 300);
+			}
 				
-			//메인 로고
-			if (manager.getCurrentSceneID() == Main)
-				logo.Draw(mdc, 450, 50, 600, 300, 0, 0, 600, 300);
 
 			manager.syncSize(hWnd); manager.show(mdc);
 			

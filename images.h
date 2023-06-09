@@ -21,6 +21,14 @@ extern CImage logo, background_main;
 
 //메인 백그라운드 스크롤
 extern int Scanner_main;
+//메인 로고 y좌표
+extern int logo_y;
+//메인 로고 애니메이션 가속
+extern int logo_acc;
+//아머리에서 메인으로 나갈때의 로고 애니메이션 재생
+extern BOOL armory_to_main;
+//메인에서 아머리로 들어갈때의 로고 애니메이션 재생
+extern BOOL main_to_armory;
 
 struct gun_catridge {
     double x, y;

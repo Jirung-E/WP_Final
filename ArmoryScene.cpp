@@ -325,6 +325,9 @@ void ArmoryScene::syncSize(const HWND& hWnd) {
 int ArmoryScene::clickL(const POINT& point) {
     RECT r = quit_button.absoluteArea(valid_area);
     if(PtInRect(&r, point)) {
+        logo_acc = 30; //로고 애니메이션 값 초기화
+        logo_y = -415;
+        armory_to_main = TRUE;
         return quit_button.getID();
     }
 

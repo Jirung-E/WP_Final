@@ -23,6 +23,14 @@ gun_catridge gc[500];
 
 //메인 화면 백그라운드 스크롤
 int Scanner_main;
+//메인 로고 y좌표
+int logo_y = 50;
+//메인 로고 애니메이션 가속
+int logo_acc = 30;
+//아머리에서 메인으로 나갈때의 로고 애니메이션 재생
+BOOL armory_to_main = FALSE;
+//메인에서 아머리로 들어갈때의 로고 애니메이션 재생
+BOOL main_to_armory = FALSE;
 
 int cdx = 0; // 탄피 인덱스 (catridge-index)
 int cat_delete_delay; //탄피 삭제 딜레이

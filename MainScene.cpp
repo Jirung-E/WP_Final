@@ -1,5 +1,5 @@
 #include "MainScene.h"
-
+#include "images.h"
 #include "Util.h"
 
 //추후 메인에 로고를 넣기 위한 버튼 크기 조정
@@ -79,6 +79,9 @@ int MainScene::clickL(const POINT& point) const {
     }
     r = armory_button.absoluteArea(valid_area);
     if(PtInRect(&r, point)) {
+        logo_acc = 30; //로고 애니메이션 값 초기화
+        logo_y = 50;
+        main_to_armory = TRUE;
         return armory_button.getID();
     }
     return None; 

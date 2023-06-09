@@ -99,6 +99,9 @@ void GameManager::keyboardInput(const HWND& hWnd, int keycode) {
 	case Armory:
 		switch(keycode) {
 		case VK_ESCAPE:
+			logo_acc = 30; //로고 애니메이션 값 초기화
+			logo_y = -415;
+			armory_to_main = TRUE;
 			quit(hWnd);
 			break;
 		}
