@@ -5,7 +5,6 @@ struct monster_info_regular { //몬스터의 보는 방향, 이동 방향, 위치를 저장하는 �
 	int img_dir;
 	int hp;
 	int targeted;
-	int attack_timer;
 	int height;
 	int motion_acc;
 };
@@ -16,7 +15,6 @@ struct monster_info_big { //대형 몬스터
 	int img_dir;
 	int hp;
 	int targeted;
-	int attack_timer;
 	int height;
 	int motion_acc;
 };
@@ -26,7 +24,6 @@ struct monster_info_air { //공중 몬스터
 	int move_dir;
 	int img_dir;
 	int hp;
-	int attack_timer;
 	int height;
 	int motion_acc;
 };

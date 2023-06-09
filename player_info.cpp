@@ -5,6 +5,7 @@ int space_pressed;       //점프 키 중복을 방지하기 위한 변수
 int CM_move_dir = -1; // 0: 좌측이동, 1: 우측 이동 -1: 정지
 int CM_jump_acc = 28; //점프 시 가속도
 int CM_jump;          //0: 점프 안 함, 1: 점프 함 2: 착지 중
+int cool_time;
 
 //BOOL로 하면 오류가 나서 int로 대체
 int cat_ready = 0;

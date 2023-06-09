@@ -28,11 +28,11 @@ const int spawn_timer_r_max = 140;	// 스폰 주기 최초 수치
 
 int mdx_big = 0;				  //대형 몬스터 수
 int spawn_timer_big = 10;		// 1000
-const int spawn_timer_big_max = 800;
+const int spawn_timer_big_max = 600;
 
 int mdx_air = 0;				  //공중 몬스터 수
 int spawn_timer_air = 10;		// 600
-const int spawn_timer_air_max = 250;
+const int spawn_timer_air_max = 400;
 
 //awp한정 몬스터를 명중 했는지를 나타내는 변수
 BOOL is_hit = FALSE;
@@ -61,7 +61,6 @@ void spawn_monster_regular(int mdx_r, int BG_scanner, RECT rt) {
 	}
 	mst_r[mdx_r].hp = 50;
 	mst_r[mdx_r].targeted = 0;
-	mst_r[mdx_r].attack_timer = 0;
 	mst_r[mdx_r].height = 100;
 	mst_r[mdx_r].motion_acc = 8;
 }
@@ -83,7 +82,6 @@ void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt) {
 	}
 	mst_big[mdx_big].hp = 100;
 	mst_big[mdx_big].targeted = 0;
-	mst_big[mdx_big].attack_timer = 0;
 	mst_big[mdx_big].height = 200;
 	mst_big[mdx_big].motion_acc = 8;
 }
@@ -104,7 +102,6 @@ void spawn_monster_air(int mdx_air, int BG_scanner, RECT rt) {
 		mst_air[mdx_air].y = 200;
 	}
 	mst_air[mdx_air].hp = 30;
-	mst_air[mdx_air].attack_timer = 50;
 	mst_air[mdx_air].height = 60;
 	mst_air[mdx_air].motion_acc = 8;
 }
@@ -185,7 +182,6 @@ void monster_array_push_r(int hit, int idx) {
 		mst_r[i].img_dir = mst_r[i + 1].img_dir;
 		mst_r[i].move_dir = mst_r[i + 1].move_dir;
 		mst_r[i].targeted = mst_r[i + 1].targeted;
-		mst_r[i].attack_timer = mst_r[i + 1].attack_timer;
 		mst_r[i].height = mst_r[i + 1].height;
 		mst_r[i].motion_acc = mst_r[i + 1].motion_acc;
 	}
@@ -196,7 +192,6 @@ void monster_array_push_r(int hit, int idx) {
 	mst_r[idx].move_dir = -1;
 	mst_r[idx].img_dir = -1; //현재 인덱스의 바로 전 인덱스까지 모두 한 칸씩 앞으로 당긴 후 남는 인덱스의 몬스터는 화면 밖으로 이동(나중에 몬스터 스폰 시 다시 값이 생성되므로 문제 없음)
 	mst_r[idx].targeted = 0;
-	mst_r[idx].attack_timer = 0;
 	mst_r[idx].height = 0;
 	mst_r[idx].motion_acc = 0;
 }
@@ -210,7 +205,6 @@ void monster_array_push_big(int hit, int idx) {
 		mst_big[i].img_dir = mst_big[i + 1].img_dir;
 		mst_big[i].move_dir = mst_big[i + 1].move_dir;
 		mst_big[i].targeted = mst_big[i + 1].targeted;
-		mst_big[i].attack_timer = mst_big[i + 1].attack_timer;
 		mst_big[i].height = mst_big[i + 1].height;
 		mst_big[i].motion_acc = mst_big[i + 1].motion_acc;
 	}
@@ -221,7 +215,6 @@ void monster_array_push_big(int hit, int idx) {
 	mst_big[idx].move_dir = -1;
 	mst_big[idx].img_dir = -1;
 	mst_big[idx].targeted = 0;
-	mst_big[idx].attack_timer = 0;
 	mst_big[idx].height = 0;
 	mst_big[idx].motion_acc = 0;
 }
@@ -234,7 +227,6 @@ void monster_array_push_air(int hit, int idx) {
 		mst_air[i].hp = mst_air[i + 1].hp;
 		mst_air[i].img_dir = mst_air[i + 1].img_dir;
 		mst_air[i].move_dir = mst_air[i + 1].move_dir;
-		mst_air[i].attack_timer = mst_air[i + 1].attack_timer;
 		mst_air[i].height = mst_air[i + 1].height;
 		mst_air[i].motion_acc = mst_air[i + 1].motion_acc;
 		
@@ -245,7 +237,6 @@ void monster_array_push_air(int hit, int idx) {
 	mst_air[idx].hp = 0;
 	mst_air[idx].move_dir = -1;
 	mst_air[idx].img_dir = -1;
-	mst_air[idx].attack_timer = 0;
 	mst_air[idx].height = 0;
 	mst_air[idx].motion_acc = 0;
 }

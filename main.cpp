@@ -1468,53 +1468,39 @@ void update_shoot_animation() {
 void check_monster_attack() {
 	//일반 몬스터 공격 판정
 	for (int i = mdx_r - 1; i >= 0; i --) {
-		if (fabs((mst_r[i].x + 50) - (CM_x + 50)) <= 120 && CM_y + 100 >= mst_r[i].y + 50) {
-			if(mst_r[i].attack_timer < 15) mst_r[i].attack_timer++;
-			if (mst_r[i].attack_timer == 15) {
-			    health -= 20;
-				mst_r[i].attack_timer = 0; mst_r[i].motion_acc = 10;
-				mst_r[i].height = 155; mst_r[i].y = 545;
+		if (cal_dist(CM_x + 50, CM_y + 50, mst_r[i].x + 50, mst_r[i].y + 50) <= 50 &&  cool_time == 0) {
+			health -= 10; mst_r[i].motion_acc = 10;
+			mst_r[i].height = 155; mst_r[i].y = 545;
+			cool_time = 30;
 				
-				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
-				ch_mst_attack_sound->stop();  play_attack_sound();
-				shake_effect = 2;
-			}
+			ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
+			ch_mst_attack_sound->stop();  play_attack_sound();
+			shake_effect = 2;
 		}
-		else
-			mst_r[i].attack_timer = 0;
 	} 
 	//대형 몬스터 공격 판정
 	for (int i = mdx_big - 1; i >= 0; i--) {
-		if (fabs((mst_big[i].x + 100) - (CM_x + 50)) <= 170 && CM_y + 100 >= mst_big[i].y + 100) {
-			if (mst_big[i].attack_timer < 20) mst_big[i].attack_timer++;
-			if (mst_big[i].attack_timer == 20) {
-				health -= 30;
-				mst_big[i].attack_timer = 20; mst_big[i].height = 255;
-				mst_big[i].y = 445;	mst_big[i].motion_acc = 10;
+		if (cal_dist(CM_x + 50 , CM_y + 50, mst_big[i].x + 100, mst_big[i].y + 100) <= 100 && cool_time == 0) {
+			health -= 15;
+			cool_time = 30;  mst_big[i].height = 255;
+			mst_big[i].y = 445;	mst_big[i].motion_acc = 10;
 				
-				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
-				ch_mst_attack_sound->stop();  play_attack_sound();
-				shake_effect = 2;
-			}
+			ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
+			ch_mst_attack_sound->stop();  play_attack_sound();
+			shake_effect = 2;
 		}
-		else 
-			mst_big[i].attack_timer = 0; 
 	} 
-	//공중 몬스터는 점프 방해가 주 목적이므로 접촉하면 즉시 대미지를 입는다.
+	//공중 몬스터 공격 판정
 	for (int i = mdx_air - 1; i >= 0; i--) {
-		if (CM_x + 50 >= mst_air[i].x && CM_x + 50 <= mst_air[i].x + 150 && CM_y <= mst_air[i].y + 60) {
-			if (mst_air[i].attack_timer < 60) mst_air[i].attack_timer++;
-			if (mst_air[i].attack_timer == 60) {
-				health -= 10;
-				mst_air[i].attack_timer = 0; mst_air[i].height = 115;
-				mst_air[i].y = 145; mst_air[i].motion_acc = 10;
+		if (cal_dist(CM_x + 50, CM_y + 50, mst_air[i].x + 75, mst_air[i].y + 30) <= 75 && cool_time == 0) {
+			health -= 5;
+			cool_time = 30; mst_air[i].height = 115;
+			mst_air[i].y = 145; mst_air[i].motion_acc = 10;
 				
-				ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
-				shake_effect = 2;
-			}
+			ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
+			shake_effect = 2;
+			
 		} 
-		else
-			mst_air[i].attack_timer = 60;
 	}
 }
 
@@ -1522,8 +1508,8 @@ void check_monster_attack() {
 void index_auto_delete() {
 	//시체 인덱스 삭제
 	if (ddx > 0) {
-		if (delete_delay < 100) delete_delay++;
-		if (delete_delay == 100) {
+		if (delete_delay < 70) delete_delay++;
+		if (delete_delay == 70) {
 			push_dead(ddx--); delete_delay = 0;
 		}
 	}
@@ -1972,6 +1958,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 						ssystem->playSound(next_round, 0, false, &ch_round);
 						round_up_sound = FALSE;
 					}
+
+					if (cool_time > 0) cool_time--;
 				}
 
 				//UI 애니메이션
