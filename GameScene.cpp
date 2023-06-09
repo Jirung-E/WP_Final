@@ -95,10 +95,14 @@ void GameScene::setUp() {
     gren_time = 0;
     gren_delay = 0;
 
-    //메인 로고 위치 초기화
-    armory_to_main = TRUE;
-    logo_acc = 30; //로고 애니메이션 값 초기화
-    logo_y = -450;
+    //새 게임 애니메이션 초기화
+    new_bg_x = 0;
+    new_bg_y = 850;
+    CM_game_start_x = -800;
+    new_logo_y = 850;
+    new_logo_acc = 35;
+    new_logo_delay = 0;
+    new_logo_move = 1;
 }
 
 
@@ -281,6 +285,9 @@ int GameScene::clickL(const POINT& point) {
         }
         r = quit_button.absoluteArea(valid_area);
         if(PtInRect(&r, point)) {
+            logo_acc = 30; //로고 애니메이션 값 초기화
+            logo_y = -415;
+            armory_to_main = TRUE;
             return quit_button.getID();
         }
         return None;
@@ -288,6 +295,9 @@ int GameScene::clickL(const POINT& point) {
     if(game_over) {
         RECT r = quit_button.absoluteArea(valid_area);
         if(PtInRect(&r, point)) {
+            logo_acc = 30; //로고 애니메이션 값 초기화
+            logo_y = -415;
+            armory_to_main = TRUE;
             return quit_button.getID();
         }
         return None;

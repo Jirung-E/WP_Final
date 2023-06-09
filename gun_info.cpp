@@ -7,9 +7,9 @@ int Gun::damage(int gun_id) {
     case scar_h:
         return 9;
     case m16:
-        return 5;
+        return 6;
     case mp_44:
-        return 13;
+        return 15;
     case mg_42:
         return 4;
     case awp:
@@ -25,7 +25,7 @@ int Gun::shoot_speed(int gun_id) {
     case m16:
         return 4;
     case mp_44:
-        return 10;
+        return 12;
     case mg_42:
         return 3;
     case awp:

@@ -12,7 +12,12 @@ BOOL button_feed_clickScene_start = FALSE;
 BOOL button_feed_clickScene_quit = FALSE;
 BOOL to_resume = FALSE;
 BOOL to_pause = FALSE;
+
+//일시정지 화면이 사라지는 애니메이션을 재생한다
 BOOL is_resumed = FALSE;
+
+//TRUE면 새 게임 인트로를 재생한다
+BOOL into_the_game = FALSE;
 
 GameManager::GameManager() : main_scene { }, game_scene { }, armory_scene { },
 current_scene { &main_scene }, mouse_position { 0, 0 } {
@@ -115,8 +120,10 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 			switch(buttonClicked(point)) {
 			case MainScene::Start:
 				button_feed_clickScene_start = TRUE;
+				into_the_game = TRUE;
 				gameStart(hWnd);
 				break;
+
 			case MainScene::Quit:
 				PostQuitMessage(0);
 				break;

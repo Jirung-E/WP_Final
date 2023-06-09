@@ -4,6 +4,7 @@
 #include <math.h>
 #include <random>
 #include "GameManager.h"
+//#include "GameManager.cpp"
 #include "monster_info.h"//몬스터 정보 헤더
 #include "ammo.h"        //총알 정보 헤더
 #include "player_info.h" //플레이어 정보 헤더
@@ -21,7 +22,7 @@ FMOD::Sound* scar_distance, * m16_distance, * mp44_distance, *mg42_distance, * a
 FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
 FMOD::Sound* hurt, *dead, *cat_hit_ground, *cat_stop, *ex_sound, *pin_sound;
 FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound, *weapon_select, *weapon_button, *start_button, *quit_button;
-FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm, *next_round, *intro;
+FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm, *next_round, *intro, *new_game, *woosh;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -73,6 +74,8 @@ static BOOL pause_bgm_on = FALSE;
 //수류탄 폭발음 중복 재생 방지
 static BOOL boom_sound = FALSE;
 static BOOL intro_sound = FALSE;
+static BOOL new_game_sound = FALSE;
+static BOOL whoosh_sound = FALSE;
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
@@ -89,7 +92,7 @@ extern monster_info_regular mst_r[100]; //몬스터 정보를 저정하는 구�
 extern monster_info_big mst_big[100];
 extern monster_info_air mst_air[100];
 extern dead_location dl[100];
-extern gun_catridge gc[500];
+extern gun_catridge gc[2000];
 
 enum Timer {
 	UPDATE
@@ -115,6 +118,9 @@ void IMG_FILE_LOAD() {
 	logo.Load(L".\\res\\logo.png");
 	background_main.Load(L".\\res\\background_main.png");
 	intro_logo.Load(L".\\res\\intro_logo.png");
+	background_game_start.Load(L".\\res\\BackGround_game_start.png");
+	CM_game_start.Load(L".\\res\\commando_game_start.png");
+	logo_game_start.Load(L".\\res\\game_start_logo.png");
 
 	commando_right.Load(L".\\res\\commando_right.png");
 	commando_left.Load(L".\\res\\commando_left.png");
@@ -203,6 +209,8 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\gameover_bgm.wav", FMOD_LOOP_NORMAL, 0, &gameover_bgm);
 	ssystem->createSound(".\\res\\sounds\\pause_bgm.wav", FMOD_LOOP_NORMAL, 0, &pause_bgm);
 	ssystem->createSound(".\\res\\sounds\\intro.wav", FMOD_DEFAULT, 0, &intro);
+	ssystem->createSound(".\\res\\sounds\\into_the_game.wav", FMOD_DEFAULT, 0, &new_game);
+	ssystem->createSound(".\\res\\sounds\\woosh.wav", FMOD_DEFAULT, 0, &woosh);
 
 
 	ssystem->createSound(".\\res\\sounds\\scar_h.wav", FMOD_DEFAULT, 0, &scar_shoot);
@@ -1640,25 +1648,25 @@ void UI_animation() {
 		if (death_acc > 0) death_x += death_acc--;
 	}
 	//메인화면 및 아머리씬 배경 스크롤 애니메이션
-	if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory) {
-		if (Scanner_main < 1500)
-			Scanner_main += 5;
-		if (Scanner_main == 1500)
-			Scanner_main = 0;
+	if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory || (manager.getCurrentSceneID() == Game && into_the_game == TRUE)) {
+		if (Scanner_main < 1500) Scanner_main += 5; 
+		if (Scanner_main == 1500) Scanner_main = 0; 
 	}
 
+	//로고 애니메이션
+	//메인->아머리씬으로 이동 시
 	if (manager.getCurrentSceneID() == Armory && main_to_armory == TRUE) {
-		if (logo_acc > 0) {
-			logo_y -= logo_acc--;
-		}
+		if (logo_acc > 0) logo_y -= logo_acc--; 
 		if (logo_acc == 0) main_to_armory = FALSE;  
 	}
-
+	//아머리씬->메인으로 이동 시
 	if (manager.getCurrentSceneID() == Main && armory_to_main == TRUE) {
-		if (logo_acc > 0) {
-			logo_y += logo_acc--;
-		}
+		if (logo_acc > 0) logo_y += logo_acc--; 
 		if (logo_acc == 0) armory_to_main = FALSE; 
+	}
+	//새 게임 시작 시
+	if (manager.getCurrentSceneID() == Game && into_the_game == TRUE) {
+		if (logo_acc > 0) logo_y -= logo_acc--; 
 	}
 }
 
@@ -1666,14 +1674,17 @@ void UI_animation() {
 void intro_animation() {
 	//인트로 음악
 	if (intro_sound == FALSE) {
-		ch_bgm->stop();
-		ssystem->playSound(intro, 0, false, &ch_bgm);
+		ch_bgm->stop(); ssystem->playSound(intro, 0, false, &ch_bgm); 
 		intro_sound = TRUE;
-	}
-
+	} 
 	//인트로 애니메이션
 	if (intro_time > 0) intro_time--;
-	if (intro_time == 0) is_intro = FALSE;
+	if (intro_time == 0) {
+		is_intro = FALSE;
+		logo_acc = 30; //로고 애니메이션 값 초기화
+		logo_y = -415;
+		armory_to_main = TRUE;
+	}
 	if (intro_time <= 500 && intro_time >= 410) ellipse_size++;
 	if (intro_time < 410 && intro_time >= 210) ellipse_size += 10;
 	if (intro_time < 300) {
@@ -1685,6 +1696,34 @@ void intro_animation() {
 		if (r > 0) {
 			r -= 2.5; g -= 2.5; b -= 2.5; 
 		}
+	}
+}
+
+//새 게임 애니메이션
+void new_game_animation(RECT rt) {
+	if (new_game_sound == FALSE) {
+		ch_bgm->stop(); ssystem->playSound(new_game, 0, false, &ch_bgm);
+		new_game_sound = TRUE;	logo_acc = 30; logo_y = 50; //로고 위치 초기화
+	}
+	if (new_acc > 0) new_bg_y -= new_acc--; 
+	if (new_acc == 0) {
+		if (new_logo_move == 1) {
+			if (new_logo_acc > 0) new_logo_y -= new_logo_acc--;
+			if (new_logo_acc == 0) {
+				if (new_logo_delay < 100) new_logo_delay++;
+				if (new_logo_delay == 100) {
+					new_logo_acc = 35; new_logo_move = 2;
+				}
+			}
+		}
+		else if (new_logo_move == 2) {
+			if(new_logo_acc > 0) new_logo_y -= new_logo_acc--;
+		}
+	}
+	if (into_time > 0) into_time--; 
+	if (into_time == 0) {								//이 변수가 TRUE가 되면 새 게임 애니메이션을 끝내고 게임 업데이트 및 출력을 시작한다.
+		new_game_sound = FALSE; into_the_game = FALSE; end_new_game = TRUE;
+		into_time = 200; new_acc = 41;
 	}
 }
 
@@ -1785,7 +1824,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		set_FMOD(); IMG_FILE_LOAD();  //초기 세팅
 		CM_x = 700, CM_y = 600;           //초기 플레이어 위치
 		SetTimer(hWnd, UPDATE, 5, NULL);  //게임 전체 타이머, 추후 애니메이션 전용 타이머도 추가 예정
-		is_intro = TRUE;
+		is_intro = TRUE;				  //비활성화 시 인트로를 건너 뛰고 게임으로 바로 넘어감
 		break;
 
 	case WM_ACTIVATE:
@@ -1796,7 +1835,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_KEYDOWN:
-		if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
+		if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver() && into_the_game == FALSE) {
 			switch(wParam) {
 			case L'A': case L'a':
 				if(is_zoom == FALSE) {
@@ -1834,7 +1873,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				break;
 			}
 		}
-		manager.keyboardInput(hWnd, wParam);
+		if(into_the_game == FALSE) manager.keyboardInput(hWnd, wParam); 
 		break;
 
 		//정지상태로 변경
@@ -1905,35 +1944,55 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			//인트로 중에는 인트로 외에는 어떠한 다른 작업도 실행되지 않는다.
 			if (is_intro == TRUE) {
 				if (intro_delay > 0) intro_delay--;
-				if(intro_delay == 0) intro_animation();
+				if (intro_delay == 0) intro_animation();
 			}
-				
-			else if (is_intro == FALSE) {
-				 manager.update(hWnd);
-				//bgm
-				{
-					//메인 화면 브금
-					if (manager.getCurrentSceneID() == Main && main_bgm_on == FALSE) {
-						ch_bgm->stop(); ssystem->playSound(main_bgm, 0, false, &ch_bgm);
-						main_bgm_on = TRUE; gameover_bgm_on = FALSE; game_bgm_on = FALSE;
-					}
-					//인 게임 브금
-					if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver() && game_bgm_on == FALSE) {
-						ch_bgm->stop(); ssystem->playSound(game_bgm, 0, false, &ch_bgm);
-						main_bgm_on = FALSE; pause_bgm_on = FALSE; game_bgm_on = TRUE;
-					}
-					//게임 오버 브금
-					if (manager.isGameOver() && gameover_bgm_on == FALSE) {
-						ch_bgm->stop(); ssystem->playSound(gameover_bgm, 0, false, &ch_bgm);
-						gameover_bgm_on = TRUE; game_bgm_on = FALSE;
-					}
-					//일시 정지 브금
-					if (manager.isPaused() && pause_bgm_on == FALSE) {
-						ch_bgm->stop(); ssystem->playSound(pause_bgm, 0, false, &ch_bgm);
-						game_bgm_on = FALSE; pause_bgm_on = TRUE;
+
+			//새 게임 시작 시 애니메이션을 재생한다.
+			if (into_the_game == TRUE) new_game_animation(rt);
+			if (into_the_game == FALSE && end_new_game == TRUE) {
+				CM_game_start_x += 100;
+				if (CM_game_start_x > rt.left - 500) {
+					new_bg_x += 100;
+					if (whoosh_sound == FALSE) {
+						ch_round->stop();  ssystem->playSound(woosh, 0, false, &ch_round);
+						whoosh_sound = TRUE;
 					}
 				}
+				if (CM_game_start_x > rt.right) {
+					end_new_game = FALSE; whoosh_sound = FALSE;
+				}
+			}
 
+			//인트로가 끝나면 버튼 사운드 출력과 UI애니메이션을 출력한다.
+			if (is_intro == FALSE) {
+				play_button_sound(); UI_animation(); 
+			}
+
+			//인트로와 새 게임 애니메이션이 재생되지 않아야 게임을 업데이트 한다.
+			if (is_intro == FALSE && into_the_game == FALSE) {
+				 manager.update(hWnd);
+				
+				//메인 화면 브금
+				if (manager.getCurrentSceneID() == Main && main_bgm_on == FALSE) {
+					ch_bgm->stop(); ssystem->playSound(main_bgm, 0, false, &ch_bgm);
+					main_bgm_on = TRUE; gameover_bgm_on = FALSE; game_bgm_on = FALSE;
+				}
+				//인 게임 브금
+				if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver() && game_bgm_on == FALSE) {
+					ch_bgm->stop(); ssystem->playSound(game_bgm, 0, false, &ch_bgm);
+					main_bgm_on = FALSE; pause_bgm_on = FALSE; game_bgm_on = TRUE;
+				}
+				//게임 오버 브금
+				if (manager.isGameOver() && gameover_bgm_on == FALSE) {
+					ch_bgm->stop(); ssystem->playSound(gameover_bgm, 0, false, &ch_bgm);
+					gameover_bgm_on = TRUE; game_bgm_on = FALSE;
+				}
+				//일시 정지 브금
+				if (manager.isPaused() && pause_bgm_on == FALSE) {
+					ch_bgm->stop(); ssystem->playSound(pause_bgm, 0, false, &ch_bgm);
+					game_bgm_on = FALSE; pause_bgm_on = TRUE;
+				}
+				
 				//인 게임
 				if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
 					update_monster_direction(CM_x); update_player_position(rt);
@@ -1959,15 +2018,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 						ssystem->playSound(next_round, 0, false, &ch_round);
 						round_up_sound = FALSE;
 					}
-
+					//대미지를 연속으로 입지 않도록 쿨타임을 조성한다.
 					if (cool_time > 0) cool_time--;
 				}
-
-				//UI 애니메이션
-				UI_animation();
-
-				//게임 버튼 사운드
-				play_button_sound();
 			}
 
 			break;
@@ -1982,20 +2035,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			hbitmap = CreateCompatibleBitmap(hdc, rt.right, rt.bottom);
 			(HBITMAP)SelectObject(mdc, hbitmap); 
 
+			//인트로에 나오는 원 애니메이션 파트
 			if (is_intro == TRUE) {
 				ellipse_intro(mdc, rt, ellipse_size, r, g, b);
 				if(intro_logo_acc == 0 && intro_time > 155)	ellipse_intro2(mdc, rt, ellipse2_size);
 				intro_logo.Draw(mdc, intro_logo_x, intro_logo_y, 700, 300, 0, 0, 700, 300);
 			}
 
+			//메인 스크롤 백그라운드
 			if (is_intro == FALSE) {
-				if (manager.getCurrentSceneID() == Game) wm_paint(mdc, rt);
-
-				//메인 스크롤 백그라운드
-				if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory) {
+				if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory 
+					|| (manager.getCurrentSceneID() == Game && into_the_game == TRUE)) {
 					background_main.Draw(mdc, rt.left, rt.top, rt.right, rt.bottom, Scanner_main, 0, 1500, 800);
 					logo.Draw(mdc, 450, logo_y, 600, 300, 0, 0, 600, 300);
 				}
+			}
+
+			//인트로와 새 게임 애니메이션이 재생되지 않아야 게임 화면을 출력한다.
+			if (is_intro == FALSE && into_the_game == FALSE) {
+				if (manager.getCurrentSceneID() == Game) wm_paint(mdc, rt);
 
 				//일시정지 씬
 				if (manager.isPaused() || is_resumed == TRUE) {
@@ -2003,10 +2061,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					CM_paused.Draw(mdc, rt.right - 550, CM_paused_y, 550, 800, 0, 0, 550, 800);
 				}
 
-
 				manager.syncSize(hWnd); manager.show(mdc);
 			}
-			
+
+
+			if (into_the_game == TRUE || end_new_game == TRUE) {
+				background_game_start.Draw(mdc, new_bg_x, new_bg_y, 1500, 800, 0, 0, 1500, 800);
+				CM_game_start.Draw(mdc, CM_game_start_x, rt.top, 800, 800, 0, 0, 800, 800);
+				logo_game_start.Draw(mdc, 400, new_logo_y, 700, 300, 0, 0, 700, 300);
+			}
 			
 			BitBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, SRCCOPY);
 		

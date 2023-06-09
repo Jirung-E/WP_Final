@@ -17,7 +17,7 @@ extern CImage BG_paused, CM_paused;
 extern CImage grenade[8];
 extern CImage avail_grenade, unavail_grenade;
 extern CImage explode[7];
-extern CImage logo, background_main, intro_logo;
+extern CImage logo, background_main, intro_logo, CM_game_start, background_game_start, logo_game_start;
 
 //메인 백그라운드 스크롤
 extern int Scanner_main;
@@ -118,7 +118,7 @@ extern int death_x;
 extern int death_acc;
 
 //새 게임 시작 시 인트로 애니메이션 재생(예정)
-static BOOL is_intro = TRUE;
+static BOOL is_intro = FALSE;
 //인트로 딜레이 변수
 static int intro_delay = 150;
 //이 변수가 0이 되어야 메인으로 진입
@@ -132,6 +132,22 @@ static double r = 255, g = 255, b = 255;
 static int intro_logo_x = 400;
 static int intro_logo_y = 850;
 static int intro_logo_acc = 35;
+
+//새 게임 애니메이션 재생 여부, 재생 시간
+extern BOOL into_the_game;
+static BOOL end_new_game;
+static int into_time = 200;
+
+//새 게임 애니메이션 관련 변수들
+extern int new_bg_x;
+extern int new_bg_y;
+extern int new_acc;
+extern int CM_game_start_x;
+extern int new_logo_y;
+extern int new_logo_acc;
+extern int new_logo_delay;
+extern int new_logo_move; //1: first, 2: second
+
 
 void push_cat(int idx);
 void ellipse_intro(HDC mdc, RECT rt, int size, double r, double g, double b);

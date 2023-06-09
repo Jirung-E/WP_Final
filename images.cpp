@@ -17,9 +17,9 @@ CImage BG_paused, CM_paused;
 CImage grenade[8];
 CImage avail_grenade, unavail_grenade;
 CImage explode[7];
-CImage logo, background_main, intro_logo;
+CImage logo, background_main, intro_logo, CM_game_start, background_game_start, logo_game_start;
 
-gun_catridge gc[500];
+gun_catridge gc[2000];
 
 //메인 화면 백그라운드 스크롤
 int Scanner_main;
@@ -31,6 +31,18 @@ int logo_acc = 30;
 BOOL armory_to_main = FALSE;
 //메인에서 아머리로 들어갈때의 로고 애니메이션 재생
 BOOL main_to_armory = FALSE;
+
+//새 게임 애니메이션 관련 변수들
+int new_bg_x = 0;
+int new_bg_y = 850;
+int new_acc = 41;
+int CM_game_start_x = -800;
+int new_logo_y = 850;
+int new_logo_acc = 35;
+int new_logo_delay = 0;
+int new_logo_move = 1;
+
+
 
 int cdx = 0; // 탄피 인덱스 (catridge-index)
 int cat_delete_delay; //탄피 삭제 딜레이
