@@ -27,9 +27,9 @@ int Gun::shoot_speed(int gun_id) {
     case mp_44:
         return 10;
     case mg_42:
-        return 2;
+        return 3;
     case awp:
-        return 120;
+        return 80;
     }
     return 0;
 }

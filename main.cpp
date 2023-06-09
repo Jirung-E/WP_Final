@@ -1454,8 +1454,8 @@ void update_shoot_animation() {
 
 	//awp의 경우 볼트를 당겨야 탄피가 배출된다.
 	if (cat_ready == 1) {
-		if (awp_cat_delay < 33)awp_cat_delay++;
-		if (awp_cat_delay == 33) {
+		if (awp_cat_delay < 55)awp_cat_delay++;
+		if (awp_cat_delay == 55) {
 			awp_cat_delay = 0; cat_ready = 0; make_cat_awp();
 		}
 	}
@@ -1527,8 +1527,8 @@ void index_auto_delete() {
 	//탄피 인덱스 삭제 
 	if (cdx > 5) {  //mg42는 연사 속도가 빨라 다른 총들보다 더 빨리 삭제함
 		if (GUN_number == mg_42) {
-			if (cat_delete_delay < 3) cat_delete_delay++;
-			if (cat_delete_delay == 3) {
+			if (cat_delete_delay < 5) cat_delete_delay++;
+			if (cat_delete_delay == 5) {
 				cat_delete_delay = 0;  push_cat(cdx--);
 			}
 		}
