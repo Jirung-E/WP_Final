@@ -81,6 +81,7 @@ void GameScene::setUp() {
     empty = 0;
     reload_x = 0;
     can_shoot = TRUE;
+    reload_delay = 0;
 
     //게임오버 씬 초기화
     death_x = -500;
@@ -94,13 +95,10 @@ void GameScene::setUp() {
     gren_time = 0;
     gren_delay = 0;
 
-    //새 게임 인트로 화면 초기화
-    is_intro = FALSE;
-
     //메인 로고 위치 초기화
-    armory_to_main = FALSE;
-    logo_acc = 0; //로고 애니메이션 값 초기화
-    logo_y = 50;
+    armory_to_main = TRUE;
+    logo_acc = 30; //로고 애니메이션 값 초기화
+    logo_y = -450;
 }
 
 

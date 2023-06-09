@@ -14,9 +14,6 @@ BOOL to_resume = FALSE;
 BOOL to_pause = FALSE;
 BOOL is_resumed = FALSE;
 
-//이 변수가 TRUE가 되면 새 게임 인트로 재생
-BOOL is_intro = FALSE;
-
 GameManager::GameManager() : main_scene { }, game_scene { }, armory_scene { },
 current_scene { &main_scene }, mouse_position { 0, 0 } {
 	ifstream ifs { "userdata.txt" };
@@ -118,8 +115,6 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 			switch(buttonClicked(point)) {
 			case MainScene::Start:
 				button_feed_clickScene_start = TRUE;
-				//게임 시작 인트로 애니메이션 재생(예정)
-				is_intro = TRUE;
 				gameStart(hWnd);
 				break;
 			case MainScene::Quit:
@@ -142,8 +137,10 @@ void GameManager::clickScene(const HWND& hWnd, const POINT& point, const Directi
 				break;
 			case GameScene::Quit:
 				button_feed_clickScene_quit = TRUE;
-				is_resumed = FALSE;
-				pause_y = 900; CM_paused_y = 850; //일시정지 화면 좌표 초기화
+				//is_resumed = FALSE;
+				//pause_y = 900; CM_paused_y = 850; //일시정지 화면 좌표 초기화
+				is_resumed = TRUE; //일시정지 화면 가속값 초기화
+				pause_acc = 88; cm_pause_acc = 88;
 				quit(hWnd);
 				break;
 			}

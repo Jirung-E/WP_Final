@@ -17,7 +17,7 @@ CImage BG_paused, CM_paused;
 CImage grenade[8];
 CImage avail_grenade, unavail_grenade;
 CImage explode[7];
-CImage logo, background_main;
+CImage logo, background_main, intro_logo;
 
 gun_catridge gc[500];
 
@@ -117,4 +117,22 @@ void push_cat(int idx) {
 		gc[i].x_speed = gc[i + 1].x_speed;
 		gc[i].acc = gc[i + 1].acc;
 	}
+}
+
+void ellipse_intro(HDC mdc, RECT rt, int size, double r, double g, double b) {
+	HBRUSH hbrush, oldbrush;
+	HPEN hpen, oldpen;
+
+	hbrush = CreateSolidBrush(RGB(r, g, b));
+	oldbrush = (HBRUSH)SelectObject(mdc, hbrush);
+	hpen = CreatePen(PS_SOLID, 1, RGB(255, 255, 255));
+	oldpen = (HPEN)SelectObject(mdc, hpen);
+
+	Ellipse(mdc, rt.right / 2 - size, rt.bottom / 2 - size, rt.right / 2 + size, rt.bottom / 2 + size);
+
+	SelectObject(mdc, oldbrush);
+	DeleteObject(hbrush);
+	SelectObject(mdc, oldpen);
+	DeleteObject(hpen);
+
 }
