@@ -1949,10 +1949,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 			if (manager.getCurrentSceneID() == Game) wm_paint(mdc, rt);
 
-			//메인 로고 및 스크롤 백그라운드
+			//메인 스크롤 백그라운드
 			if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory) 
 				background_main.Draw(mdc, rt.left, rt.top, rt.right, rt.bottom, Scanner_main, 0, 1500, 800);
 				
+			//메인 로고
 			if (manager.getCurrentSceneID() == Main)
 				logo.Draw(mdc, 450, 50, 600, 300, 0, 0, 600, 300);
 
