@@ -1679,6 +1679,7 @@ void intro_animation() {
 	if (intro_time < 300) {
 		if (intro_logo_acc > 0) intro_logo_y -= intro_logo_acc--; 
 	}
+	if (intro_logo_acc == 0 && intro_time > 155) ellipse2_size += 12;
 	//배경이 점차 어두워진다
 	if (intro_time < 150) {
 		if (r > 0) {
@@ -1983,6 +1984,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 			if (is_intro == TRUE) {
 				ellipse_intro(mdc, rt, ellipse_size, r, g, b);
+				if(intro_logo_acc == 0 && intro_time > 155)	ellipse_intro2(mdc, rt, ellipse2_size);
 				intro_logo.Draw(mdc, intro_logo_x, intro_logo_y, 700, 300, 0, 0, 700, 300);
 			}
 

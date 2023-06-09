@@ -136,3 +136,29 @@ void ellipse_intro(HDC mdc, RECT rt, int size, double r, double g, double b) {
 	DeleteObject(hpen);
 
 }
+
+void ellipse_intro2(HDC mdc, RECT rt, int size) {
+	HBRUSH hbrush, oldbrush;
+	HPEN hpen, oldpen;
+
+	hbrush = CreateSolidBrush(RGB(0, 0, 0));
+	oldbrush = (HBRUSH)SelectObject(mdc, hbrush);
+	hpen = CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+	oldpen = (HPEN)SelectObject(mdc, hpen);
+
+	Ellipse(mdc, rt.right / 2 - size, rt.bottom / 2 - size, rt.right / 2 + size, rt.bottom / 2 + size);
+
+
+	hbrush = CreateSolidBrush(RGB(255, 255, 255));
+	oldbrush = (HBRUSH)SelectObject(mdc, hbrush);
+	hpen = CreatePen(PS_SOLID, 1, RGB(255, 255, 255));
+	oldpen = (HPEN)SelectObject(mdc, hpen);
+
+	Ellipse(mdc, rt.right / 2 - (size - 20), rt.bottom / 2 - (size - 20), rt.right / 2 + (size - 20), rt.bottom / 2 + (size - 20));
+
+	SelectObject(mdc, oldbrush);
+	DeleteObject(hbrush);
+	SelectObject(mdc, oldpen);
+	DeleteObject(hpen);
+
+}

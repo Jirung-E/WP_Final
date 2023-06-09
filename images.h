@@ -120,12 +120,13 @@ extern int death_acc;
 //새 게임 시작 시 인트로 애니메이션 재생(예정)
 static BOOL is_intro = TRUE;
 //인트로 딜레이 변수
-static int intro_delay = 100;
+static int intro_delay = 150;
 //이 변수가 0이 되어야 메인으로 진입
 static int intro_time = 500;
 //배경 변수
 static int ellipse_size = 0;
-static int ellipse_acc = 0;
+static int ellipse2_size = 0;
+
 static double r = 255, g = 255, b = 255;
 //팀 로고 변수
 static int intro_logo_x = 400;
@@ -134,3 +135,4 @@ static int intro_logo_acc = 35;
 
 void push_cat(int idx);
 void ellipse_intro(HDC mdc, RECT rt, int size, double r, double g, double b);
+void ellipse_intro2(HDC mdc, RECT rt, int size);
