@@ -414,13 +414,17 @@ void init_exp_animation() {
 }
 
 //정조준 완료 표시
-void show_zoom_complited(HDC mdc) {
-	zoom_complited.Draw(mdc, CM_x - 25 + ss_x, CM_y - ypos_zc + ss_y + landing_shake, 150, 150, 0, 0, 100, 100);
+void show_zoom_complited(HDC mdc, RECT rt) {
+	zoom_complited.Draw(mdc, (CM_x - 25 + ss_x) / 1500.0 * rt.right, (CM_y - ypos_zc + ss_y + landing_shake) / 800.0 * rt.bottom, 
+		150 / 1500.0 * rt.right, 150 / 1500.0 * rt.right,
+		0, 0, 100, 100);
 }
 
 //awp 관통 대상 탐색
-void find_target(int mx, int my) {
+void find_target(int mx, int my, RECT rt) {
 	//마우스 좌표 mx +- 500 범위 내에 몬스터가 있을 시 관통 대상이 된다. 
+	mx = mx * 1500.0 / rt.right;
+	my = my * 800.0 / rt.bottom;
 	for (int i = 0; i < mdx_r; i++) {
 		if (CM_img_dir == 0 && mst_r[i].x <= mx && mst_r[i].x >= mx - 500 && my >= mst_r[i].y && my <= mst_r[i].y + 100) mst_r[i].targeted = 1; 
 		else if (CM_img_dir == 1 && mst_r[i].x + 100 >= mx && mst_r[i].x + 100 <= mx + 500 && my >= mst_r[i].y && my <= mst_r[i].y + 100) mst_r[i].targeted = 1; 
@@ -434,13 +438,24 @@ void find_target(int mx, int my) {
 }
 
 //awp 관통 대상 표시
-void show_awp_targeted(HDC mdc) {
+void show_awp_targeted(HDC mdc, RECT rt) {
 	//관통 대상이 된 몬스터는 따로 표시된다.
+	int tx;
+	int ty;
+	int tw = 100 / 1500.0 * rt.right;
 	for (int i = 0; i < mdx_r; i++) {
-		if (mst_r[i].targeted == 1) zoom_targeted.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y - 90 + ss_x + landing_shake, 100, 100, 0, 0, 100, 100); 
+		if(mst_r[i].targeted == 1) {
+			tx = (mst_r[i].x + ss_x) / 1500.0 * rt.right;
+			ty = (mst_r[i].y - 90 + ss_x + landing_shake) / 800.0 * rt.bottom;
+			zoom_targeted.Draw(mdc, tx, ty, tw, tw, 0, 0, 100, 100);
+		}
 	} 
 	for (int i = 0; i < mdx_big; i++) {
-		if (mst_big[i].targeted == 1) zoom_targeted.Draw(mdc, mst_big[i].x + 50 + ss_x, mst_big[i].y - 90 + landing_shake, 100, 100, 0, 0, 100, 100); 
+		if(mst_big[i].targeted == 1) {
+			tx = (mst_big[i].x + 50 + ss_x) / 1500.0 * rt.right;
+			ty = (mst_big[i].y - 90 + landing_shake) / 800.0 * rt.bottom;
+			zoom_targeted.Draw(mdc, tx, ty, tw, tw, 0, 0, 100, 100);
+		}
 	}
 }
 
@@ -681,18 +696,24 @@ void show_player(HDC mdc, RECT rt) {
 	CM_w = player_image->GetWidth();
 	CM_h = player_image->GetHeight();
 	pw = CM_w / 1500.0 * rt.right;
-	ph = CM_h / 800.0 * rt.bottom;
-	RECT r = { 0, 0, pw, ph };
-	r = expandRatio(r, CM_w, CM_h);		// 비율 맞추기
-	player_image->Draw(mdc, px, py, r.right-r.left, r.bottom-r.top, 0, 0, CM_w, CM_h);
+	//ph = CM_h / 800.0 * rt.bottom;
+	ph = CM_h / 1500.0 * rt.right;
+	//RECT r = { 0, 0, pw, ph };
+	//r = expandRatio(r, CM_w, CM_h);		// 비율 맞추기
+	//pw = r.right-r.left;
+	//ph = r.bottom-r.top;
+	player_image->Draw(mdc, px, py, pw, ph, 0, 0, CM_w, CM_h);
 
 	GUN_w = gun_image->GetWidth();
 	GUN_h = gun_image->GetHeight();
 	gw = GUN_w / 1500.0 * rt.right;
-	gh = GUN_h / 800.0 * rt.bottom;
-	r = { 0, 0, gw, gh };
-	r = expandRatio(r, GUN_w, GUN_h);		// 비율 맞추기
-	gun_image->Draw(mdc, gx, gy, r.right-r.left, r.bottom-r.top, 0, 0, GUN_w, GUN_h);
+	//gh = GUN_h / 800.0 * rt.bottom;
+	gh = GUN_h / 1500.0 * rt.right;
+	//r = { 0, 0, gw, gh };
+	//r = expandRatio(r, GUN_w, GUN_h);		// 비율 맞추기
+	//gw = r.right-r.left;
+	//gh = r.bottom-r.top;
+	gun_image->Draw(mdc, gx, gy, gw, gh, 0, 0, GUN_w, GUN_h);
 
 	if(flame != nullptr) {
 		flame->Draw(mdc, fx, fy, fw, fh, 0, 0, 100, 100);
@@ -832,7 +853,7 @@ void update_player_direction(int mouse_x) {
 }
 
 //플레이어 위치 업데이트
-void update_player_position(RECT rt) {
+void update_player_position() {
 //점프
 	if (CM_jump == 1) { //위로 올라가는 중
 		CM_y -= CM_jump_acc; CM_jump_acc--; //위로 올라갈수록 가속이 줄어듬
@@ -871,7 +892,7 @@ void update_player_position(RECT rt) {
 		} 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) CM_x -= 15;   
 			//배경 인식 좌표가 10이되고 플레이어가 다시 가운데로 이동할 때까지 플레이어만 움직임 
-		if (CM_x <= rt.left) CM_x += 15;  
+		if (CM_x <= 0) CM_x += 15;  
 			//벽에 닿으면 이동 중지      
 	} 
 	else if (CM_move_dir == 1) { //우측 이동
@@ -884,7 +905,7 @@ void update_player_position(RECT rt) {
 			gren_x -= 15; BG_scanner += 15;
 		} 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) CM_x += 15; 
-		if (CM_x + 100 >= rt.right) CM_x -= 15; 
+		if (CM_x + 100 >= 1500) CM_x -= 15; 
 	} 
 }
 
@@ -924,7 +945,9 @@ void update_monster_position() {
 }
 
 //AWP 전용 몬스터 명중 판정
-void check_hit_awp() {
+void check_hit_awp(RECT rt) {
+	int hit_x = ::hit_x * 1500.0 / rt.right;
+	int hit_y = ::hit_y * 800.0 / rt.bottom;
 	//조건문 중복 방지 변수
 	int is_kill_r = 0; int is_kill_big = 0; int is_kill_air = 0;
 	//최소 한 마리의 몬스터를 맞추어야 관통 효과가 발동된다
@@ -1132,11 +1155,15 @@ void make_rand_ammo(int ammo, int max_ammo, RECT rt) {
 	ammo_x2 = ammo_x1 + (1500 * cos(angle)); ammo_y2 = ammo_y1 + (1500 * sin(angle));
 	 
 	//히트 판정
-	if(GUN_number != awp) check_hit(rt);
-		 
-	//AWP일 경우 전용 히트 판정 함수 사용
-	if (GUN_number == awp) check_hit_awp();
-		 
+	switch(GUN_number) {
+	case awp:
+		//AWP일 경우 전용 히트 판정 함수 사용
+		check_hit_awp(rt);
+		break;
+	default:
+		check_hit(rt);
+	}
+
 	is_draw = TRUE; draw_hit = TRUE; //그리기 시작
 	ind_effect = 1; shake_effect = 1; //각각 인터페이스 이펙트, 흔들림 이펙트
 	shoot_delay = 0;	//딜레이는 0이되어 다시 딜레이가 증가하기 시작
@@ -1863,11 +1890,11 @@ void wm_paint(HDC mdc, RECT rt) {
 
 	//정조준 완료 시에 관통 대상 표시
 	if (GUN_number == awp && is_zoom == TRUE && empty == 0 && reload == 0 && r_pressed == 0) {
-		find_target(mx, my); show_awp_targeted(mdc); 
+		find_target(mx, my, rt); show_awp_targeted(mdc, rt); 
 	}
 
 	//awp 정조준 완료 표시
-	show_zoom_complited(mdc);
+	show_zoom_complited(mdc, rt);
 
 	//몬스터 이미지 출력
 	show_monster(mdc, ss_x, ss_y, landing_shake, rt);
@@ -2089,7 +2116,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				
 				//인 게임
 				if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
-					update_monster_direction(CM_x); update_player_position(rt);
+					update_monster_direction(CM_x); update_player_position();
 					update_monster_position();      update_shoot_animation();
 					check_monster_attack();         monster_animation();
 					make_monster(rt);               shoot(rt);
