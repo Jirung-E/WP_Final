@@ -19,7 +19,7 @@ extern CImage grenade[8];
 extern CImage avail_grenade, unavail_grenade;
 extern CImage explode[7];
 extern CImage logo, background_main, intro_logo, CM_game_start, background_game_start, logo_game_start;
-extern CImage clip[4];
+extern CImage clip[4], CM_loading[2];
 
 //메인 백그라운드 스크롤
 extern int Scanner_main;
@@ -122,7 +122,7 @@ extern int death_acc;
 //새 게임 시작 시 인트로 애니메이션 재생(예정)
 static BOOL is_intro = FALSE;
 //인트로 딜레이 변수
-static int intro_delay = 200;
+static int intro_delay = 400;
 //이 변수가 0이 되어야 메인으로 진입
 static int intro_time = 500;
 //배경 변수
@@ -134,6 +134,10 @@ static double r = 255, g = 255, b = 255;
 static int intro_logo_x = 400;
 static int intro_logo_y = 850;
 static int intro_logo_acc = 35;
+
+//로딩 화면 애니메이션 프레임
+static int loading_frame = 0;
+static int loading_delay = 0;
 
 //새 게임 애니메이션 재생 여부, 재생 시간
 extern BOOL into_the_game;

@@ -25,7 +25,7 @@ int Gun::shoot_speed(int gun_id) {
     case scar_h:
         return 7;
     case m16:
-        return 4;
+        return 5;
     case mp_44:
         return 12;
     case mg_42:
@@ -164,7 +164,7 @@ int Gun::speed_info(int gun_id) {
     case scar_h:
         return 545;
     case m16:
-        return 800;
+        return 700;
     case mp_44:
         return 375;
     case mg_42:

@@ -41,7 +41,8 @@ int calc_spawn_timer(int spawn_timer_max) {
 	if(game_round < 100) {
 		return spawn_timer_max * (100.0 - (game_round-1)) / 100;
 	}
-	return spawn_timer_max * 2.0 / 100;
+	else
+		return spawn_timer_max;
 }
 
 //일반 몬스터 생성

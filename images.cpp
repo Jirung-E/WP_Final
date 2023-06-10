@@ -19,7 +19,7 @@ CImage grenade[8];
 CImage avail_grenade, unavail_grenade;
 CImage explode[7];
 CImage logo, background_main, intro_logo, CM_game_start, background_game_start, logo_game_start;
-CImage clip[4];
+CImage clip[4], CM_loading[2];
 
 gun_catridge gc[2000];
 

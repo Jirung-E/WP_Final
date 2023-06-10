@@ -208,6 +208,9 @@ void IMG_FILE_LOAD() {
 	clip[1].Load(L".\\res\\clip\\clip2.png");
 	clip[2].Load(L".\\res\\clip\\clip3.png");
 	clip[3].Load(L".\\res\\clip\\clip4.png");
+
+	CM_loading[0].Load(L".\\res\\loading\\CM_loading1.png");
+	CM_loading[1].Load(L".\\res\\loading\\CM_loading2.png");
 } 
 
 //FMOD 세팅
@@ -730,11 +733,11 @@ void make_monster(RECT rt) {
 void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 	//죽은 몬스터 출력
 	for (int i = 0; i < ddx; i++) {
-		if (dl[i].monster_type == 1) {
+		if (dl[i].monster_type == 1 || dl[i].monster_type == 4 || dl[i].monster_type == 5) {
 			if(dl[i].dir == 0) monster_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100); 
 			else if(dl[i].dir == 1) monster_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100); 
 		}
-		else if (dl[i].monster_type == 2) {
+		else if (dl[i].monster_type == 2 || dl[i].monster_type == 6 || dl[i].monster_type == 7) {
 			if(dl[i].dir == 0) monster_big_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200); 
 			else if (dl[i].dir == 1) monster_big_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200); 
 		}
@@ -1210,41 +1213,78 @@ void check_explode_damage() {
 	if (is_boom == TRUE) {
 		int is_kill_r = 0; int is_kill_big = 0; 
 		for (int i = mdx_r - 1; i >= 0; i--) {
-			if (mst_r[i].x + 50 >= (gren_x - 90) - 400 && mst_r[i].x + 50 <= (gren_x - 90) + 400) mst_r[i].hp -= 150; 
-			if (mst_r[i].hp <= 0) {
-				if (i < mdx_r - 1 && is_kill_r == 0) {
-					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
-					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
-					monster_array_push_r(i, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
-					init_exp_animation(); is_kill_r = 1; kill_count++;
+			if (mst_r[i].x + 50 >= (gren_x - 90) - 400 && mst_r[i].x + 50 <= (gren_x - 90) + 400) {
+				mst_r[i].hp -= 150;
+				if (mst_r[i].hp <= 0) { //수류탄의 왼쪽에 있을 경우
+					if (mst_r[i].x + 50 <= (gren_x - 90)) {
+						if (i < mdx_r - 1 && is_kill_r == 0) {
+							dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 4; dl[ddx].dir = mst_r[i].img_dir;
+							dl[ddx].acc = 30; dl[ddx++].motion_dir = 1;
+							monster_array_push_r(i, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
+							init_exp_animation(); is_kill_r = 1; kill_count++;
+						}
+						else if (i == mdx_r - 1 && is_kill_r == 0) {
+							dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 4; dl[ddx].dir = mst_r[i].img_dir;
+							dl[ddx].acc = 30; dl[ddx++].motion_dir = 1;
+							mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
+							init_exp_animation(); is_kill_r = 1; kill_count++;
+						}
+					}
+					//수류탄의 오른쪽에 있을 경우
+					else if (mst_r[i].x + 50 >= (gren_x - 90)) {
+						if (i < mdx_r - 1 && is_kill_r == 0) {
+							dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 5; dl[ddx].dir = mst_r[i].img_dir;
+							dl[ddx].acc = 30; dl[ddx++].motion_dir = 1;
+							monster_array_push_r(i, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
+							init_exp_animation(); is_kill_r = 1; kill_count++;
+						}
+						else if (i == mdx_r - 1 && is_kill_r == 0) {
+							dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 5; dl[ddx].dir = mst_r[i].img_dir;
+							dl[ddx].acc = 30; dl[ddx++].motion_dir = 1;
+							mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
+							init_exp_animation(); is_kill_r = 1; kill_count++;
+						}
+					}
+					ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); is_kill_r = 0;
 				}
-				else if (i == mdx_r - 1 && is_kill_r == 0) {
-					dl[ddx].x = mst_r[i].x; dl[ddx].y = mst_r[i].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[i].img_dir;
-					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
-					mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
-					init_exp_animation(); is_kill_r = 1; kill_count++;
-				}
-				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); is_kill_r = 0; 
 			}
 		}
 
 		for (int i = mdx_big - 1; i >= 0; i--) {
-			if (mst_big[i].x + 100 >= (gren_x - 90) - 400 && mst_big[i].x + 100 <= (gren_x - 90) + 400) mst_big[i].hp -= 150; 
-			if (mst_big[i].hp <= 0) {
-				if (i < mdx_big - 1 && is_kill_big == 0) {
-					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
-					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
-					monster_array_push_big(i, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
-					init_exp_animation(); is_kill_big = 1; kill_count++;
+			if (mst_big[i].x + 100 >= (gren_x - 90) - 400 && mst_big[i].x + 100 <= (gren_x - 90) + 400) {
+				mst_big[i].hp -= 150;
+				if (mst_big[i].hp <= 0) {
+					if (mst_big[i].x + 100 <= (gren_x - 90)) {
+						if (i < mdx_big - 1 && is_kill_big == 0) {
+							dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 6; dl[ddx].dir = mst_big[i].img_dir;
+							dl[ddx].acc = 30; dl[ddx++].motion_dir = 1;
+							monster_array_push_big(i, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
+							init_exp_animation(); is_kill_big = 1; kill_count++;
+						}
+						else if (i == mdx_big - 1 && is_kill_big == 0) {
+							dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 6; dl[ddx].dir = mst_big[i].img_dir;
+							dl[ddx].acc = 30; dl[ddx++].motion_dir = 1;
+							mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
+							init_exp_animation(); is_kill_big = 1; kill_count++;
+						}
+					}
+					else if (mst_big[i].x + 100 >= (gren_x - 90)) {
+						if (i < mdx_big - 1 && is_kill_big == 0) {
+							dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 7; dl[ddx].dir = mst_big[i].img_dir;
+							dl[ddx].acc = 30; dl[ddx++].motion_dir = 1;
+							monster_array_push_big(i, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
+							init_exp_animation(); is_kill_big = 1; kill_count++;
+						}
+						else if (i == mdx_big - 1 && is_kill_big == 0) {
+							dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 7; dl[ddx].dir = mst_big[i].img_dir;
+							dl[ddx].acc = 30; dl[ddx++].motion_dir = 1;
+							mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
+							init_exp_animation(); is_kill_big = 1; kill_count++;
+						}
+					}
+					ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); is_kill_big = 0;
 				}
-				else if (i == mdx_big - 1 && is_kill_big == 0) {
-					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
-					dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
-					mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
-					init_exp_animation(); is_kill_big = 1; kill_count++;
-				}
-				ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp); is_kill_big = 0;
-			} 
+			}
 		}
 	}
 }
@@ -1763,6 +1803,23 @@ void monster_animation() {
 				if (dl[i].acc < 21)	dl[i].y += dl[i].acc++;
 				if (dl[i].acc == 21) dl[i].motion_dir = -1;
 			}
+			if (dl[i].motion_dir != -1) {
+				if (dl[i].dir == 0) dl[i].x += 5;
+				else if (dl[i].dir == 1) dl[i].x -= 5;
+			}
+		}
+		//폭발 사망 애니메이션
+		if (dl[i].monster_type == 4 || dl[i].monster_type == 5 || dl[i].monster_type == 6 || dl[i].monster_type == 7) {
+			if (dl[i].motion_dir == 1) {
+				if (dl[i].acc > -1) dl[i].y -= dl[i].acc--;
+				if (dl[i].acc == -1) dl[i].motion_dir = 2;
+			}
+			if (dl[i].motion_dir == 2) {
+				if (dl[i].acc < 31)	dl[i].y += dl[i].acc++;
+				if (dl[i].acc == 31) dl[i].motion_dir = -1;
+			}
+			if ((dl[i].monster_type == 4 || dl[i].monster_type == 6) && dl[i].motion_dir != -1) dl[i].x -= 20;
+			else if ((dl[i].monster_type == 5 || dl[i].monster_type == 7) && dl[i].motion_dir != -1) dl[i].x += 20;
 		}
 	}
 }
@@ -2039,7 +2096,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		}
 		if(into_the_game == FALSE) manager.keyboardInput(hWnd, wParam); 
 
-		if (is_intro == TRUE) {
+		if (is_intro == TRUE && intro_delay == 0) {
 			switch (wParam) {
 			case VK_SPACE:
 				is_intro = FALSE;
@@ -2112,6 +2169,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		switch (wParam) {
 		case UPDATE: //게임 전체 타이머
 			GetClientRect(hWnd, &rt);
+
+			if (intro_delay > 0) {
+				if(loading_delay < 15) loading_delay++;
+				if (loading_delay == 15) {
+					loading_delay = 0;
+					if (loading_frame == 0) loading_frame = 1;
+					else if (loading_frame == 1) loading_frame = 0;
+				}
+			}
 
 			//인트로 중에는 인트로 외에는 어떠한 다른 작업도 실행되지 않는다.
 			if (is_intro == TRUE) {
@@ -2212,6 +2278,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				ellipse_intro(mdc, rt, ellipse_size, r, g, b);
 				if(intro_logo_acc == 0 && intro_time > 155)	ellipse_intro2(mdc, rt, ellipse2_size);
 				intro_logo.Draw(mdc, intro_logo_x, intro_logo_y, 700, 300, 0, 0, 700, 300);
+
+				//인트로 전 로딩 단계 애니메이션 출력
+				if (intro_time == 500) {
+					SetBkMode(mdc, TRANSPARENT);
+					SetTextColor(mdc, RGB(255, 255, 255));
+					TextOut(mdc, 690, 600, L"Game is Loading...", lstrlen(L"Game is Loading..."));
+					CM_loading[loading_frame].Draw(mdc, 695, 450, 100, 120, 0, 0, 100, 120);
+				}
 			}
 
 			//메인 스크롤 백그라운드
