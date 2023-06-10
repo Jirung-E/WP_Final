@@ -4,7 +4,6 @@
 #include <math.h>
 #include <random>
 #include "GameManager.h"
-//#include "GameManager.cpp"
 #include "monster_info.h"//몬스터 정보 헤더
 #include "ammo.h"        //총알 정보 헤더
 #include "player_info.h" //플레이어 정보 헤더
@@ -13,6 +12,7 @@
 #include "gun_info.h"
 #include "fmod.hpp"
 #include "fmod_errors.h"
+#include "resource.h"
 
 #pragma comment (lib, "C:/Program Files (x86)/FMOD SoundSystem/FMOD Studio API Windows/api/core/lib/x64/fmod_vc.lib")
 
@@ -2100,12 +2100,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	WndClass.cbClsExtra = 0;
 	WndClass.cbWndExtra = 0;
 	WndClass.hInstance = hInstance;
-	WndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	WndClass.hCursor = LoadCursor(NULL, IDC_HAND);
+	WndClass.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
+	WndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	WndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 	WndClass.lpszMenuName = NULL;
 	WndClass.lpszClassName = lpszClass;
-	WndClass.hIconSm = LoadIcon(NULL, IDI_QUESTION);
+	WndClass.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	RegisterClassEx(&WndClass);
 	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_EX_TOPMOST, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);

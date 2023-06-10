@@ -198,6 +198,7 @@
     <ClInclude Include="monster_info.h" />
     <ClInclude Include="player_info.h" />
     <ClInclude Include="Point.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="TextBox.h" />
@@ -206,6 +207,12 @@
   <ItemGroup>
     <Text Include="userdata.txt" />
     <Text Include="변경사항.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\icon\NON_STOP_icon_256x256.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
