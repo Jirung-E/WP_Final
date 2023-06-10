@@ -16,7 +16,6 @@ public:
 
 public:
 	Sprite(const tstring& file_name);
-	Sprite(const CImage& cimage);
 
 public:
 	void draw(const HDC& hdc, const RECT& draw_area) const;

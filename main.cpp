@@ -1648,6 +1648,7 @@ void UI_animation() {
 	//게임 오버 화면 애니메이션
 	if (manager.isGameOver()) {
 		if (death_acc > 0) death_x += death_acc--;
+		if(death_x > 1000) death_x = 1000;
 	}
 	//메인화면 및 아머리씬 배경 스크롤 애니메이션
 	if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory || (manager.getCurrentSceneID() == Game && into_the_game == TRUE)) {
@@ -1819,7 +1820,12 @@ void wm_paint(HDC mdc, RECT rt) {
 		oldbrush = (HBRUSH)SelectObject(mdc, hbrush); 
 		Rectangle(mdc, rt.left, rt.top, rt.right, rt.bottom); 
 		SelectObject(mdc, oldbrush); DeleteObject(hbrush); 
-		CM_dead.Draw(mdc, death_x, 200, 500, 500, 0, 0, 500, 500);
+		//CM_dead.Draw(mdc, death_x, 200, 500, 500, 0, 0, 500, 500);
+		Sprite sp { L"./res/commando_dead.png" };
+		sp.fix_ratio = true;
+		sp.position.x = death_x / 1500.0 * rt.right - percentOf(rectToSquare(rt, Left).right, 70);
+		sp.size_per = 70;
+		sp.draw(mdc, rt);
 	} 
 }
 
