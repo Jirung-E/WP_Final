@@ -338,63 +338,71 @@ void mouse_fastClick_prevention() {
 }
 
 //조준점 출력
-void show_target(HDC mdc, int mouse_x, int mouse_y, double var) {
+void show_target(HDC mdc, int mouse_x, int mouse_y, double var, RECT rt) {
 	HPEN hpen, oldpen;
-	hpen = CreatePen(PS_SOLID, 12, RGB(0, 0, 0));
+	hpen = CreatePen(PS_SOLID, 12 / 1500.0 * rt.right, RGB(0, 0, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
-	MoveToEx(mdc, mouse_x + 12 + var, mouse_y, NULL);
-	LineTo(mdc, mouse_x + 41 + var, mouse_y);
-	MoveToEx(mdc, mouse_x - 12 - var, mouse_y, NULL);
-	LineTo(mdc, mouse_x - 41 - var, mouse_y);
-	MoveToEx(mdc, mouse_x, mouse_y - 12 - var, NULL);
-	LineTo(mdc, mouse_x, mouse_y - 41 - var);
-	MoveToEx(mdc, mouse_x, mouse_y + 12 + var, NULL);
-	LineTo(mdc, mouse_x, mouse_y + 41 + var);
+	int s = (12 + var) / 1500.0 * rt.right;
+	int S = (41 + var) / 1500.0 * rt.right;
+	MoveToEx(mdc, mouse_x + s, mouse_y, NULL);
+	LineTo(mdc, mouse_x + S, mouse_y);
+	MoveToEx(mdc, mouse_x - s, mouse_y, NULL);
+	LineTo(mdc, mouse_x - S, mouse_y);
+	MoveToEx(mdc, mouse_x, mouse_y - s, NULL);
+	LineTo(mdc, mouse_x, mouse_y - S);
+	MoveToEx(mdc, mouse_x, mouse_y + s, NULL);
+	LineTo(mdc, mouse_x, mouse_y + S);
 
 	SelectObject(mdc, oldpen); DeleteObject(hpen);
 	 
-	hpen = CreatePen(PS_SOLID, 5, RGB(40, 40, 40));
+	hpen = CreatePen(PS_SOLID, 5 / 1500.0 * rt.right, RGB(40, 40, 40));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
 	//awp일 경우 관통 범위 표시
 	if (GUN_number == awp) {
-		MoveToEx(mdc, mouse_x - 500, mouse_y - 40, NULL);
-		LineTo(mdc, mouse_x - 500, mouse_y + 40); 
-		MoveToEx(mdc, mouse_x + 500, mouse_y - 40, NULL);
-		LineTo(mdc, mouse_x + 500, mouse_y + 40);
+		s = 40 / 1500.0 * rt.right;
+		S = 500 / 1500.0 * rt.right;
+		MoveToEx(mdc, mouse_x - S, mouse_y - s, NULL);
+		LineTo(mdc, mouse_x - S, mouse_y + s);
+		MoveToEx(mdc, mouse_x + S, mouse_y - s, NULL);
+		LineTo(mdc, mouse_x + S, mouse_y + s);
 	} 
 	SelectObject(mdc, oldpen); DeleteObject(hpen);
 	 
-	hpen = CreatePen(PS_SOLID, 5, RGB(0, 255, 0));
+	hpen = CreatePen(PS_SOLID, 5 / 1500.0 * rt.right, RGB(0, 255, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
-	MoveToEx(mdc, mouse_x + 13 + var, mouse_y, NULL);
-	LineTo(mdc, mouse_x + 40 + var, mouse_y);
-	MoveToEx(mdc, mouse_x - 13 - var, mouse_y, NULL);
-	LineTo(mdc, mouse_x - 40 - var, mouse_y);
-	MoveToEx(mdc, mouse_x, mouse_y - 13 - var, NULL);
-	LineTo(mdc, mouse_x, mouse_y - 40 - var);
-	MoveToEx(mdc, mouse_x, mouse_y + 13 + var, NULL);
-	LineTo(mdc, mouse_x, mouse_y + 40 + var);
+	s = (13 + var) / 1500.0 * rt.right;
+	S = (40 + var) / 1500.0 * rt.right;
+	MoveToEx(mdc, mouse_x + s, mouse_y, NULL);
+	LineTo(mdc, mouse_x + S, mouse_y);
+	MoveToEx(mdc, mouse_x - s, mouse_y, NULL);
+	LineTo(mdc, mouse_x - S, mouse_y);
+	MoveToEx(mdc, mouse_x, mouse_y - s, NULL);
+	LineTo(mdc, mouse_x, mouse_y - S);
+	MoveToEx(mdc, mouse_x, mouse_y + s, NULL);
+	LineTo(mdc, mouse_x, mouse_y + S);
 
 	SelectObject(mdc, oldpen); DeleteObject(hpen); 
 }
 
 //히트 포인트 표시
-void show_hit(HDC mdc, int hit_x, int hit_y) {
+void show_hit(HDC mdc, int hit_x, int hit_y, RECT rt) {
 	HPEN hpen, oldpen;
-	hpen = CreatePen(PS_SOLID, 4, RGB(255, 0, 0));
+	hpen = CreatePen(PS_SOLID, 4 / 1500.0 * rt.right, RGB(255, 0, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
-	MoveToEx(mdc, hit_x - 5, hit_y - 5, NULL);
-	LineTo(mdc, hit_x - 15, hit_y - 15);
-	MoveToEx(mdc, hit_x + 5, hit_y - 5, NULL);
-	LineTo(mdc, hit_x + 15, hit_y - 15);
-	MoveToEx(mdc, hit_x - 5, hit_y + 5, NULL);
-	LineTo(mdc, hit_x - 15, hit_y + 15);
-	MoveToEx(mdc, hit_x + 5, hit_y + 5, NULL);
-	LineTo(mdc, hit_x + 15, hit_y + 15);
+	int s = 5 / 1500.0 * rt.right;
+	int S = 15 / 1500.0 * rt.right;
+	MoveToEx(mdc, hit_x - s, hit_y - s, NULL);
+	LineTo(mdc, hit_x - S, hit_y - S);
+	MoveToEx(mdc, hit_x + s, hit_y - s, NULL);
+	LineTo(mdc, hit_x + S, hit_y - S);
+	MoveToEx(mdc, hit_x - s, hit_y + s, NULL);
+	LineTo(mdc, hit_x - S, hit_y + S);
+	MoveToEx(mdc, hit_x + s, hit_y + s, NULL);
+	LineTo(mdc, hit_x + S, hit_y + S);
 
 	SelectObject(mdc, oldpen);
 	DeleteObject(hpen);
@@ -721,55 +729,82 @@ void make_monster(RECT rt) {
 }
 
 //몬스터 이미지 출력
-void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
+void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 	//죽은 몬스터 출력
+	int mx;
+	int my;
+	int mw;
+	int mh;
 	for (int i = 0; i < ddx; i++) {
+		mx = (dl[i].x + ss_x)  / 1500.0 * rt.right;
+		my = (dl[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
 		if (dl[i].monster_type == 1) {
-			if(dl[i].dir == 0) monster_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100); 
-			else if(dl[i].dir == 1) monster_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100); 
+			mw = 100 / 1500.0 * rt.right;
+			mh = 100 / 1500.0 * rt.right;
+			if(dl[i].dir == 0) monster_dead_left.Draw(mdc, mx, my, mw, mh, 0, 0, 100, 100); 
+			else if(dl[i].dir == 1) monster_dead_right.Draw(mdc, mx, my, mw, mh, 0, 0, 100, 100); 
 		}
 		else if (dl[i].monster_type == 2) {
-			if(dl[i].dir == 0) monster_big_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200); 
-			else if (dl[i].dir == 1) monster_big_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200); 
+			my = (dl[i].y + 50 + ss_y + landing_shake) / 1500.0 * rt.right;
+			mw = 200 / 1500.0 * rt.right;
+			mh = 200 / 1500.0 * rt.right;
+			if(dl[i].dir == 0) monster_big_dead_left.Draw(mdc, mx, my, 200, 200, 0, 0, 200, 200); 
+			else if (dl[i].dir == 1) monster_big_dead_right.Draw(mdc, mx, my, 200, 200, 0, 0, 200, 200); 
 		}
-		else if (dl[i].monster_type == 3) monster_air_dead.Draw(mdc, dl[i].x + ss_x, dl[i].y  + ss_y + landing_shake, 150, 60, 0, 0, 150, 60); 
+		else if(dl[i].monster_type == 3) {
+			mw = 150 / 1500.0 * rt.right;
+			mh = 60 / 1500.0 * rt.right;
+			monster_air_dead.Draw(mdc, mx, my, mw, mh, 0, 0, 150, 60);
+		}
 	} 
 	//일반 몬스터 출력
 	for (int i = 0; i < mdx_r; i++) {
+		mx = (mst_r[i].x + ss_x)  / 1500.0 * rt.right;
+		my = (mst_r[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
+		mw = 100 / 1500.0 * rt.right;
+		mh = mst_r[i].height / 1500.0 * rt.right;
 		switch (mst_r[i].img_dir) {
 		case 0:
 			MST_w = monster_left.GetWidth(); MST_h = monster_left.GetHeight(); 
-			monster_left.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y + ss_y + landing_shake, 100, mst_r[i].height, 0, 0, MST_w, MST_h);
+			monster_left.Draw(mdc, mx, my, mw, mh, 0, 0, MST_w, MST_h);
 			break; 
 		case 1:
 			MST_w = monster_right.GetWidth(); MST_h = monster_right.GetHeight(); 
-			monster_right.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y + ss_y + landing_shake, 100, mst_r[i].height, 0, 0, MST_w, MST_h);
+			monster_right.Draw(mdc, mx, my, mw, mh, 0, 0, MST_w, MST_h);
 			break;
 		}
 	} 
 	//대형 몬스터 출력
 	for (int i = 0; i < mdx_big; i++) {
+		mx = (mst_big[i].x + ss_x)  / 1500.0 * rt.right;
+		my = (mst_big[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
+		mw = 200 / 1500.0 * rt.right;
+		mh = mst_big[i].height / 1500.0 * rt.right;
 		switch (mst_big[i].img_dir) {
 		case 0:
 			MST_big_w = monster_big_left.GetWidth(); MST_big_h = monster_big_left.GetHeight(); 
-			monster_big_left.Draw(mdc, mst_big[i].x + ss_x, mst_big[i].y + ss_y + landing_shake, 200, mst_big[i].height, 0, 0, MST_big_w, MST_big_h);
+			monster_big_left.Draw(mdc, mx, my, mw, mh, 0, 0, MST_big_w, MST_big_h);
 			break; 
 		case 1:
 			MST_big_w = monster_big_right.GetWidth(); MST_big_h = monster_big_right.GetHeight(); 
-			monster_big_right.Draw(mdc, mst_big[i].x + ss_x, mst_big[i].y + ss_y + landing_shake, 200, mst_big[i].height , 0, 0, MST_big_w, MST_big_h);
+			monster_big_right.Draw(mdc, mx, my, mw, mh, 0, 0, MST_big_w, MST_big_h);
 			break;
 		}
 	} 
 	//공중 몬스터 출력
 	for (int i = 0; i < mdx_air; i++) {
+		mx = (mst_air[i].x + ss_x)  / 1500.0 * rt.right;
+		my = (mst_air[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
+		mw = 150 / 1500.0 * rt.right;
+		mh = mst_air[i].height / 1500.0 * rt.right;
 		switch (mst_air[i].img_dir) {
 		case 0:
 			MST_air_w = monster_air_left[air].GetWidth(); MST_air_h = monster_air_left[air].GetHeight(); 
-			monster_air_left[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, mst_air[i].height, 0, 0, MST_air_w, MST_air_h);
+			monster_air_left[air].Draw(mdc, mx, my, mw, mh, 0, 0, MST_air_w, MST_air_h);
 			break; 
 		case 1:
 			MST_air_w = monster_air_right[air].GetWidth(); MST_air_h = monster_air_right[air].GetHeight(); 
-			monster_air_right[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, mst_air[i].height, 0, 0, MST_air_w, MST_air_h);
+			monster_air_right[air].Draw(mdc, mx, my, mw, mh, 0, 0, MST_air_w, MST_air_h);
 			break;
 		}
 	}
@@ -1819,7 +1854,9 @@ void wm_rbuttondown() {
 void wm_paint(HDC mdc, RECT rt) {
 	//////////////////////// 버퍼
 	BG_w = 1500; BG_h = BackGround.GetHeight();
-	BackGround.Draw(mdc, rt.left + ss_x, rt.top - 30 + landing_shake + ss_y, rt.right, rt.bottom + 30, BG_scanner, 0, BG_w, BG_h);
+	BackGround.Draw(mdc, rt.left + ss_x / 1500.0 * rt.right, rt.top + (-30 + landing_shake + ss_y) / 800.0 * rt.bottom, 
+		rt.right, rt.bottom + 30,
+		BG_scanner, 0, BG_w, BG_h);
 	//BG_scanner가 클수록 배경은 오른쪽으로 이동하게 됨
 
 	//정조준 완료 시에 관통 대상 표시
@@ -1831,7 +1868,7 @@ void wm_paint(HDC mdc, RECT rt) {
 	show_zoom_complited(mdc);
 
 	//몬스터 이미지 출력
-	show_monster(mdc, ss_x, ss_y, landing_shake);
+	show_monster(mdc, ss_x, ss_y, landing_shake, rt);
 
 	//총알 궤적 그리기
 	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2, GUN_number);
@@ -1846,13 +1883,13 @@ void wm_paint(HDC mdc, RECT rt) {
 	if(is_throw == TRUE || set_grenade == TRUE) show_grenade(mdc, ss_x, ss_y, landing_shake);
 		 
 	//히트 포인트 그리기
-	if (draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2);
+	if (draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2, rt);
 
 	//인터페이스 출력
 	show_interface(mdc, rt);
 
 	//조준점 출력
-	if (!manager.isPaused() && !manager.isGameOver()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
+	if (!manager.isPaused() && !manager.isGameOver()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var, rt);
 
 	//게임 오버 씬
 	if (manager.isGameOver()) {
@@ -1870,29 +1907,9 @@ void wm_paint(HDC mdc, RECT rt) {
 	} 
 }
 
-void syncSize(const RECT& rect) {
-	// 플레이어 이미지 사이즈 맞추기
-	// 플레이어 위치 맞추기
-	// 배경 비율 유지하면서 출력
-	// 총 이미지 사이즈 맞추기
-	// 총 위치 맞추기
-	// 몬스터 이미지 사이즈 맞추기
-	// 몬스터 위치 맞추기
-	// 각종 애니메이션에 쓰이는 스프라이트 사이즈 맞추기
-	// 충돌체크할때 사이즈도 맞춰야됨
-	// 수류탄 이미지 사이즈 맞추기
-	// 탄피 이미지 사이즈 맞추기
-	// 조준점 크기
-	// 탄퍼짐 정도 사이즈 상관 없이 일정하게 조정
-	
-	// 스크린 크기에 의존한 값이 너무 많다
-	// -> 이걸 기본 좌표계로 설정하고 화면 크기 변경 정도를 구해서 적용하도록..
-}
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hdc, mdc;  PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt;
 	GetClientRect(hWnd, &rt);
-	syncSize(rt);
 
 	switch(uMsg) {
 	case WM_CREATE:
@@ -2114,8 +2131,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			SetWindowExtEx(mdc, rt.right, rt.bottom, NULL);
 			SetViewportExtEx(mdc, rt.right, rt.bottom, NULL);
 
-			syncSize(rt);
-
 			////인트로에 나오는 원 애니메이션 파트
 			//if (is_intro == TRUE) {
 			//	ellipse_intro(mdc, rt, ellipse_size, r, g, b);
@@ -2135,7 +2150,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			if (is_intro == FALSE) {
 				if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory 
 					|| (manager.getCurrentSceneID() == Game && into_the_game == TRUE)) {
-					background_main.Draw(mdc, rt.left, rt.top, rt.right, rt.bottom, Scanner_main / 1500.0 * rt.right, 0, 1500, 800);
+					RECT r = expandRatio(rt, 1500, 800, Down);
+					background_main.Draw(mdc, r.left, r.top, r.right-r.left, r.bottom-r.top, Scanner_main, 0, 1500, 800);
 					//logo.Draw(mdc, rt.right/2-300, logo_y, 600, 300, 0, 0, 600, 300);
 					Sprite game_logo { L"./res/logo.png" };
 					game_logo.fix_ratio = true;
