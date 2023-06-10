@@ -517,136 +517,173 @@ void show_interface(HDC mdc, RECT rt) {
 }
 
 //플레이어 이미지, 총 이미지 출력
-void show_player(HDC mdc) {
+void show_player(HDC mdc, RECT rt) {
+	int px = (CM_x + ss_x) / 1500.0 * rt.right;
+	int py = (CM_y + landing_shake + ss_y) / 800.0 * rt.bottom;
+	int pw;
+	int ph;
+	int gx;
+	int gy = (CM_y + landing_shake + ss_y) / 800.0 * rt.bottom;
+	int gw;
+	int gh;
+	int fx;
+	int fy = fy = (CM_y + landing_shake + ss_y) / 800.0 * rt.bottom;;
+	int fw = 100 / 1500.0 * rt.right;
+	int fh = 100 / 800.0 * rt.bottom;
+	CImage* player_image = nullptr;
+	CImage* gun_image = nullptr;
+	CImage* flame = nullptr;
+
 	switch (CM_img_dir) { //플레이어, 총 이미지 출력
 	case 0:
 		//플레이어 이미지 좌픅
 		if (CM_jump == 0) {
 			//awp 정조준 시 스코프를 바라보는 모습을 취함
 			if (is_zoom == TRUE) {
-				CM_w = commando_zoom_left.GetWidth(); CM_h = commando_zoom_left.GetHeight();
-				commando_zoom_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h);
+				player_image = &commando_zoom_left;
 			} 
 			else {
 				if (is_draw == TRUE) {
-					CM_w = commando_fire_left.GetWidth(); CM_h = commando_fire_left.GetHeight();
-					commando_fire_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+					player_image = &commando_fire_left;
 				}
-				else if (is_draw == FALSE) {
-					CM_w = commando_left.GetWidth(); CM_h = commando_left.GetHeight();
-					commando_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+				else {
+					player_image = &commando_left;
 				}
 			}
 		} 
 		else if (CM_jump == 1 || CM_jump == 2) {
 			if (is_draw == TRUE) {
-				CM_w = commando_jump_fire_left.GetWidth(); CM_h = commando_jump_fire_left.GetHeight();
-				commando_jump_fire_left.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+				player_image = &commando_jump_fire_left;
 			}
-			else if (is_draw == FALSE) {
-				CM_w = commando_jump_left.GetWidth(); CM_h = commando_jump_left.GetHeight();
-				commando_jump_left.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+			else {
+				player_image = &commando_jump_left;
 			}
+			py = (CM_y - 10 + landing_shake + ss_y) / 800.0 * rt.bottom;
 		}
 
 		//총 좌측
 		switch (GUN_number) {
 		case scar_h:
-			GUN_w = SCAR_H_left.GetWidth(); GUN_h = SCAR_H_left.GetHeight();
-			SCAR_H_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &SCAR_H_left;
+			gx = (CM_x - 40 + ss_x) / 1500.0 * rt.right;
 			break; 
 		case m16:
-			GUN_w = M16_left.GetWidth(); GUN_h = M16_left.GetHeight();
-			M16_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &M16_left;
+			gx = (CM_x - 40 + ss_x) / 1500.0 * rt.right;
 			break; 
 		case mp_44:
-			GUN_w = MP44_left.GetWidth(); GUN_h = MP44_left.GetHeight();
-			MP44_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &MP44_left;
+			gx = (CM_x - 40 + ss_x) / 1500.0 * rt.right;
 			break; 
 		case mg_42:
-			GUN_w = MG42_left.GetWidth(); GUN_h = MG42_left.GetHeight();
-			MG42_left.Draw(mdc, CM_x - 120 + ss_x, CM_y + landing_shake + ss_y, 200, 100, 0, 0, GUN_w, GUN_h);
+			gun_image = &MG42_left;
+			gx = (CM_x - 120 + ss_x) / 1500.0 * rt.right;
 			break; 
 		case awp:
-			GUN_w = AWP_left.GetWidth(); GUN_h = AWP_left.GetHeight();
-			AWP_left.Draw(mdc, CM_x - 80 +ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
+			gun_image = &AWP_left;
+			gx = (CM_x - 80 + ss_x) / 1500.0 * rt.right;
 			break;
 		}
 
 		//불꽃 좌측
-		if (is_draw == TRUE && GUN_number != mg_42 && GUN_number != awp)
-			flame_left.Draw(mdc, CM_x - 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100); 
-		if (is_draw == TRUE && GUN_number == mg_42)
-			flame_left.Draw(mdc, CM_x - 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100); 
-		if (is_draw == TRUE && GUN_number == awp)
-			flame_left.Draw(mdc, CM_x - 170 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
+		if(is_draw == TRUE) {
+			flame = &flame_left;
+			switch(GUN_number) {
+			case mg_42:
+				fx = (CM_x - 220 + ss_x) / 1500.0 * rt.right;
+				break;
+			case awp:
+				fx = (CM_x - 170 + ss_x) / 1500.0 * rt.right;
+				break;
+			default:
+				fx = (CM_x - 140 + ss_x) / 1500.0 * rt.right;
+			}
+		}
 
 		break;
 		//////////////////////
 	case 1:
 		//플레이어 우측
-		if (CM_jump == 0) {
-			if (is_zoom == TRUE) {
-				CM_w = commando_zoom_right.GetWidth(); CM_h = commando_zoom_right.GetHeight();
-				commando_zoom_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h);
+		if(CM_jump == 0) {
+			//awp 정조준 시 스코프를 바라보는 모습을 취함
+			if(is_zoom == TRUE) {
+				player_image = &commando_zoom_right;
 			}
 			else {
-				if (is_draw == TRUE) {
-					CM_w = commando_fire_right.GetWidth(); CM_h = commando_fire_right.GetHeight();
-					commando_fire_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+				if(is_draw == TRUE) {
+					player_image = &commando_fire_right;
 				}
-				else if (is_draw == FALSE) {
-					CM_w = commando_right.GetWidth(); CM_h = commando_right.GetHeight();
-					commando_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+				else {
+					player_image = &commando_right;
 				}
 			}
 		}
-		else if (CM_jump == 1 || CM_jump == 2) {
-			if (is_draw == TRUE) {
-				CM_w = commando_jump_fire_right.GetWidth(); CM_h = commando_jump_fire_right.GetHeight();
-				commando_jump_fire_right.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+		else if(CM_jump == 1 || CM_jump == 2) {
+			if(is_draw == TRUE) {
+				player_image = &commando_jump_fire_right;
 			}
-			else if (is_draw == FALSE) {
-				CM_w = commando_jump_right.GetWidth(); CM_h = commando_jump_right.GetHeight();
-				commando_jump_right.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+			else {
+				player_image = &commando_jump_right;
 			}
+			py = (CM_y - 10 + landing_shake + ss_y) / 800.0 * rt.bottom;
 		}
 
 		//총 우측
-		switch (GUN_number) {
+		switch(GUN_number) {
 		case scar_h:
-			GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetHeight();
-			SCAR_H_right.Draw(mdc, CM_x + 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h);
+			gun_image = &SCAR_H_right;
+			gx = (CM_x + 40 + ss_x) / 1500.0 * rt.right;
 			break;
 		case m16:
-			GUN_w = M16_right.GetWidth(); GUN_h = M16_right.GetHeight();
-			M16_right.Draw(mdc, CM_x + 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &M16_right;
+			gx = (CM_x + 40 + ss_x) / 1500.0 * rt.right;
 			break;
 		case mp_44:
-			GUN_w = MP44_right.GetWidth(); GUN_h = MP44_right.GetHeight();
-			MP44_right.Draw(mdc, CM_x + 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &MP44_right;
+			gx = (CM_x + 40 + ss_x) / 1500.0 * rt.right;
 			break;
 		case mg_42:
-			GUN_w = MG42_right.GetWidth();  GUN_h = MG42_left.GetHeight();
-			MG42_right.Draw(mdc, CM_x + 20 + ss_x, CM_y + landing_shake + ss_y, 200, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &MG42_right;
+			gx = (CM_x + 120 + ss_x) / 1500.0 * rt.right;
 			break;
 		case awp:
-			GUN_w = AWP_right.GetWidth(); GUN_h = AWP_right.GetHeight();
-			AWP_right.Draw(mdc, CM_x + 30 + ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
+			gun_image = &AWP_right;
+			gx = (CM_x + 80 + ss_x) / 1500.0 * rt.right;
 			break;
 		}
 
 		//불꽃 우측
-		if (is_draw == TRUE && GUN_number != mg_42 && GUN_number != awp)
-			flame_right.Draw(mdc, CM_x + 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
-
-		if(is_draw == TRUE && GUN_number == mg_42)
-			flame_right.Draw(mdc, CM_x + 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
-
-		if (is_draw == TRUE && GUN_number == awp)
-			flame_right.Draw(mdc, CM_x + 170 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
+		if(is_draw == TRUE) {
+			flame = &flame_right;
+			switch(GUN_number) {
+			case mg_42:
+				fx = (CM_x + 220 + ss_x) / 1500.0 * rt.right;
+				break;
+			case awp:
+				fx = (CM_x + 170 + ss_x) / 1500.0 * rt.right;
+				break;
+			default:
+				fx = (CM_x + 140 + ss_x) / 1500.0 * rt.right;
+			}
+		}
 
 		break;
+	}
+
+	CM_w = player_image->GetWidth();
+	CM_h = player_image->GetHeight();
+	pw = CM_w / 1500.0 * rt.right;
+	ph = CM_h / 800.0 * rt.bottom;
+	player_image->Draw(mdc, px, py, pw, ph, 0, 0, CM_w, CM_h);
+
+	GUN_w = gun_image->GetWidth();
+	GUN_h = gun_image->GetHeight();
+	gw = GUN_w / 1500.0 * rt.right;
+	gh = GUN_w / 800.0 * rt.bottom;
+	gun_image->Draw(mdc, gx, gy, gw, gh, 0, 0, GUN_w, GUN_h);
+
+	if(flame != nullptr) {
+		flame->Draw(mdc, fx, fy, fw, fh, 0, 0, 100, 100);
 	}
 }
 
@@ -1796,7 +1833,7 @@ void wm_paint(HDC mdc, RECT rt) {
 	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2, GUN_number);
 
 	//플레이어 이미지 출력
-	show_player(mdc);
+	show_player(mdc, rt);
 
 	//탄피 이미지 출력
 	show_catridge(mdc, ss_x, ss_y, landing_shake);
@@ -1973,7 +2010,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_TIMER:
 		switch (wParam) {
 		case UPDATE: //게임 전체 타이머
-			GetClientRect(hWnd, &rt);
+			//GetClientRect(hWnd, &rt);
 
 			//인트로 중에는 인트로 외에는 어떠한 다른 작업도 실행되지 않는다.
 			if (is_intro == TRUE) {
@@ -2094,7 +2131,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			if (is_intro == FALSE) {
 				if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory 
 					|| (manager.getCurrentSceneID() == Game && into_the_game == TRUE)) {
-					background_main.Draw(mdc, rt.left, rt.top, rt.right, rt.bottom, Scanner_main, 0, 1500, 800);
+					background_main.Draw(mdc, rt.left, rt.top, rt.right, rt.bottom, Scanner_main / 1500.0 * rt.right, 0, 1500, 800);
 					//logo.Draw(mdc, rt.right/2-300, logo_y, 600, 300, 0, 0, 600, 300);
 					Sprite game_logo { L"./res/logo.png" };
 					game_logo.fix_ratio = true;
@@ -2139,7 +2176,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 			
 			BitBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, SRCCOPY);
-			//StretchBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, 1500, 800, SRCCOPY);
+			//RECT area = expandRatio(rt, 1500, 800, Up);
+			//StretchBlt(hdc, area.left, area.top, area.right-area.left, area.bottom-area.top, mdc, 0, 0, 1500, 800, SRCCOPY);
 		
 			DeleteDC(mdc); DeleteObject(hbitmap); EndPaint(hWnd, &ps);
 		break;
