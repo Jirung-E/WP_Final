@@ -1011,7 +1011,9 @@ void check_hit_awp() {
 }
 
 //몬스터 명중 판정
-void check_hit() {
+void check_hit(RECT rt) {
+	int hit_x = ::hit_x * 1500.0 / rt.right;
+	int hit_y = ::hit_y * 800.0 / rt.bottom;
 	//조건문 중복 방지 변수
 	int is_kill = 0;
 	//일반 몬스터 히트 판정
@@ -1118,7 +1120,7 @@ void make_shake(int shake_acc, int shake_end) {
 }
 
 //총알 발사 시 수행되는 작업 모음
-void make_rand_ammo(int ammo, int max_ammo) {
+void make_rand_ammo(int ammo, int max_ammo, RECT rt) {
 	if (ammo + 1 == max_ammo) empty = 1;							//총알 소모가 정히진 값에 도달하면 더 이상 발사되지 않는다
 
 	std::random_device rd_ammo; std::mt19937 gen(rd_ammo()); 
@@ -1130,7 +1132,7 @@ void make_rand_ammo(int ammo, int max_ammo) {
 	ammo_x2 = ammo_x1 + (1500 * cos(angle)); ammo_y2 = ammo_y1 + (1500 * sin(angle));
 	 
 	//히트 판정
-	if(GUN_number != awp) check_hit();
+	if(GUN_number != awp) check_hit(rt);
 		 
 	//AWP일 경우 전용 히트 판정 함수 사용
 	if (GUN_number == awp) check_hit_awp();
@@ -1143,12 +1145,12 @@ void make_rand_ammo(int ammo, int max_ammo) {
 }
 
 //사격
-void shoot() {
+void shoot(RECT rt) {
 	if (is_click == TRUE && reload == 0 && empty == 0) {
 		if(shoot_delay < Gun::shoot_speed(GUN_number))
 			shoot_delay++;
 		if(shoot_delay == Gun::shoot_speed(GUN_number)) {
-			make_rand_ammo(ammo, Gun::max_ammo(GUN_number)); //최대 장탄수를 오른쪽 인수에 적는다
+			make_rand_ammo(ammo, Gun::max_ammo(GUN_number), rt); //최대 장탄수를 오른쪽 인수에 적는다
 			var += Gun::recoil(GUN_number); ammo++;
 			is_zoom = FALSE; avail_awp = FALSE;
 			ch_gun->stop(); ch_gun2->stop(); 
@@ -2090,7 +2092,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					update_monster_direction(CM_x); update_player_position(rt);
 					update_monster_position();      update_shoot_animation();
 					check_monster_attack();         monster_animation();
-					make_monster(rt);               shoot();
+					make_monster(rt);               shoot(rt);
 					index_auto_delete();			grenade_process();
 					play_idle_sound();				play_player_sound();
 
