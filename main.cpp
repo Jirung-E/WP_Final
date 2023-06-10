@@ -18,8 +18,8 @@
 
 FMOD::System* ssystem;
 FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot, *dry_fire;
-FMOD::Sound* scar_distance, * m16_distance, * mp44_distance, *mg42_distance, * awp_distance;
-FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
+FMOD::Sound* scar_distance, * m16_distance, * mp44_distance, *mg42_distance, * awp_distance, *m1_shoot, *m1_distance;
+FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, *m1_reload, *m1_clip, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
 FMOD::Sound* hurt, *dead, *cat_hit_ground, *cat_stop, *ex_sound, *pin_sound;
 FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound, *weapon_select, *weapon_button, *start_button, *quit_button;
 FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm, *next_round, *intro, *new_game, *woosh, *cant_buy, *buy;
@@ -28,6 +28,8 @@ FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm, *
 FMOD::Channel* ch_gun = 0;
 //gun_distance sound
 FMOD::Channel* ch_gun2 = 0;
+//m1_clip
+FMOD::Channel* ch_clip = 0;
 //reload_sound
 FMOD::Channel* ch_reload = 0;
 //hit_sound
@@ -155,6 +157,8 @@ void IMG_FILE_LOAD() {
 	MG42_left.Load(L".\\res\\mg42_left.png");
 	AWP_right.Load(L".\\res\\awp_right.png");
 	AWP_left.Load(L".\\res\\awp_left.png");
+	m1_right.Load(L".\\res\\m1_right.png");
+	m1_left.Load(L".\\res\\m1_left.png");
 
 	indicator_back.Load(L".\\res\\indicator_back.png");
 	ammo_icon.Load(L".\\res\\ammo_icon.png");
@@ -163,6 +167,7 @@ void IMG_FILE_LOAD() {
 	flame_left.Load(L".\\res\\flame_left.png");
 	ammo_lmg_icon.Load(L".\\res\\ammo_lmg_icon.png");
 	ammo_sniper_icon.Load(L".\\res\\ammo_sniper_icon.png");
+	ammo_clip_icon.Load(L".\\res\\ammo_clip_icon.png");
 	zoom_complited.Load(L".\\res\\zoom_complited.png");
 	zoom_targeted.Load(L".\\res\\zoom_targeted.png");
 
@@ -218,18 +223,22 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\mp44.wav", FMOD_DEFAULT, 0, &mp44_shoot);
 	ssystem->createSound(".\\res\\sounds\\mg42.wav", FMOD_DEFAULT, 0, &mg42_shoot);
 	ssystem->createSound(".\\res\\sounds\\awp.wav", FMOD_DEFAULT, 0, &awp_shoot);
+	ssystem->createSound(".\\res\\sounds\\m1.wav", FMOD_DEFAULT, 0, &m1_shoot);
 
 	ssystem->createSound(".\\res\\sounds\\scar_h_distance.wav", FMOD_DEFAULT, 0, &scar_distance);
 	ssystem->createSound(".\\res\\sounds\\m16_distance.wav", FMOD_DEFAULT, 0, &m16_distance);
 	ssystem->createSound(".\\res\\sounds\\mp44_distance.wav", FMOD_DEFAULT, 0, &mp44_distance);
 	ssystem->createSound(".\\res\\sounds\\mg42_distance.wav", FMOD_DEFAULT, 0, &mg42_distance);
 	ssystem->createSound(".\\res\\sounds\\awp_distance.wav", FMOD_DEFAULT, 0, &awp_distance);
+	ssystem->createSound(".\\res\\sounds\\m1_distance.wav", FMOD_DEFAULT, 0, &m1_distance);
 
 
 
 	ssystem->createSound(".\\res\\sounds\\rifle_reload.wav", FMOD_DEFAULT, 0, &rifle_reload);
 	ssystem->createSound(".\\res\\sounds\\lmg_reload.ogg", FMOD_DEFAULT, 0, &lmg_reload);
 	ssystem->createSound(".\\res\\sounds\\sniper_reload.ogg", FMOD_DEFAULT, 0, &sniper_reload);
+	ssystem->createSound(".\\res\\sounds\\m1_reload.wav", FMOD_DEFAULT, 0, &m1_reload);
+	ssystem->createSound(".\\res\\sounds\\m1_clip.wav", FMOD_DEFAULT, 0, &m1_clip);
 
 	ssystem->createSound(".\\res\\sounds\\sniper_bolt.mp3", FMOD_DEFAULT, 0, &sniper_bolt);
 
@@ -473,6 +482,10 @@ void show_interface(HDC mdc, RECT rt) {
 		AMO_w = ammo_sniper_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
 		ammo_sniper_icon.Draw(mdc, rt.right - 200 + ss_x, rt.bottom - 105 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
 	}
+	if (GUN_number == m1) {
+		AMO_w = ammo_clip_icon.GetWidth(); AMO_h = ammo_clip_icon.GetHeight();
+		ammo_clip_icon.Draw(mdc, rt.right - 240 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
+	}
 	 
 	//총 아이콘 및 장탄수 출력
 	switch (GUN_number) {
@@ -496,6 +509,11 @@ void show_interface(HDC mdc, RECT rt) {
 		GUN_w = AWP_right.GetWidth(); GUN_h = AWP_right.GetHeight();
 		AWP_right.Draw(mdc, rt.right - 450 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 200, 150, 0, 0, GUN_w, GUN_h);
 		break;
+	case m1:
+		GUN_w = m1_right.GetWidth(); GUN_h = m1_right.GetHeight();
+		m1_right.Draw(mdc, rt.right - 450 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 200, 150, 0, 0, GUN_w, GUN_h);
+		break;
+
 	}
 	//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
 	ammo_indicator(mdc, Gun::max_ammo(GUN_number), ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
@@ -584,14 +602,18 @@ void show_player(HDC mdc) {
 			GUN_w = AWP_left.GetWidth(); GUN_h = AWP_left.GetHeight();
 			AWP_left.Draw(mdc, CM_x - 80 +ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
 			break;
+		case m1:
+			GUN_w = m1_left.GetWidth(); GUN_h = m1_left.GetHeight();
+			m1_left.Draw(mdc, CM_x - 80 + ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
+			break;
 		}
 
 		//불꽃 좌측
-		if (is_draw == TRUE && GUN_number != mg_42 && GUN_number != awp)
+		if (is_draw == TRUE && GUN_number != mg_42 && GUN_number != awp && GUN_number != m1)
 			flame_left.Draw(mdc, CM_x - 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100); 
 		if (is_draw == TRUE && GUN_number == mg_42)
 			flame_left.Draw(mdc, CM_x - 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100); 
-		if (is_draw == TRUE && GUN_number == awp)
+		if (is_draw == TRUE && (GUN_number == awp || GUN_number == m1))
 			flame_left.Draw(mdc, CM_x - 170 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
 
 		break;
@@ -647,16 +669,20 @@ void show_player(HDC mdc) {
 			GUN_w = AWP_right.GetWidth(); GUN_h = AWP_right.GetHeight();
 			AWP_right.Draw(mdc, CM_x + 30 + ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
 			break;
+		case m1:
+			GUN_w = m1_right.GetWidth(); GUN_h = m1_right.GetHeight();
+			m1_right.Draw(mdc, CM_x + 30 + ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
+			break;
 		}
 
 		//불꽃 우측
-		if (is_draw == TRUE && GUN_number != mg_42 && GUN_number != awp)
+		if (is_draw == TRUE && GUN_number != mg_42 && GUN_number != awp && GUN_number != m1)
 			flame_right.Draw(mdc, CM_x + 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
 
 		if(is_draw == TRUE && GUN_number == mg_42)
 			flame_right.Draw(mdc, CM_x + 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
 
-		if (is_draw == TRUE && GUN_number == awp)
+		if (is_draw == TRUE && (GUN_number == awp || GUN_number == m1))
 			flame_right.Draw(mdc, CM_x + 170 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
 
 		break;
@@ -1113,6 +1139,13 @@ void shoot() {
 				ch_reload->stop(); ssystem->playSound(sniper_bolt, 0, false, &ch_reload);
 				is_click = FALSE; cat_ready = 1;
 				//탄피를 배출할 준비를 한다. 
+				break;
+			case m1:
+				ssystem->playSound(m1_shoot, 0, false, &ch_gun);
+				ssystem->playSound(m1_distance, 0, false, &ch_gun2);
+				if (ammo == 8) {
+					ch_clip->stop(); ssystem->playSound(m1_clip, 0, false, &ch_clip);
+				}
 				break;
 			}
 
@@ -1864,6 +1897,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 						ch_reload->stop(); ssystem->playSound(sniper_reload, 0, false, &ch_reload);
 						is_zoom = FALSE; avail_awp = FALSE; 
 					}
+					if (GUN_number == m1) {
+						ch_reload->stop(); ssystem->playSound(m1_reload, 0, false, &ch_reload);
+						if (ammo < 8) {
+							ch_clip->stop(); ssystem->playSound(m1_clip, 0, false, &ch_clip);
+						}
+					}
 				} break;
 				 
 			case VK_SHIFT: //수류탄 던지기
@@ -1878,6 +1917,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 		if(into_the_game == FALSE) manager.keyboardInput(hWnd, wParam); 
+
+		if (is_intro == TRUE) {
+			switch (wParam) {
+			case VK_SPACE:
+				is_intro = FALSE;
+				break;
+			}
+		}
 		break;
 
 		//정지상태로 변경

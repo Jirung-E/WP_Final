@@ -57,6 +57,10 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
     weapon_buttons.back().sprite = new Sprite{ L"./res/awp_right.png" };
     weapon_buttons.back().sprite->fix_ratio = true;
 
+    weapon_buttons.push_back(Button{ Weapon5, L"M1", {}, 0, 0 });
+    weapon_buttons.back().sprite = new Sprite{ L"./res/m1_right.png" };
+    weapon_buttons.back().sprite->fix_ratio = true;
+
     for(auto& e : weapon_buttons) {
         e.background_color = LightGray;
         e.border_color = Gray;
@@ -119,6 +123,9 @@ void ArmoryScene::draw(const HDC& hdc) const {
     case awp:
         current_gun = new Sprite { L"./res/awp_right.png" };
         break;
+
+    case m1:
+        current_gun = new Sprite { L"./res/m1_right.png" };
     }
 
     if(current_gun != nullptr) {

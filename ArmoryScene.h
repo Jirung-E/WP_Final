@@ -16,9 +16,10 @@ public:
         Weapon2,
         Weapon3,
         Weapon4,
+        Weapon5
     };
     int selected_weapon_button_index;
-    bool unlocked[5];
+    bool unlocked[6];
 
 private:
     Button quit_button;

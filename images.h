@@ -2,10 +2,11 @@
 
 #include <atlimage.h>
 
-extern CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon, ammo_sniper_icon;
+extern CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon, ammo_sniper_icon, ammo_clip_icon;
 extern CImage commando_right, commando_left, commando_jump_right, commando_jump_left;
 extern CImage commando_fire_right, commando_fire_left, commando_jump_fire_right, commando_jump_fire_left, commando_zoom_right, commando_zoom_left;
 extern CImage SCAR_H_right, SCAR_H_left, M16_right, M16_left, MP44_right, MP44_left, MG42_right, MG42_left, AWP_right, AWP_left;
+extern CImage m1_right, m1_left;
 extern CImage monster_right, monster_left, monster_big_right, monster_big_left;
 extern CImage monster_air_right[3], monster_air_left[3];
 extern CImage exp_icon, flame_right, flame_left;
@@ -89,7 +90,7 @@ extern int up_down; //공중 몬스터 애니메이션의 인덱스 감소 및 증가 결정, 기본값 
 
 //무기 이미지 관련 (gun)
 enum gun_name_images {
-    null, scar_h, m16, mp_44, mg_42, awp
+    null, scar_h, m16, mp_44, mg_42, awp, m1
 };
 
 extern int GUN_number;    //무기 번호
@@ -120,7 +121,7 @@ extern int death_acc;
 //새 게임 시작 시 인트로 애니메이션 재생(예정)
 static BOOL is_intro = FALSE;
 //인트로 딜레이 변수
-static int intro_delay = 150;
+static int intro_delay = 200;
 //이 변수가 0이 되어야 메인으로 진입
 static int intro_time = 500;
 //배경 변수
