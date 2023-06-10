@@ -2063,11 +2063,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_PAINT:
-			GetClientRect(hWnd, &rt);
+			//GetClientRect(hWnd, &rt);
 			hdc = BeginPaint(hWnd, &ps);
 			mdc = CreateCompatibleDC(hdc);
 			hbitmap = CreateCompatibleBitmap(hdc, rt.right, rt.bottom);
 			(HBITMAP)SelectObject(mdc, hbitmap); 
+
+			SetMapMode(mdc, MM_ANISOTROPIC);
+			SetWindowExtEx(mdc, rt.right, rt.bottom, NULL);
+			SetViewportExtEx(mdc, rt.right, rt.bottom, NULL);
 
 			syncSize(rt);
 
@@ -2135,6 +2139,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 			
 			BitBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, SRCCOPY);
+			//StretchBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, 1500, 800, SRCCOPY);
 		
 			DeleteDC(mdc); DeleteObject(hbitmap); EndPaint(hWnd, &ps);
 		break;
