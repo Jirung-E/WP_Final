@@ -482,38 +482,46 @@ void show_interface(HDC mdc, RECT rt) {
 	//총알 아이콘
 	if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
 		AMO_w = ammo_icon.GetWidth(); AMO_h = ammo_icon.GetHeight();
-		ammo_icon.Draw(mdc, rt.right - 260 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
+		ammo_icon.Draw(mdc, rt.right + (-260 + ss_x) / 1500.0 * rt.right, rt.bottom + (-108 + landing_shake + ss_y) / 1500.0 * rt.right,
+			100 / 1500.0 * rt.right, 100 / 1500.0 * rt.right, 0, 0, AMO_w, AMO_h);
 	} 
 	if (GUN_number == mg_42) {
 		AMO_w = ammo_lmg_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
-		ammo_lmg_icon.Draw(mdc, rt.right - 230 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
+		ammo_lmg_icon.Draw(mdc, rt.right + (-230 + ss_x) / 1500.0 * rt.right, rt.bottom + (-108 + landing_shake + ss_y) / 1500.0 * rt.right,
+			100 / 1500.0 * rt.right, 100 / 1500.0 * rt.right, 0, 0, AMO_w, AMO_h);
 	} 
 	if (GUN_number == awp) {
 		AMO_w = ammo_sniper_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
-		ammo_sniper_icon.Draw(mdc, rt.right - 200 + ss_x, rt.bottom - 105 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
+		ammo_sniper_icon.Draw(mdc, rt.right + (-200 + ss_x) / 1500.0 * rt.right, rt.bottom + (-105 + landing_shake + ss_y) / 1500.0 * rt.right,
+			100 / 1500.0 * rt.right, 100 / 1500.0 * rt.right, 0, 0, AMO_w, AMO_h);
 	}
 	 
 	//총 아이콘 및 장탄수 출력
 	switch (GUN_number) {
 	case scar_h:
 		GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetWidth();
-		SCAR_H_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
+		SCAR_H_right.Draw(mdc, rt.right + (-430 + ss_x) / 1500.0 * rt.right, rt.bottom + (-150 + landing_shake + ss_y) / 1500.0 * rt.right,
+			150 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break; 
 	case m16:
 		GUN_w = M16_right.GetWidth(); GUN_h = M16_right.GetWidth();
-		M16_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
+		M16_right.Draw(mdc, rt.right + (-430 + ss_x) / 1500.0 * rt.right, rt.bottom + (-150 + landing_shake + ss_y) / 1500.0 * rt.right,
+			150 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break; 
 	case mp_44:
 		GUN_w = MP44_right.GetWidth(); GUN_h = MP44_right.GetWidth();
-		MP44_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
+		MP44_right.Draw(mdc, rt.right + (-430 + ss_x) / 1500.0 * rt.right, rt.bottom + (-150 + landing_shake + ss_y) / 1500.0 * rt.right,
+			150 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break; 
 	case mg_42:
 		GUN_w = MG42_right.GetWidth(); GUN_h = MG42_right.GetHeight();
-		MG42_right.Draw(mdc, rt.right - 500 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 250, 150, 0, 0, GUN_w, GUN_h);
+		MG42_right.Draw(mdc, rt.right + (-500 + ss_x), rt.bottom + (-150 + landing_shake + ss_y) / 1500.0 * rt.right,
+			250 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break; 
 	case awp:
 		GUN_w = AWP_right.GetWidth(); GUN_h = AWP_right.GetHeight();
-		AWP_right.Draw(mdc, rt.right - 450 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 200, 150, 0, 0, GUN_w, GUN_h);
+		AWP_right.Draw(mdc, rt.right + (-450 + ss_x) / 1500.0 * rt.right, rt.bottom + (-150 + landing_shake + ss_y) / 1500.0 * rt.right,
+			200 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break;
 	}
 	//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
