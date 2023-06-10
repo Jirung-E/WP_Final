@@ -37,6 +37,9 @@
     <Filter Include="Math\Point">
       <UniqueIdentifier>{031033db-93b3-4169-acf5-1cd91ce4df13}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Math\Vector">
+      <UniqueIdentifier>{8e88d737-4606-42a0-b640-83f878ef2e6d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -87,6 +90,12 @@
     <ClCompile Include="ammo.cpp">
       <Filter>소스 파일\in game</Filter>
     </ClCompile>
+    <ClCompile Include="Point.cpp">
+      <Filter>Math\Point</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector.cpp">
+      <Filter>Math\Vector</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="images.h">
@@ -136,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="Point.h">
       <Filter>Math\Point</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>Math\Vector</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

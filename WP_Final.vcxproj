@@ -180,10 +180,12 @@
     <ClCompile Include="MainScene.cpp" />
     <ClCompile Include="monster_info.cpp" />
     <ClCompile Include="player_info.cpp" />
+    <ClCompile Include="Point.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="Util.cpp" />
+    <ClCompile Include="Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ammo.h" />
@@ -202,6 +204,7 @@
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="TextBox.h" />
     <ClInclude Include="Util.h" />
+    <ClInclude Include="Vector.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="userdata.txt" />

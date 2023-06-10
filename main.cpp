@@ -678,11 +678,11 @@ void show_player(HDC mdc, RECT rt) {
 			break;
 		case mg_42:
 			gun_image = &MG42_right;
-			gx = (CM_x + 120 + ss_x) / 1500.0 * rt.right;
+			gx = (CM_x + 20 + ss_x) / 1500.0 * rt.right;
 			break;
 		case awp:
 			gun_image = &AWP_right;
-			gx = (CM_x + 80 + ss_x) / 1500.0 * rt.right;
+			gx = (CM_x + 30 + ss_x) / 1500.0 * rt.right;
 			break;
 		}
 
@@ -777,31 +777,37 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 		if (dl[i].monster_type == 1) {
 			mw = 100 / 1500.0 * rt.right;
 			mh = 100 / 1500.0 * rt.right;
+			my += mh;
 			RECT r = { 0, 0, mw, mh };
 			r = convertRatio(r, 100, 100, Down);		// 비율 맞추기
 			mw = r.right-r.left;
 			mh = r.bottom-r.top;
+			my -= mh;
 			if(dl[i].dir == 0) monster_dead_left.Draw(mdc, mx, my, mw, mh, 0, 0, 100, 100); 
 			else if(dl[i].dir == 1) monster_dead_right.Draw(mdc, mx, my, mw, mh, 0, 0, 100, 100); 
 		}
 		else if (dl[i].monster_type == 2) {
-			my = (dl[i].y + 50 + ss_y + landing_shake) / 1500.0 * rt.right;
+			my = (dl[i].y + 50 + ss_y + landing_shake) / 800.0 * rt.bottom;
 			mw = 200 / 1500.0 * rt.right;
 			mh = 200 / 1500.0 * rt.right;
+			my += mh;
 			RECT r = { 0, 0, mw, mh };
 			r = convertRatio(r, 100, 100, Down);		// 비율 맞추기
 			mw = r.right-r.left;
 			mh = r.bottom-r.top;
+			my -= mh;
 			if(dl[i].dir == 0) monster_big_dead_left.Draw(mdc, mx, my, mw, mh, 0, 0, 200, 200);
 			else if (dl[i].dir == 1) monster_big_dead_right.Draw(mdc, mx, my, mw, mh, 0, 0, 200, 200);
 		}
 		else if(dl[i].monster_type == 3) {
 			mw = 150 / 1500.0 * rt.right;
 			mh = 60 / 1500.0 * rt.right;
+			my += mh;
 			RECT r = { 0, 0, mw, mh };
 			r = convertRatio(r, 150, 60, Down);		// 비율 맞추기
 			mw = r.right-r.left;
 			mh = r.bottom-r.top;
+			my -= mh;
 			monster_air_dead.Draw(mdc, mx, my, mw, mh, 0, 0, 150, 60);
 		}
 	} 
@@ -811,6 +817,7 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 		my = (mst_r[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
 		mw = 100 / 1500.0 * rt.right;
 		mh = mst_r[i].height / 1500.0 * rt.right;
+		my += mh;
 		RECT r = { 0, 0, mw, mh };
 		switch (mst_r[i].img_dir) {
 		case 0:
@@ -818,6 +825,7 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 			r = convertRatio(r, MST_w, MST_h, Down);		// 비율 맞추기
 			mw = r.right-r.left;
 			mh = r.bottom-r.top;
+			my -= mh;
 			monster_left.Draw(mdc, mx, my, mw, mh, 0, 0, MST_w, MST_h);
 			break; 
 		case 1:
@@ -825,6 +833,7 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 			r = convertRatio(r, MST_w, MST_h, Down);		// 비율 맞추기
 			mw = r.right-r.left;
 			mh = r.bottom-r.top;
+			my -= mh;
 			monster_right.Draw(mdc, mx, my, mw, mh, 0, 0, MST_w, MST_h);
 			break;
 		}
@@ -835,6 +844,7 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 		my = (mst_big[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
 		mw = 200 / 1500.0 * rt.right;
 		mh = mst_big[i].height / 1500.0 * rt.right;
+		my += mh;
 		RECT r = { 0, 0, mw, mh };
 		switch (mst_big[i].img_dir) {
 		case 0:
@@ -842,6 +852,7 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 			r = convertRatio(r, MST_big_w, MST_big_h, Down);		// 비율 맞추기
 			mw = r.right-r.left;
 			mh = r.bottom-r.top;
+			my -= mh;
 			monster_big_left.Draw(mdc, mx, my, mw, mh, 0, 0, MST_big_w, MST_big_h);
 			break; 
 		case 1:
@@ -849,6 +860,7 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 			r = convertRatio(r, MST_big_w, MST_big_h, Down);		// 비율 맞추기
 			mw = r.right-r.left;
 			mh = r.bottom-r.top;
+			my -= mh;
 			monster_big_right.Draw(mdc, mx, my, mw, mh, 0, 0, MST_big_w, MST_big_h);
 			break;
 		}
@@ -859,6 +871,7 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 		my = (mst_air[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
 		mw = 150 / 1500.0 * rt.right;
 		mh = mst_air[i].height / 1500.0 * rt.right;
+		my += mh;
 		RECT r = { 0, 0, mw, mh };
 		switch (mst_air[i].img_dir) {
 		case 0:
@@ -866,6 +879,7 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 			r = convertRatio(r, MST_air_w, MST_air_h, Down);		// 비율 맞추기
 			mw = r.right-r.left;
 			mh = r.bottom-r.top;
+			my -= mh;
 			monster_air_left[air].Draw(mdc, mx, my, mw, mh, 0, 0, MST_air_w, MST_air_h);
 			break; 
 		case 1:
@@ -873,6 +887,7 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 			r = convertRatio(r, MST_air_w, MST_air_h, Down);		// 비율 맞추기
 			mw = r.right-r.left;
 			mh = r.bottom-r.top;
+			my -= mh;
 			monster_air_right[air].Draw(mdc, mx, my, mw, mh, 0, 0, MST_air_w, MST_air_h);
 			break;
 		}
@@ -880,17 +895,23 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 }
 
 //탄피 출력
-void show_catridge(HDC mdc, int ss_x, int ss_y, int landing_shake) {
+void show_catridge(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 	for (int i = cdx - 1; i >= 0; i--)
-		catridge[gc[i].frame].Draw(mdc, gc[i].x + ss_x, gc[i].y + ss_y + landing_shake, 20, 20, 0, 0, 20, 20);
+		catridge[gc[i].frame].Draw(mdc, (gc[i].x + ss_x) / 1500.0 * rt.right, (gc[i].y + ss_y + landing_shake) / 800.0 * rt.bottom, 
+			20 / 1500.0 * rt.right, 20 / 1500.0 * rt.right, 
+			0, 0, 20, 20);
 }
 
 //수류탄 출력
-void show_grenade(HDC mdc, int ss_x, int ss_y, int landing_shake) {
+void show_grenade(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 	if(is_throw == TRUE || (set_grenade == TRUE && is_boom == FALSE))
-		grenade[g_frame].Draw(mdc, gren_x + ss_x, gren_y + ss_y + landing_shake, 60, 60, 0, 0, 60, 60);
+		grenade[g_frame].Draw(mdc, (gren_x + ss_x) / 1500.0 * rt.right, (gren_y + ss_y + landing_shake) / 800.0 * rt.bottom,
+			60 / 1500.0 * rt.right, 60 / 1500.0 * rt.right, 
+			0, 0, 60, 60);
 	if (is_boom == TRUE)
-		explode[ex_frame].Draw(mdc, (gren_x - 180) + ss_x, (gren_y - 250) + ss_y + landing_shake, 400, 400, 0, 0, 100, 100);
+		explode[ex_frame].Draw(mdc, ((gren_x - 180) + ss_x) / 1500.0 * rt.right, ((gren_y - 250) + ss_y + landing_shake) / 800.0 * rt.bottom,
+			400 / 1500.0 * rt.right, 400 / 1500.0 * rt.right, 
+			0, 0, 100, 100);
 }
 
 //플레이어 이미지 방향 업데이트
@@ -1092,8 +1113,8 @@ void check_hit(RECT rt) {
 		if (hit_x >= mst_r[i].x && hit_x <= mst_r[i].x + 100 && hit_y >= mst_r[i].y && hit_y <= mst_r[i].y + 100) {
 			hit = i;    //조준점 내부의 좌표가 몬스터 이미지 내부에 위치하면 히트로 판정되어 총알은 해당 몬스터에 가로막힌다.
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
-			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
-			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+			ammo_x2 = ::hit_x;
+			ammo_y2 = ::hit_y;
 
 			mst_r[hit].hp = cal_damage(mst_r[hit].hp, GUN_number);
 			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
@@ -1123,8 +1144,8 @@ void check_hit(RECT rt) {
 		if (hit_x >= mst_big[i].x && hit_x <= mst_big[i].x + 200 && hit_y >= mst_big[i].y && hit_y <= mst_big[i].y + 200) {
 			hit = i;
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
-			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
-			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+			ammo_x2 = ::hit_x;
+			ammo_y2 = ::hit_y;
 
 			mst_big[hit].hp = cal_damage(mst_big[hit].hp, GUN_number);
 			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
@@ -1152,8 +1173,8 @@ void check_hit(RECT rt) {
 		if (hit_x >= mst_air[i].x && hit_x <= mst_air[i].x + 150 && hit_y >= mst_air[i].y && hit_y <= mst_air[i].y + 60) {
 			hit = i;
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
-			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
-			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+			ammo_x2 = ::hit_x;
+			ammo_y2 = ::hit_y;
 
 			mst_air[hit].hp = cal_damage(mst_air[hit].hp, GUN_number);
 			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
@@ -1195,12 +1216,19 @@ void make_rand_ammo(int ammo, int max_ammo, RECT rt) {
 	if (ammo + 1 == max_ammo) empty = 1;							//총알 소모가 정히진 값에 도달하면 더 이상 발사되지 않는다
 
 	std::random_device rd_ammo; std::mt19937 gen(rd_ammo()); 
-	std::uniform_int_distribution<int> x(mx - (10 + var), mx + (10 + var)); //분산도가 넓어질수록 정확도가 떨어지게됨
-	std::uniform_int_distribution<int> y(my - (10 + var), my + (10 + var));
+	int v = (10 + var) / 1500.0 * rt.right;
+	std::uniform_int_distribution<int> x(mx - v, mx + v); //분산도가 넓어질수록 정확도가 떨어지게됨
+	std::uniform_int_distribution<int> y(my - v, my + v);
 	hit_x = x(gen); hit_y = y(gen);									//이 좌표가 몬스터의 이미지 안쪽에 위치해야 대미지 판정을 받는다.
-	angle = atan2(y(gen) - (CM_y + 60), x(gen) - (CM_x + 50));      //atan2 함수로 총알이 그려지는 각도를 계산한다.
+	//angle = atan2((hit_y - (CM_y + 60)) / 1500.0 * rt.right, (hit_x - (CM_x + 50)) / 800.0 * rt.bottom);      //atan2 함수로 총알이 그려지는 각도를 계산한다.
 	ammo_x1 = CM_x + 50; ammo_y1 = CM_y + 60;
-	ammo_x2 = ammo_x1 + (1500 * cos(angle)); ammo_y2 = ammo_y1 + (1500 * sin(angle));
+
+	Point p1 = { hit_x, hit_y };
+	Point p2 = { ammo_x1 / 1500.0 * rt.right, ammo_y1 / 800.0 * rt.bottom };
+	Vector dir = (p1 - p2).unit() * (rt.right + rt.bottom);
+	ammo_x2 = p2.x + dir.x;
+	ammo_y2 = p2.y + dir.y;
+	//ammo_x2 = ammo_x1 + (rt.right * cos(angle)); ammo_y2 = ammo_y1 + (rt.right * sin(angle));
 	 
 	//히트 판정
 	switch(GUN_number) {
@@ -1948,16 +1976,18 @@ void wm_paint(HDC mdc, RECT rt) {
 	show_monster(mdc, ss_x, ss_y, landing_shake, rt);
 
 	//총알 궤적 그리기
-	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2, GUN_number);
+	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1 / 1500.0 * rt.right, ammo_y1 / 800.0 * rt.bottom,
+		ammo_x2, ammo_y2, GUN_number, rt);
+	//make_rand_ammo
 
 	//플레이어 이미지 출력
 	show_player(mdc, rt);
 
 	//탄피 이미지 출력
-	show_catridge(mdc, ss_x, ss_y, landing_shake);
+	show_catridge(mdc, ss_x, ss_y, landing_shake, rt);
 
 	//수류탄 이미지 출력
-	if(is_throw == TRUE || set_grenade == TRUE) show_grenade(mdc, ss_x, ss_y, landing_shake);
+	if(is_throw == TRUE || set_grenade == TRUE) show_grenade(mdc, ss_x, ss_y, landing_shake, rt);
 		 
 	//히트 포인트 그리기
 	if (draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2, rt);
