@@ -19,6 +19,7 @@ CImage grenade[8];
 CImage avail_grenade, unavail_grenade;
 CImage explode[7];
 CImage logo, background_main, intro_logo, CM_game_start, background_game_start, logo_game_start;
+CImage clip[4];
 
 gun_catridge gc[2000];
 
@@ -74,6 +75,14 @@ int gren_time = 0;
 int ex_frame = 0;
 int ex_frame_delay = 0;
 
+//m1 게런드 클립 변수
+int clip_x;
+int clip_y;
+int clip_acc;
+int clip_dir;
+int clip_motion_dir; //1 up 2 down
+int clip_frame;
+BOOL clip_created = FALSE;
 
 //_right: 우측 이미지, _left: 좌측 이미지
 

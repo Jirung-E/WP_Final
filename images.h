@@ -19,6 +19,7 @@ extern CImage grenade[8];
 extern CImage avail_grenade, unavail_grenade;
 extern CImage explode[7];
 extern CImage logo, background_main, intro_logo, CM_game_start, background_game_start, logo_game_start;
+extern CImage clip[4];
 
 //메인 백그라운드 스크롤
 extern int Scanner_main;
@@ -149,6 +150,14 @@ extern int new_logo_acc;
 extern int new_logo_delay;
 extern int new_logo_move; //1: first, 2: second
 
+//m1게런드 탄클립 변수
+extern int clip_x;
+extern int clip_y;
+extern int clip_acc;
+extern int clip_dir;
+extern int clip_motion_dir; //1 up 2 down
+extern int clip_frame;
+extern BOOL clip_created;
 
 void push_cat(int idx);
 void ellipse_intro(HDC mdc, RECT rt, int size, double r, double g, double b);

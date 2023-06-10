@@ -94,6 +94,8 @@ void GameScene::setUp() {
     able_grenade = TRUE;
     gren_time = 0;
     gren_delay = 0;
+    gren_motion_dir = -1;
+    boom_delay = 0;
 
     //새 게임 애니메이션 초기화
     new_bg_x = 0;
@@ -103,6 +105,10 @@ void GameScene::setUp() {
     new_logo_acc = 35;
     new_logo_delay = 0;
     new_logo_move = 1;
+
+    //탄클립 초기화
+    clip_created = FALSE;
+    clip_motion_dir = -1;
 }
 
 

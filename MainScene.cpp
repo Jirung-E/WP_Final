@@ -6,8 +6,7 @@
 MainScene::MainScene() : Scene { Main }, 
 start_button{ Start, L"▶", { 30, 50 }, 40, 40 },
 quit_button{ Quit, L"→]", { 80, 55 }, 30, 30 },
-armory_button{ Armory, L"ARMS", { -10, 55 }, 30, 30 },
-background_image { L"./res/Armory_background(temp).jpg" } 
+armory_button{ Armory, L"ARMS", { -10, 55 }, 30, 30 }
 {
     start_button.border_color = Gray;
     start_button.border_width = 10;
@@ -26,9 +25,7 @@ background_image { L"./res/Armory_background(temp).jpg" }
 }
 
 
-//백그라운드를 넣기 위해 껐습니다
 void MainScene::draw(const HDC& hdc) const {
-    //background_image.draw(hdc, valid_area);
 
     start_button.show(hdc, valid_area);
     quit_button.show(hdc, valid_area);

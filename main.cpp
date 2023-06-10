@@ -19,8 +19,8 @@
 FMOD::System* ssystem;
 FMOD::Sound* scar_shoot, *m16_shoot, *mp44_shoot, *mg42_shoot, *awp_shoot, *dry_fire;
 FMOD::Sound* scar_distance, * m16_distance, * mp44_distance, *mg42_distance, * awp_distance, *m1_shoot, *m1_distance;
-FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, *m1_reload, *m1_clip, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
-FMOD::Sound* hurt, *dead, *cat_hit_ground, *cat_stop, *ex_sound, *pin_sound;
+FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, *m1_reload, *m1_clip, *m1_clip_hit, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
+FMOD::Sound* hurt, * dead, * cat_hit_ground, * cat_stop, * ex_sound, * pin_sound, * bounce;
 FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound, *weapon_select, *weapon_button, *start_button, *quit_button;
 FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm, *next_round, *intro, *new_game, *woosh, *cant_buy, *buy;
 
@@ -30,6 +30,8 @@ FMOD::Channel* ch_gun = 0;
 FMOD::Channel* ch_gun2 = 0;
 //m1_clip
 FMOD::Channel* ch_clip = 0;
+//m1_clip2
+FMOD::Channel * ch_clip2 = 0;
 //reload_sound
 FMOD::Channel* ch_reload = 0;
 //hit_sound
@@ -110,7 +112,6 @@ static bool jumping = false; static bool shift_pressed = false;
 
 //TRUE일 경우 일시정지 화면이 사라지는 애니메이션 재생
 extern BOOL is_resumed;
-
 
 //이미지 파일 로드
 void IMG_FILE_LOAD() {
@@ -202,6 +203,11 @@ void IMG_FILE_LOAD() {
 	explode[4].Load(L".\\res\\explode\\ex5.png");
 	explode[5].Load(L".\\res\\explode\\ex6.png");
 	explode[6].Load(L".\\res\\explode\\ex7.png");
+
+	clip[0].Load(L".\\res\\clip\\clip1.png");
+	clip[1].Load(L".\\res\\clip\\clip2.png");
+	clip[2].Load(L".\\res\\clip\\clip3.png");
+	clip[3].Load(L".\\res\\clip\\clip4.png");
 } 
 
 //FMOD 세팅
@@ -239,6 +245,7 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\sniper_reload.ogg", FMOD_DEFAULT, 0, &sniper_reload);
 	ssystem->createSound(".\\res\\sounds\\m1_reload.wav", FMOD_DEFAULT, 0, &m1_reload);
 	ssystem->createSound(".\\res\\sounds\\m1_clip.wav", FMOD_DEFAULT, 0, &m1_clip);
+	ssystem->createSound(".\\res\\sounds\\m1_clip_hit.wav", FMOD_DEFAULT, 0, &m1_clip_hit);
 
 	ssystem->createSound(".\\res\\sounds\\sniper_bolt.mp3", FMOD_DEFAULT, 0, &sniper_bolt);
 
@@ -275,6 +282,7 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\resume.wav", FMOD_DEFAULT, 0, &resume);
 	ssystem->createSound(".\\res\\sounds\\explode.wav", FMOD_DEFAULT, 0, &ex_sound);
 	ssystem->createSound(".\\res\\sounds\\throw.wav", FMOD_DEFAULT, 0, &pin_sound);
+	ssystem->createSound(".\\res\\sounds\\bounce.wav", FMOD_DEFAULT, 0, &bounce);
 }
 
 //몬스터 공격 사운드
@@ -787,6 +795,14 @@ void show_grenade(HDC mdc, int ss_x, int ss_y, int landing_shake) {
 		explode[ex_frame].Draw(mdc, (gren_x - 180) + ss_x, (gren_y - 250) + ss_y + landing_shake, 400, 400, 0, 0, 100, 100);
 }
 
+//클립 생성
+void make_clip() {
+	clip_dir = CM_img_dir; clip_motion_dir = 1;
+	clip_x = CM_x + 50; clip_y = CM_y + 50;
+	clip_acc = 10; clip_frame = 0;
+	clip_created = TRUE;
+}
+
 //플레이어 이미지 방향 업데이트
 void update_player_direction(int mouse_x) {
 	if(mouse_x < CM_x + 50) CM_img_dir = 0; 
@@ -830,7 +846,7 @@ void update_player_position(RECT rt) {
 			for (int i = 0; i < mdx_air; i++) mst_air[i].x += 15; 
 			for (int i = 0; i < ddx; i++) dl[i].x += 15; 
 			for (int i = 0; i < cdx; i++) gc[i].x += 15; 
-			gren_x += 15; BG_scanner -= 15;
+			gren_x += 15; BG_scanner -= 15; clip_x += 15;
 		} 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) CM_x -= 15;   
 			//배경 인식 좌표가 10이되고 플레이어가 다시 가운데로 이동할 때까지 플레이어만 움직임 
@@ -844,7 +860,7 @@ void update_player_position(RECT rt) {
 			for (int i = 0; i < mdx_air; i++) mst_air[i].x -= 15; 
 			for (int i = 0; i < ddx; i++) dl[i].x -= 15; 
 			for (int i = 0; i < cdx; i++) gc[i].x -= 15; 
-			gren_x -= 15; BG_scanner += 15;
+			gren_x -= 15; BG_scanner += 15; clip_x -= 15;
 		} 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) CM_x += 15; 
 		if (CM_x + 100 >= rt.right) CM_x -= 15; 
@@ -1145,7 +1161,9 @@ void shoot() {
 				ssystem->playSound(m1_distance, 0, false, &ch_gun2);
 				if (ammo == 8) {
 					ch_clip->stop(); ssystem->playSound(m1_clip, 0, false, &ch_clip);
+					make_clip();
 				}
+				is_click = FALSE;
 				break;
 			}
 
@@ -1159,7 +1177,6 @@ void shoot() {
 				//탄피 랜덤 속도 생성
 				std::uniform_int_distribution<int> cat_rand(6, 12); gc[cdx].acc = cat_rand(gen); 
 				std::uniform_int_distribution<int> speed_rand(10, 15); gc[cdx].x_speed = speed_rand(gen);
-				 
 				gc[cdx].motion_dir = 1; //1: up 2: down
 				if (CM_img_dir == 0) gc[cdx++].dir = 0; 
 				else if (CM_img_dir == 1) gc[cdx++].dir = 1; 
@@ -1394,15 +1411,16 @@ void update_shoot_animation() {
 				gc[i].x += gc[i].x_speed; gc[i].y += gc[i].acc++; 
 				if (gc[i].y >= 700) {
 					ch_cat->stop(); ssystem->playSound(cat_hit_ground, 0, false, &ch_cat); 
-					gc[i].motion_dir = 3; gc[i].acc = 0; 
+					gc[i].motion_dir = 3; 
+					gc[i].acc -= (gc[i].acc / 3);
 				}
 			} 
 			//탄피가 땅에 튕긴다
 			else if (gc[i].motion_dir == 3) {
 				gc[i].x += gc[i].x_speed - 2;
-				if (gc[i].acc < 12) gc[i].y -= gc[i].acc++; 
-				if (gc[i].acc == 12) {
-					gc[i].motion_dir = 4; gc[i].acc = 0; 
+				if (gc[i].acc > 0) gc[i].y -= gc[i].acc--; 
+				if (gc[i].acc == 0) {
+					gc[i].motion_dir = 4;
 				}
 			} 
 			//탄피는 더 이상 튕기지 않는다
@@ -1424,14 +1442,15 @@ void update_shoot_animation() {
 				gc[i].x -= gc[i].x_speed; gc[i].y += gc[i].acc++; 
 				if (gc[i].y >= 700) {
 					ch_cat->stop(); ssystem->playSound(cat_hit_ground, 0, false, &ch_cat); 
-					gc[i].motion_dir = 3; gc[i].acc = 0; 
+					gc[i].motion_dir = 3; 
+					gc[i].acc -=(gc[i].acc / 3);
 				}
 			} 
 			else if (gc[i].motion_dir == 3) {
 				gc[i].x -= gc[i].x_speed - 2;
-				if (gc[i].acc < 12) gc[i].y -= gc[i].acc++; 
-				if (gc[i].acc == 12) {
-					gc[i].motion_dir = 4; gc[i].acc = 0; 
+				if (gc[i].acc > 0) gc[i].y -= gc[i].acc--; 
+				if (gc[i].acc == 0) {
+					gc[i].motion_dir = 4;
 				}
 			} 
 			else if (gc[i].motion_dir == 4) {
@@ -1445,46 +1464,71 @@ void update_shoot_animation() {
 	}
 
 	//수류탄 던지고 날아가는 애니메이션
-	if (is_throw == TRUE) { //방향에 따라 수류탄이 회전하는 방향이 달라짐
+	if (gren_motion_dir != -1) {
 		if (gren_dir == 1) {
-			if (g_frame < 7) g_frame++; 
-			if (g_frame == 7) g_frame = 0; 
-		}
-		else if (gren_dir == 0) { 
-			if (g_frame > 0) g_frame--; 
-			if (g_frame == 0) g_frame = 7; 
-		} 
-		//수류탄을 던져서 날아감
-		if (gren_dir == 1) { 
-			if (gren_motion_dir == 1) {
-				gren_x += 15;
-				if (gren_y > 0) gren_y -= gren_acc--;
-				if (gren_acc == 0) gren_motion_dir = 2;
-			}
-			//떨어지기 시작
-			else if (gren_motion_dir == 2) {
-				gren_x += 15; gren_y += gren_acc++; 
-				if (gren_y >= 650) { //땅에 닿으면 점화 시작 
-					set_grenade = TRUE; is_throw = FALSE;
-					gren_motion_dir = 0;
-				}
-			}
+			if (g_frame < 7) g_frame++;
+			if (g_frame == 7) g_frame = 0;
 		}
 		else if (gren_dir == 0) {
-			if (gren_motion_dir == 1) {
-				gren_x -= 15;
-				if (gren_y > 0) gren_y -= gren_acc--;
-				if (gren_acc == 0) gren_motion_dir = 2;
-			}
-			else if (gren_motion_dir == 2) {
-				gren_x -= 15; gren_y += gren_acc++; 
-				if (gren_y >= 650) { 
-					set_grenade = TRUE; is_throw = FALSE;
-					gren_motion_dir = 0;
-				}
+			if (g_frame > 0) g_frame--;
+			if (g_frame == 0) g_frame = 7;
+		}
+	}
+	//수류탄을 던져서 날아감
+	if (gren_dir == 1) { 
+		if (gren_motion_dir == 1) {
+			gren_x += 15;
+			if (gren_y > 0) gren_y -= gren_acc--;
+			if (gren_acc == 0) gren_motion_dir = 2;
+		}
+		//떨어지기 시작
+		else if (gren_motion_dir == 2) {
+			gren_x += 15; gren_y += gren_acc++; 
+			if (gren_y >= 650) {
+				gren_motion_dir = 3; gren_acc -= (gren_acc / 2);
+				ch_explode->stop(); ssystem->playSound(bounce, 0, false, &ch_explode);
 			}
 		}
-	} 
+		else if (gren_motion_dir == 3) {
+			gren_x += 10;
+			if(gren_acc > 0) gren_y -= gren_acc--;
+			if (gren_acc == 0) gren_motion_dir = 4;
+		}
+		else if (gren_motion_dir == 4) {
+			gren_x += 8; gren_y += gren_acc++;
+			if (gren_y >= 650) { //땅에 닿으면 점화 시작 
+				gren_motion_dir = -1; set_grenade = TRUE;
+				ch_explode->stop(); ssystem->playSound(bounce, 0, false, &ch_explode);
+			}
+		}
+	}
+	else if (gren_dir == 0) {
+		if (gren_motion_dir == 1) {
+			gren_x -= 15;
+			if (gren_y > 0) gren_y -= gren_acc--;
+			if (gren_acc == 0) gren_motion_dir = 2;
+		}
+		else if (gren_motion_dir == 2) {
+			gren_x -= 15; gren_y += gren_acc++; 
+			if (gren_y >= 650) { 
+				gren_motion_dir = 3; gren_acc -= (gren_acc / 2);
+				ch_explode->stop(); ssystem->playSound(bounce, 0, false, &ch_explode);
+			}
+		}
+		else if (gren_motion_dir == 3) {
+			gren_x -= 10;
+			if (gren_acc > 0) gren_y -= gren_acc--;
+			if (gren_acc == 0) gren_motion_dir = 4;
+		}
+		else if (gren_motion_dir == 4) {
+			gren_x -= 8; gren_y += gren_acc++;
+			if (gren_y >= 650) {
+				gren_motion_dir = -1; set_grenade = TRUE;
+				ch_explode->stop(); ssystem->playSound(bounce, 0, false, &ch_explode);
+			}
+		}
+	}
+	
 	//폭발 화염 애니매이션
 	if (is_boom == TRUE) {
 		check_explode_damage(); //몬스터 폭발 대미지 판정
@@ -1493,8 +1537,77 @@ void update_shoot_animation() {
 			if (ex_frame < 6) ex_frame++; 
 			if (ex_frame == 6) { 
 				is_boom = FALSE; set_grenade = FALSE; 
+				is_throw = FALSE;
 			}
 			ex_frame_delay = 0;
+		}
+	}
+
+	//m1게런드 클립 애니메이션
+	if (clip_motion_dir != -1) {
+		if (clip_dir == 0) {
+			if (clip_frame < 3) clip_frame++;
+			if (clip_frame == 3) clip_frame = 0;
+		}
+		else if (clip_dir == 1) {
+			if (clip_frame > 0) clip_frame--;
+			if (clip_frame == 0) clip_frame = 3;
+		}
+	}
+	if (clip_dir == 0) {
+		if (clip_motion_dir == 1) {
+			clip_x += 10;
+			if (clip_acc > 0) clip_y -= clip_acc--;
+			if (clip_acc == 0) clip_motion_dir = 2;
+		}
+		else if (clip_motion_dir == 2) {
+			clip_x += 10; clip_y += clip_acc++;
+			if (clip_y >= 670) {
+				clip_motion_dir = 3; clip_acc -= (clip_acc / 4);
+				ch_clip2->stop(); ssystem->playSound(m1_clip_hit, 0, false, &ch_clip2);
+			}
+		}
+		else if (clip_motion_dir == 3) {
+			clip_x += 8;
+			if (clip_acc > 0) clip_y -= clip_acc--;
+			if (clip_acc == 0) {
+				clip_motion_dir = 4;
+			}
+		}
+		else if (clip_motion_dir == 4) {
+			clip_x += 8; clip_y += clip_acc++;
+			if (clip_y >= 670) {
+				clip_motion_dir = -1; clip_frame = 0; clip_acc = 0;
+				ch_clip2->stop(); ssystem->playSound(m1_clip_hit, 0, false, &ch_clip2);
+			}
+		}
+	}
+	else if (clip_dir == 1) {
+		if (clip_motion_dir == 1) {
+			clip_x -= 10;
+			if (clip_acc > 0) clip_y -= clip_acc--;
+			if (clip_acc == 0) clip_motion_dir = 2;
+		}
+		else if (clip_motion_dir == 2) {
+			clip_x -= 10; clip_y += clip_acc++;
+			if (clip_y >= 670) {
+				clip_motion_dir = 3; clip_acc -= (clip_acc / 4);
+				ch_clip2->stop(); ssystem->playSound(m1_clip_hit, 0, false, &ch_clip2);
+			}
+		}
+		else if (clip_motion_dir == 3) {
+			clip_x -= 8;
+			if (clip_acc > 0) clip_y -= clip_acc--;
+			if (clip_acc == 0) {
+				clip_motion_dir = 4;
+			}
+		}
+		else if (clip_motion_dir == 4) {
+			clip_x -= 8; clip_y += clip_acc++;
+			if (clip_y >= 670) {
+				clip_motion_dir = -1; clip_frame = 0; clip_acc = 0;
+				ch_clip2->stop(); ssystem->playSound(m1_clip_hit, 0, false, &ch_clip2);
+			}
 		}
 	}
 
@@ -1788,6 +1901,9 @@ void wm_lbuttondown() {
 		if (GUN_number == awp) {
 			ch_reload->stop(); ssystem->playSound(sniper_reload, 0, false, &ch_reload); 
 		}
+		if (GUN_number == m1) {
+			ch_reload->stop(); ssystem->playSound(m1_reload, 0, false, &ch_reload);
+		}
 	}
 
 	//연사력이 높을수록 딜레이 수치는 낮음
@@ -1829,6 +1945,10 @@ void wm_paint(HDC mdc, RECT rt) {
 
 	//탄피 이미지 출력
 	show_catridge(mdc, ss_x, ss_y, landing_shake);
+
+	//m1 게런드 클립 이미지 출력
+	if (clip_created == TRUE)
+		clip[clip_frame].Draw(mdc, clip_x + ss_x, clip_y + ss_y + landing_shake, 40, 40, 0, 0, 30, 30);
 
 	//수류탄 이미지 출력
 	if(is_throw == TRUE || set_grenade == TRUE) show_grenade(mdc, ss_x, ss_y, landing_shake);
@@ -1901,6 +2021,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 						ch_reload->stop(); ssystem->playSound(m1_reload, 0, false, &ch_reload);
 						if (ammo < 8) {
 							ch_clip->stop(); ssystem->playSound(m1_clip, 0, false, &ch_clip);
+							make_clip();
 						}
 					}
 				} break;

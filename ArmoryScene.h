@@ -26,7 +26,6 @@ private:
     Button equip_button;
     Button unlock_button;
     std::vector<Button> weapon_buttons;
-    Sprite background_image;
     Sprite player_preview;
     RECT preview_area;
     RECT weapon_list_view_area;

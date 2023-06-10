@@ -15,7 +15,7 @@ int Gun::damage(int gun_id) {
     case awp:
         return 100;
     case m1: 
-        return 40;
+        return 30;
     }
     return 0;
 }
@@ -33,7 +33,7 @@ int Gun::shoot_speed(int gun_id) {
     case awp:
         return 100;
     case m1:
-        return 25;
+        return 0;
     }
     return 0;
 }
@@ -98,9 +98,9 @@ int Gun::recoil(int gun_id) {
     case mg_42:
         return 2;
     case awp:
-        return 30;
+        return 0;
     case m1:
-        return 10;
+        return 60;
     }
     return 0;
 }
@@ -172,7 +172,7 @@ int Gun::speed_info(int gun_id) {
     case awp:
         return 46;
     case m1:
-        return 200;
+        return 0;
     }
     return 0;
 }

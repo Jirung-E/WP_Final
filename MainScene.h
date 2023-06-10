@@ -15,7 +15,6 @@ private:
     Button start_button;
     Button quit_button;
     Button armory_button;
-    Sprite background_image;
 
 public:
     MainScene();

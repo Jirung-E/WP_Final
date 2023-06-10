@@ -15,7 +15,6 @@ quit_button{ Quit, L"[←", { 40, 15 }, 80, 80 },
 equip_button { Equip, L"EQUIP", { 0, 0 }, 0, 0 },
 unlock_button { Unlock, L"UNLOCK", { 0, 0 }, 0, 0 },
 selected_weapon_button_index { -1 },
-background_image { L"./res/Armory_background(temp).jpg" },
 player_preview { L"./res/commando_right.png" },
 preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
     quit_button.border_color = Gray;
@@ -57,7 +56,7 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
     weapon_buttons.back().sprite = new Sprite{ L"./res/awp_right.png" };
     weapon_buttons.back().sprite->fix_ratio = true;
 
-    weapon_buttons.push_back(Button{ Weapon5, L"M1", {}, 0, 0 });
+    weapon_buttons.push_back(Button{ Weapon5, L"GARAND", {}, 0, 0 });
     weapon_buttons.back().sprite = new Sprite{ L"./res/m1_right.png" };
     weapon_buttons.back().sprite->fix_ratio = true;
 
@@ -77,9 +76,7 @@ preview_area { 0, 0, 0, 0 }, weapon_list_view_area { 0, 0, 0, 0 } {
 }
 
 //폰트 두께 통일
-//여기도 배경 껐습니다
 void ArmoryScene::draw(const HDC& hdc) const {
-   // background_image.draw(hdc, valid_area);
 
     //// current equipment layout
     //Rectangle(hdc, preview_area.left, preview_area.top, 
@@ -123,9 +120,9 @@ void ArmoryScene::draw(const HDC& hdc) const {
     case awp:
         current_gun = new Sprite { L"./res/awp_right.png" };
         break;
-
     case m1:
         current_gun = new Sprite { L"./res/m1_right.png" };
+        break;
     }
 
     if(current_gun != nullptr) {
