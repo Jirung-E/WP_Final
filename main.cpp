@@ -759,14 +759,14 @@ void show_player(HDC mdc, RECT rt) {
 }
 
 //몬스터 생성
-void make_monster(RECT rt) {
+void make_monster() {
 	//spawn_timer의 수치가 0이 되면 몬스터가 한 마리씩 스폰
 	//일반 몬스터
 	spawn_timer_r--;
 	if (spawn_timer_r == 0) {
 		spawn_timer_r = calc_spawn_timer(spawn_timer_r_max);		// 원래값 500
 		if (mdx_r < 99) {
-			spawn_monster_regular(mdx_r, BG_scanner, rt); mdx_r++;
+			spawn_monster_regular(mdx_r, BG_scanner); mdx_r++;
 		}
 	}  
 	//대형 몬스터
@@ -774,7 +774,7 @@ void make_monster(RECT rt) {
 	if (spawn_timer_big == 0) {
 		spawn_timer_big = calc_spawn_timer(spawn_timer_big_max);	// 원래값 1000
 		if (mdx_big < 99) {
-			spawn_monster_big(mdx_big, BG_scanner, rt); mdx_big++;
+			spawn_monster_big(mdx_big, BG_scanner); mdx_big++;
 		}
 	} 
 	//공중 몬스터
@@ -782,7 +782,7 @@ void make_monster(RECT rt) {
 	if (spawn_timer_air == 0) {
 		spawn_timer_air = calc_spawn_timer(spawn_timer_air_max);	// 원래값 600
 		if (mdx_air < 99) {
-			spawn_monster_air(mdx_air, BG_scanner, rt); mdx_air++;
+			spawn_monster_air(mdx_air, BG_scanner); mdx_air++;
 		}
 	}
 }
@@ -2220,7 +2220,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					update_monster_direction(CM_x); update_player_position();
 					update_monster_position();      update_shoot_animation();
 					check_monster_attack();         monster_animation();
-					make_monster(rt);               shoot(rt);
+					make_monster();	                shoot(rt);
 					index_auto_delete();			grenade_process();
 					play_idle_sound();				play_player_sound();
 

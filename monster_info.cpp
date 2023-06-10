@@ -45,18 +45,18 @@ int calc_spawn_timer(int spawn_timer_max) {
 }
 
 //일반 몬스터 생성
-void spawn_monster_regular(int mdx_r, int BG_scanner, RECT rt) {
+void spawn_monster_regular(int mdx_r, int BG_scanner) {
 	int spawn_dir = 0;
 	std::random_device rd_mst;
 	std::mt19937 gen(rd_mst());
 	std::uniform_int_distribution<int> left_or_right(0, 1); //몬스터는 맵 왼쪽 끝 또는 오른쪽 끝에서 생성된다
 	spawn_dir = left_or_right(gen);							//0이면 왼쪽, 1이면 오른쪽
 	if (spawn_dir == 0) {
-		mst_r[mdx_r].x = rt.left - BG_scanner - 100;				//맵의 왼쪽 끝에서 생성
+		mst_r[mdx_r].x = -BG_scanner - 100;				//맵의 왼쪽 끝에서 생성
 		mst_r[mdx_r].y = 600;	
 	}
 	else if (spawn_dir == 1) {
-		mst_r[mdx_r].x = rt.right + 3000 - BG_scanner + 100;    //맵의 오른쪽 끝에서 생성
+		mst_r[mdx_r].x = 1500 + 3000 - BG_scanner + 100;    //맵의 오른쪽 끝에서 생성
 		mst_r[mdx_r].y = 600;
 	}
 	mst_r[mdx_r].hp = 50;
@@ -66,18 +66,18 @@ void spawn_monster_regular(int mdx_r, int BG_scanner, RECT rt) {
 }
 
 //대형 몬스터 생성
-void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt) {
+void spawn_monster_big(int mdx_big, int BG_scanner) {
 	int spawn_dir = 0;
 	std::random_device rd_mst;
 	std::mt19937 gen(rd_mst());
 	std::uniform_int_distribution<int> left_or_right(0, 1); //몬스터는 맵 왼쪽 끝 또는 오른쪽 끝에서 생성된다
 	spawn_dir = left_or_right(gen);							//0이면 왼쪽, 1이면 오른쪽
 	if (spawn_dir == 0) {
-		mst_big[mdx_big].x = rt.left - BG_scanner - 200;				//맵의 왼쪽 끝에서 생성
+		mst_big[mdx_big].x = -BG_scanner - 200;				//맵의 왼쪽 끝에서 생성
 		mst_big[mdx_big].y = 500;
 	}
 	else if (spawn_dir == 1) {
-		mst_big[mdx_big].x = rt.right + 3000 - BG_scanner + 200;    //맵의 오른쪽 끝에서 생성
+		mst_big[mdx_big].x = 1500 + 3000 - BG_scanner + 200;    //맵의 오른쪽 끝에서 생성
 		mst_big[mdx_big].y = 500;
 	}
 	mst_big[mdx_big].hp = 100;
@@ -87,18 +87,18 @@ void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt) {
 }
 
 //공중 몬스터 생성
-void spawn_monster_air(int mdx_air, int BG_scanner, RECT rt) {
+void spawn_monster_air(int mdx_air, int BG_scanner) {
 	int spawn_dir = 0;
 	std::random_device rd_mst;
 	std::mt19937 gen(rd_mst());
 	std::uniform_int_distribution<int> left_or_right(0, 1); //몬스터는 맵 왼쪽 끝 또는 오른쪽 끝에서 생성된다
 	spawn_dir = left_or_right(gen);							//0이면 왼쪽, 1이면 오른쪽
 	if (spawn_dir == 0) {
-		mst_air[mdx_air].x = rt.left - BG_scanner - 150;				//맵의 왼쪽 끝에서 생성
+		mst_air[mdx_air].x = -BG_scanner - 150;				//맵의 왼쪽 끝에서 생성
 		mst_air[mdx_air].y = 200;
 	}
 	else if (spawn_dir == 1) {
-		mst_air[mdx_air].x = rt.right + 3000 - BG_scanner + 150;    //맵의 오른쪽 끝에서 생성
+		mst_air[mdx_air].x = 1500 + 3000 - BG_scanner + 150;    //맵의 오른쪽 끝에서 생성
 		mst_air[mdx_air].y = 200;
 	}
 	mst_air[mdx_air].hp = 30;
