@@ -1229,7 +1229,7 @@ void check_explode_damage() {
 		}
 
 		for (int i = mdx_big - 1; i >= 0; i--) {
-			if (mst_big[i].x + 100 >= (gren_x - 90) - 400 && mst_big[i].x + 50 <= (gren_x - 90) + 400) mst_big[i].hp -= 150; 
+			if (mst_big[i].x + 100 >= (gren_x - 90) - 400 && mst_big[i].x + 100 <= (gren_x - 90) + 400) mst_big[i].hp -= 150; 
 			if (mst_big[i].hp <= 0) {
 				if (i < mdx_big - 1 && is_kill_big == 0) {
 					dl[ddx].x = mst_big[i].x; dl[ddx].y = mst_big[i].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[i].img_dir;
