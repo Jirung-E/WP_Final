@@ -674,13 +674,17 @@ void show_player(HDC mdc, RECT rt) {
 	CM_h = player_image->GetHeight();
 	pw = CM_w / 1500.0 * rt.right;
 	ph = CM_h / 800.0 * rt.bottom;
-	player_image->Draw(mdc, px, py, pw, ph, 0, 0, CM_w, CM_h);
+	RECT r = { 0, 0, pw, ph };
+	r = expandRatio(r, CM_w, CM_h);		// 비율 맞추기
+	player_image->Draw(mdc, px, py, r.right-r.left, r.bottom-r.top, 0, 0, CM_w, CM_h);
 
 	GUN_w = gun_image->GetWidth();
 	GUN_h = gun_image->GetHeight();
 	gw = GUN_w / 1500.0 * rt.right;
-	gh = GUN_w / 800.0 * rt.bottom;
-	gun_image->Draw(mdc, gx, gy, gw, gh, 0, 0, GUN_w, GUN_h);
+	gh = GUN_h / 800.0 * rt.bottom;
+	r = { 0, 0, gw, gh };
+	r = expandRatio(r, GUN_w, GUN_h);		// 비율 맞추기
+	gun_image->Draw(mdc, gx, gy, r.right-r.left, r.bottom-r.top, 0, 0, GUN_w, GUN_h);
 
 	if(flame != nullptr) {
 		flame->Draw(mdc, fx, fy, fw, fh, 0, 0, 100, 100);
