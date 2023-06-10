@@ -109,6 +109,7 @@ static BOOL is_click = FALSE;
 //키보드 키 검사
 static bool left_pressed = false; static bool right_pressed = false;
 static bool jumping = false; static bool shift_pressed = false;
+static bool intro_skip = false;
 
 //TRUE일 경우 일시정지 화면이 사라지는 애니메이션 재생
 extern BOOL is_resumed;
@@ -1888,9 +1889,6 @@ void intro_animation() {
 	if (intro_time > 0) intro_time--;
 	if (intro_time == 0) {
 		is_intro = FALSE;
-		logo_acc = 30; //로고 애니메이션 값 초기화
-		logo_y = -415;
-		armory_to_main = TRUE;
 	}
 	if (intro_time <= 500 && intro_time >= 410) ellipse_size++;
 	if (intro_time < 410 && intro_time >= 210) ellipse_size += 10;
@@ -2100,9 +2098,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			switch (wParam) {
 			case VK_SPACE:
 				is_intro = FALSE;
+				intro_skip = true;
 				break;
 			}
 		}
+
+		if (is_intro == FALSE && is_menu == FALSE && intro_skip == false) {
+			switch (wParam) {
+			case VK_SPACE:
+				is_menu = TRUE;
+				if (intro_skip == false) {
+					ch_button->stop(); ssystem->playSound(resume, 0, false, &ch_button);
+				}
+				intro_skip = true;
+				break;
+			}
+		}
+
 		break;
 
 		//정지상태로 변경
@@ -2121,6 +2133,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			break;
 
 		case VK_SPACE:
+			if (manager.getCurrentSceneID() != Game) intro_skip = false;
 			jumping = false;
 			break;
 
@@ -2170,6 +2183,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		case UPDATE: //게임 전체 타이머
 			GetClientRect(hWnd, &rt);
 
+			//인트로 전 로딩 화면 로딩 애니메이션
 			if (intro_delay > 0) {
 				if(loading_delay < 15) loading_delay++;
 				if (loading_delay == 15) {
@@ -2183,6 +2197,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			if (is_intro == TRUE) {
 				if (intro_delay > 0) intro_delay--;
 				if (intro_delay == 0) intro_animation();
+			}
+
+			//인트로 진입 시 로고 애니메이션
+			if (is_menu == TRUE) {
+				if (press_acc > 0) press_y += press_acc--;
+				if (logo_acc_enter > 0) logo_y -= logo_acc_enter--;
 			}
 
 			//새 게임 시작 시 애니메이션을 재생한다.
@@ -2297,8 +2317,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				}
 			}
 
+			if (is_intro == FALSE) press_space(mdc, press_y);
+				
+
 			//인트로와 새 게임 애니메이션이 재생되지 않아야 게임 화면을 출력한다.
-			if (is_intro == FALSE && into_the_game == FALSE) {
+			if (is_intro == FALSE && into_the_game == FALSE && is_menu == TRUE) {
 				if (manager.getCurrentSceneID() == Game) wm_paint(mdc, rt);
 
 				//일시정지 씬

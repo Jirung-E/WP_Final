@@ -119,6 +119,7 @@ extern int ypos_zc_acc;
 extern int death_x;
 extern int death_acc;
 
+static BOOL is_menu = FALSE;
 //새 게임 시작 시 인트로 애니메이션 재생(예정)
 static BOOL is_intro = FALSE;
 //인트로 딜레이 변수
@@ -163,6 +164,12 @@ extern int clip_motion_dir; //1 up 2 down
 extern int clip_frame;
 extern BOOL clip_created;
 
+//press space 애니메이션
+static int press_y = 640;
+static int press_acc = 15;
+static int logo_acc_enter = 15;
+
 void push_cat(int idx);
 void ellipse_intro(HDC mdc, RECT rt, int size, double r, double g, double b);
 void ellipse_intro2(HDC mdc, RECT rt, int size);
+void press_space(HDC mdc, int y);

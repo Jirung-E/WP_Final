@@ -26,7 +26,7 @@ gun_catridge gc[2000];
 //메인 화면 백그라운드 스크롤
 int Scanner_main;
 //메인 로고 y좌표
-int logo_y = 50;
+int logo_y = 170;
 //메인 로고 애니메이션 가속
 int logo_acc = 30;
 //아머리에서 메인으로 나갈때의 로고 애니메이션 재생
@@ -183,4 +183,21 @@ void ellipse_intro2(HDC mdc, RECT rt, int size) {
 	SelectObject(mdc, oldpen);
 	DeleteObject(hpen);
 
+}
+
+void press_space(HDC mdc, int y) {
+	HFONT hfont, oldfont;
+	hfont = CreateFont(50, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("맑은 고딕"));
+	oldfont = (HFONT)SelectObject(mdc, hfont);
+	SetBkMode(mdc, TRANSPARENT);
+
+	for (int i = -3; i <= 3; i++)
+		for (int j = -4; j <= 4; j++)
+			TextOut(mdc, 600 + i, y + j, L"- Press Space -", lstrlen(L"- Press Space -"));
+
+	SetTextColor(mdc, RGB(255, 255, 255));
+	TextOut(mdc, 600, y, L"- Press Space -", lstrlen(L"- Press Space -"));
+
+	SelectObject(mdc, oldfont);
+	DeleteObject(hfont);
 }
