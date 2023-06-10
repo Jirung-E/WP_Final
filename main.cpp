@@ -463,12 +463,21 @@ void show_awp_targeted(HDC mdc, RECT rt) {
 void show_interface(HDC mdc, RECT rt) {
 	//장탄수 표시기 배경
 	IND_w = indicator_back.GetWidth(); IND_h = indicator_back.GetHeight();
-	indicator_back.Draw(mdc, rt.right - 600 + ss_x, rt.bottom - 110 + landing_shake + ss_y, 600, 110, 0, 0, IND_w, IND_h);
+	indicator_back.Draw(mdc, rt.right + (-600 + ss_x) / 1500.0 * rt.right, rt.bottom + (-110 + landing_shake + ss_y) / 1500.0 * rt.right,
+		600 / 1500.0 * rt.right, 110 / 1500.0 * rt.right, 0, 0, IND_w, IND_h);
 
 	//수류탄 대기 시간 출력
-	show_gren_time(mdc, ss_x, ss_y, landing_shake, gren_time);
-	if (able_grenade == TRUE) avail_grenade.Draw(mdc, 420 + ss_x, 680 + ss_y + landing_shake, 80, 80, 0, 0, 100, 100); 
-	if(able_grenade == FALSE) unavail_grenade.Draw(mdc, 420 + ss_x, 680 + ss_y + landing_shake, 80, 80, 0, 0, 100, 100);
+	show_gren_time(mdc, ss_x, ss_y, landing_shake, gren_time, rt);
+	if(able_grenade == TRUE) {
+		avail_grenade.Draw(mdc, (420 + ss_x) / 1500.0 * rt.right, rt.bottom + (-80 + ss_y + landing_shake) / 1500.0 * rt.right,
+			80 / 1500.0 * rt.right, 80 / 1500.0 * rt.right,
+			0, 0, 100, 100);
+	}
+	else {
+		unavail_grenade.Draw(mdc, (420 + ss_x) / 1500.0 * rt.right, rt.bottom + (-80 + ss_y + landing_shake) / 1500.0 * rt.right,
+			80 / 1500.0 * rt.right, 80 / 1500.0 * rt.right,
+			0, 0, 100, 100);
+	}
 		 
 	//총알 아이콘
 	if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
@@ -532,8 +541,10 @@ void show_interface(HDC mdc, RECT rt) {
 		monster_hp_ind(mdc, mst_air[i].x + ss_x, mst_air[i].y - 30 + landing_shake + ss_y, mst_air[i].x + mst_air[i].hp * 5 + ss_x, mst_air[i].y - 15 + landing_shake + ss_y,
 			mst_air[i].x + ss_x, mst_air[i].y - 30 + landing_shake + ss_y, mst_air[i].x + 150 + ss_x, mst_air[i].y - 15 + landing_shake + ss_y);
 	//플레이어 체력, 따로 만들기 귀찮아서 몬스터 체력 게이지로 공용
-	monster_hp_ind(mdc, (rt.left + 10) + ss_x, (rt.bottom - 30) + landing_shake + ss_y, (rt.left + 10) + (health * 3) + ss_x, (rt.bottom - 10) + landing_shake + ss_y,
-	(rt.left + 10) + ss_x, (rt.bottom - 30) + landing_shake + ss_y, (rt.left + 10) + 300 + ss_x, (rt.bottom - 10) + landing_shake + ss_y);
+	monster_hp_ind(mdc, rt.left + (10 + ss_x) / 1500.0 * rt.right, rt.bottom + (-40 + landing_shake + ss_y) / 1500.0 * rt.right,
+		rt.left + (10 + (health * 3) + ss_x) / 1500.0 * rt.right, rt.bottom + (-10 + landing_shake + ss_y) / 1500.0 * rt.right,
+		rt.left + (10 + ss_x) / 1500.0 * rt.right, rt.bottom + (-40 + landing_shake + ss_y) / 1500.0 * rt.right,
+		rt.left + (10 + 300 + ss_x) / 1500.0 * rt.right, rt.bottom + (-10 + landing_shake + ss_y) / 1500.0 * rt.right);
 
 	//플레이어 체력 숫자 표시
 	player_health(mdc, rt, ss_x, ss_y, landing_shake, health);
