@@ -22,7 +22,7 @@ FMOD::Sound* scar_distance, * m16_distance, * mp44_distance, *mg42_distance, * a
 FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, * sniper_bolt, * walk, * hit_sound, * jump, * exp_get, *land_sound, *zoom_sound, *unzoom_sound;
 FMOD::Sound* hurt, *dead, *cat_hit_ground, *cat_stop, *ex_sound, *pin_sound;
 FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound, *weapon_select, *weapon_button, *start_button, *quit_button;
-FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm, *next_round, *intro, *new_game, *woosh;
+FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm, *next_round, *intro, *new_game, *woosh, *cant_buy, *buy;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -256,6 +256,8 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\weapon_select.wav", FMOD_DEFAULT, 0, &weapon_select);
 	ssystem->createSound(".\\res\\sounds\\start_button.wav", FMOD_DEFAULT, 0, &start_button);
 	ssystem->createSound(".\\res\\sounds\\quit_button.wav", FMOD_DEFAULT, 0, &quit_button);
+	ssystem->createSound(".\\res\\sounds\\cant_buy.wav", FMOD_DEFAULT, 0, &cant_buy);
+	ssystem->createSound(".\\res\\sounds\\buy.wav", FMOD_DEFAULT, 0, &buy);
 
 	ssystem->createSound(".\\res\\sounds\\cat_hit_ground.wav", FMOD_DEFAULT, 0, &cat_hit_ground);
 	ssystem->createSound(".\\res\\sounds\\cat_stop.wav", FMOD_DEFAULT, 0, &cat_stop);
@@ -327,6 +329,16 @@ void play_button_sound() {
 	if (to_resume == TRUE) {
 		ch_button->stop();ssystem->playSound(resume, 0, false, &ch_button); 
 		to_resume = FALSE;
+	}
+	//상점 구매 불가 사운드
+	if (cant_buy_sound == TRUE) {
+		ch_button->stop(); ssystem->playSound(cant_buy, 0, false, &ch_button);
+		cant_buy_sound = FALSE;
+	}
+	//상점 구매 사운드
+	if (buy_sound == TRUE) {
+		ch_button->stop(); ssystem->playSound(buy, 0, false, &ch_button);
+		buy_sound = FALSE;
 	}
 }
 
@@ -1477,8 +1489,8 @@ void check_monster_attack() {
 	//일반 몬스터 공격 판정
 	for (int i = mdx_r - 1; i >= 0; i --) {
 		if (cal_dist(CM_x + 50, CM_y + 50, mst_r[i].x + 50, mst_r[i].y + 50) <= 50 &&  cool_time == 0) {
-			health -= 10; mst_r[i].motion_acc = 10;
-			mst_r[i].height = 155; mst_r[i].y = 545;
+			health -= 10; mst_r[i].motion_acc = 13;
+			mst_r[i].height = 191; mst_r[i].y = 509;
 			cool_time = 30;
 				
 			ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
@@ -1490,8 +1502,8 @@ void check_monster_attack() {
 	for (int i = mdx_big - 1; i >= 0; i--) {
 		if (cal_dist(CM_x + 50 , CM_y + 50, mst_big[i].x + 100, mst_big[i].y + 100) <= 100 && cool_time == 0) {
 			health -= 15;
-			cool_time = 30;  mst_big[i].height = 255;
-			mst_big[i].y = 445;	mst_big[i].motion_acc = 10;
+			cool_time = 30;  mst_big[i].height = 291;
+			mst_big[i].y = 409;	mst_big[i].motion_acc = 13;
 				
 			ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
 			ch_mst_attack_sound->stop();  play_attack_sound();
@@ -1502,8 +1514,8 @@ void check_monster_attack() {
 	for (int i = mdx_air - 1; i >= 0; i--) {
 		if (cal_dist(CM_x + 50, CM_y + 50, mst_air[i].x + 75, mst_air[i].y + 30) <= 75 && cool_time == 0) {
 			health -= 5;
-			cool_time = 30; mst_air[i].height = 115;
-			mst_air[i].y = 145; mst_air[i].motion_acc = 10;
+			cool_time = 30; mst_air[i].height = 151;
+			mst_air[i].y = 109; mst_air[i].motion_acc = 13;
 				
 			ch_hurt->stop(); ssystem->playSound(hurt, 0, false, &ch_hurt);
 			shake_effect = 2;
@@ -1522,18 +1534,10 @@ void index_auto_delete() {
 		}
 	}
 	//탄피 인덱스 삭제 
-	if (cdx > 5) {  //mg42는 연사 속도가 빨라 다른 총들보다 더 빨리 삭제함
-		if (GUN_number == mg_42) {
-			if (cat_delete_delay < 5) cat_delete_delay++;
-			if (cat_delete_delay == 5) {
-				cat_delete_delay = 0;  push_cat(cdx--);
-			}
-		}
-		if (GUN_number != mg_42) {
-			if (cat_delete_delay < 8) cat_delete_delay++;
-			if (cat_delete_delay == 8) {
-				cat_delete_delay = 0; push_cat(cdx--);
-			}
+	if (cdx > 10) { 
+		if (cat_delete_delay < 5) cat_delete_delay++;
+		if (cat_delete_delay == 5) {
+			cat_delete_delay = 0; push_cat(cdx--);
 		}
 	}
 }

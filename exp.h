@@ -10,5 +10,9 @@ extern int exp_acc;
 extern int out;
 extern int exp_out_delay;
 
+//상점 사운드 재생 여부
+extern BOOL cant_buy_sound;
+extern BOOL buy_sound;
+
 void show_exp(HDC mdc, int experience, int x, int y);
 void show_exp_add(HDC mdc, int prev_up, int x, int y);

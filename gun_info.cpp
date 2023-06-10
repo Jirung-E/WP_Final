@@ -138,7 +138,23 @@ int Gun::price(int gun_id) {
     case mg_42:
         return 1000;
     case awp:
-        return 0;
+        return 1000;
+    }
+    return 0;
+}
+
+int Gun::speed_info(int gun_id) {
+    switch (gun_id) {
+    case scar_h:
+        return 545;
+    case m16:
+        return 800;
+    case mp_44:
+        return 375;
+    case mg_42:
+        return 1500;
+    case awp:
+        return 46;
     }
     return 0;
 }

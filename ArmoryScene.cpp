@@ -6,6 +6,8 @@
 
 BOOL button_feed_armory_button = FALSE;
 BOOL button_feed_armory_select = FALSE;
+BOOL cant_buy_sound = FALSE;
+BOOL buy_sound = FALSE;
 
 //폰트 두께 통일
 ArmoryScene::ArmoryScene() : Scene { Armory }, 
@@ -156,8 +158,8 @@ void ArmoryScene::draw(const HDC& hdc) const {
     damage_text.show(hdc, preview_area);
     damage_value.show(hdc, preview_area);
 
-    TextBox speed_text { L"SPEED", { 50, 80 }, 25, 10 };
-    TextBox speed_value { std::to_wstring(100-Gun::shoot_speed(idx)/2), { 75, 80 }, 25, 10 };
+    TextBox speed_text { L"RPM", { 50, 80 }, 25, 10 };  //기존의 속도 계산법 대신 실제 총기 데이터 사용
+    TextBox speed_value { std::to_wstring(Gun::speed_info(idx)), { 75, 80 }, 25, 10};
     speed_text.font_size = font_size;
     speed_value.font_size = font_size;
     speed_text.bold = 4;
@@ -349,6 +351,10 @@ int ArmoryScene::clickL(const POINT& point) {
                     experience -= Gun::price(selected_weapon_button_index+1);
                     GUN_number = selected_weapon_button_index+1;
                     unlocked[selected_weapon_button_index] = true;
+                    buy_sound = TRUE;
+                }
+                else if (experience < Gun::price(selected_weapon_button_index + 1)) {
+                    cant_buy_sound = TRUE;
                 }
             }
             return unlock_button.getID();

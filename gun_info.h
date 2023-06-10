@@ -10,5 +10,6 @@ namespace Gun {
     int shake(int gun_id);          // 화면 흔들림 정도
     int shake_time(int gun_id);     // 화면 흔들림 시간
     int price(int gun_id);          // 가격
+    int speed_info(int gun_id);     //연사력 정보
 }
 
