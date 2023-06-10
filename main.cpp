@@ -532,26 +532,37 @@ void show_interface(HDC mdc, RECT rt) {
 	//ammo_indicator(mdc, Gun::max_ammo(GUN_number), ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
 
 	//경험치 수치 출력
-	show_exp(mdc, experience, rt.left + 130 + ss_x, rt.top + 3 + ss_y + landing_shake);
-	exp_icon.Draw(mdc, rt.left + 20 + ss_x, rt.top + 15 + ss_y + landing_shake, 100, 50, 0, 0, 100, 50);
-	show_exp_add(mdc, prev_up, exp_x + ss_x, rt.top + 70 + ss_y + landing_shake);
+	show_exp(mdc, experience, rt.left + (130 + ss_x) / 1500.0 * rt.right, rt.top + (3 + ss_y + landing_shake) / 1500.0 * rt.right, rt);
+	exp_icon.Draw(mdc, rt.left + (20 + ss_x) / 1500.0 * rt.right, rt.top + (15 + ss_y + landing_shake) / 1500.0 * rt.right, 
+		100 / 1500.0 * rt.right, 50 / 1500.0 * rt.right, 0, 0, 100, 50);
+	show_exp_add(mdc, prev_up, (exp_x + ss_x) / 1500.0 * rt.right, rt.top + (70 + ss_y + landing_shake) / 1500.0 * rt.right, rt);
 	 
 	//재장전 게이지 출력
 	if (reload == 1)
-		reload_indicator(mdc, CM_x + ss_x, CM_y - 30 + landing_shake + ss_y, CM_x + reload_x + ss_x, CM_y - 10 + landing_shake + ss_y, CM_x + ss_x, CM_y - 30 + landing_shake + ss_y, CM_x + 100 + ss_x, CM_y - 10 + landing_shake + ss_y);
+		reload_indicator(mdc, (CM_x + ss_x) / 1500.0 * rt.right, (CM_y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(CM_x + reload_x + ss_x) / 1500.0 * rt.right, (CM_y - 10 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(CM_x + ss_x) / 1500.0 * rt.right, (CM_y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(CM_x + 100 + ss_x) / 1500.0 * rt.right, (CM_y - 10 + landing_shake + ss_y) / 800.0 * rt.bottom);
 	 
 	//몬스터 체력 게이지 출력
 	for (int i = 0; i < mdx_r; i++)
-		monster_hp_ind(mdc, mst_r[i].x + ss_x, mst_r[i].y - 30 + landing_shake + ss_y, mst_r[i].x + mst_r[i].hp * 2 + ss_x, mst_r[i].y - 15 + landing_shake + ss_y,
-			mst_r[i].x + ss_x, mst_r[i].y - 30 + landing_shake + ss_y, mst_r[i].x + 100 + ss_x, mst_r[i].y - 15 + landing_shake + ss_y);
+		monster_hp_ind(mdc, (mst_r[i].x + ss_x) / 1500.0 * rt.right, (mst_r[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_r[i].x + mst_r[i].hp * 2 + ss_x) / 1500.0 * rt.right, (mst_r[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_r[i].x + ss_x) / 1500.0 * rt.right, (mst_r[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_r[i].x + 100 + ss_x) / 1500.0 * rt.right, (mst_r[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom);
 	//대형 몬스터
 	for (int i = 0; i < mdx_big; i++)
-		monster_hp_ind(mdc, mst_big[i].x + ss_x, mst_big[i].y - 30 + landing_shake + ss_y, mst_big[i].x + mst_big[i].hp * 2 + ss_x, mst_big[i].y - 15 + landing_shake + ss_y,
-			mst_big[i].x + ss_x, mst_big[i].y - 30 + landing_shake + ss_y, mst_big[i].x + 200 + ss_x, mst_big[i].y - 15 + landing_shake + ss_y);
+		monster_hp_ind(mdc, (mst_big[i].x + ss_x) / 1500.0 * rt.right, (mst_big[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_big[i].x + mst_big[i].hp * 2 + ss_x) / 1500.0 * rt.right, (mst_big[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_big[i].x + ss_x) / 1500.0 * rt.right, (mst_big[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_big[i].x + 200 + ss_x) / 1500.0 * rt.right, (mst_big[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom);
 	//공중 몬스터
 	for (int i = 0; i < mdx_air; i++)
-		monster_hp_ind(mdc, mst_air[i].x + ss_x, mst_air[i].y - 30 + landing_shake + ss_y, mst_air[i].x + mst_air[i].hp * 5 + ss_x, mst_air[i].y - 15 + landing_shake + ss_y,
-			mst_air[i].x + ss_x, mst_air[i].y - 30 + landing_shake + ss_y, mst_air[i].x + 150 + ss_x, mst_air[i].y - 15 + landing_shake + ss_y);
+		monster_hp_ind(mdc, (mst_air[i].x + ss_x) / 1500.0 * rt.right, (mst_air[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_air[i].x + mst_air[i].hp * 5 + ss_x) / 1500.0 * rt.right, (mst_air[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_air[i].x + ss_x) / 1500.0 * rt.right, (mst_air[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_air[i].x + 150 + ss_x) / 1500.0 * rt.right, (mst_air[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom);
+
 	//플레이어 체력, 따로 만들기 귀찮아서 몬스터 체력 게이지로 공용
 	monster_hp_ind(mdc, rt.left + (10 + ss_x) / 1500.0 * rt.right, rt.bottom + (-40 + landing_shake + ss_y) / 1500.0 * rt.right,
 		rt.left + (10 + (health * 3) + ss_x) / 1500.0 * rt.right, rt.bottom + (-10 + landing_shake + ss_y) / 1500.0 * rt.right,

@@ -10,5 +10,5 @@ extern int exp_acc;
 extern int out;
 extern int exp_out_delay;
 
-void show_exp(HDC mdc, int experience, int x, int y);
-void show_exp_add(HDC mdc, int prev_up, int x, int y);
+void show_exp(HDC mdc, int experience, int x, int y, RECT rt);
+void show_exp_add(HDC mdc, int prev_up, int x, int y, RECT rt);
