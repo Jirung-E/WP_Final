@@ -4,7 +4,6 @@
 #include <math.h>
 #include <random>
 #include "GameManager.h"
-//#include "GameManager.cpp"
 #include "monster_info.h"//몬스터 정보 헤더
 #include "ammo.h"        //총알 정보 헤더
 #include "player_info.h" //플레이어 정보 헤더
@@ -1627,6 +1626,9 @@ void UI_animation() {
 	if (manager.isPaused()) {
 		if (pause_acc > 0) {
 			pause_y -= pause_acc; pause_acc -= 4;
+			if(pause_y < 0) {
+				pause_y = 0;
+			}
 		}
 		if (pause_acc == 0) {
 			if (cm_pause_acc > 0) {
@@ -1705,7 +1707,12 @@ void new_game_animation(RECT rt) {
 		ch_bgm->stop(); ssystem->playSound(new_game, 0, false, &ch_bgm);
 		new_game_sound = TRUE;	logo_acc = 30; logo_y = 50; //로고 위치 초기화
 	}
-	if (new_acc > 0) new_bg_y -= new_acc--; 
+	if(new_acc > 0) {
+		new_bg_y -= new_acc--;
+		if(new_bg_y < 0) {
+			new_bg_y = 0;
+		}
+	}
 	if (new_acc == 0) {
 		if (new_logo_move == 1) {
 			if (new_logo_acc > 0) new_logo_y -= new_logo_acc--;
@@ -1816,9 +1823,30 @@ void wm_paint(HDC mdc, RECT rt) {
 	} 
 }
 
+void syncSize(const RECT& rect) {
+	// 플레이어 이미지 사이즈 맞추기
+	// 플레이어 위치 맞추기
+	// 배경 비율 유지하면서 출력
+	// 총 이미지 사이즈 맞추기
+	// 총 위치 맞추기
+	// 몬스터 이미지 사이즈 맞추기
+	// 몬스터 위치 맞추기
+	// 각종 애니메이션에 쓰이는 스프라이트 사이즈 맞추기
+	// 충돌체크할때 사이즈도 맞춰야됨
+	// 수류탄 이미지 사이즈 맞추기
+	// 탄피 이미지 사이즈 맞추기
+	// 조준점 크기
+	// 탄퍼짐 정도 사이즈 상관 없이 일정하게 조정
+	
+	// 스크린 크기에 의존한 값이 너무 많다
+	// -> 이걸 기본 좌표계로 설정하고 화면 크기 변경 정도를 구해서 적용하도록..
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hdc, mdc;  PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt;
-	 
+	GetClientRect(hWnd, &rt);
+	syncSize(rt);
+
 	switch(uMsg) {
 	case WM_CREATE:
 		set_FMOD(); IMG_FILE_LOAD();  //초기 세팅
@@ -2035,19 +2063,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			hbitmap = CreateCompatibleBitmap(hdc, rt.right, rt.bottom);
 			(HBITMAP)SelectObject(mdc, hbitmap); 
 
-			//인트로에 나오는 원 애니메이션 파트
-			if (is_intro == TRUE) {
-				ellipse_intro(mdc, rt, ellipse_size, r, g, b);
-				if(intro_logo_acc == 0 && intro_time > 155)	ellipse_intro2(mdc, rt, ellipse2_size);
-				intro_logo.Draw(mdc, intro_logo_x, intro_logo_y, 700, 300, 0, 0, 700, 300);
-			}
+			syncSize(rt);
+
+			////인트로에 나오는 원 애니메이션 파트
+			//if (is_intro == TRUE) {
+			//	ellipse_intro(mdc, rt, ellipse_size, r, g, b);
+			//	if(intro_logo_acc == 0 && intro_time > 155)	ellipse_intro2(mdc, rt, ellipse2_size);
+			//	//intro_logo.Draw(mdc, intro_logo_x, intro_logo_y, 700, 300, 0, 0, 700, 300);
+			//	Sprite intro_logo { L"./res/intro_logo.png" };
+			//	intro_logo.fix_ratio = true;
+			//	//intro_logo.position.x = intro_logo_x / 700.0 * rt.right;
+			//	intro_logo.position.y = intro_logo_y / 850.0 * rt.bottom;
+			//	RECT r = percentOf(rt, 50, Up);
+			//	intro_logo.draw(mdc, r);
+			//}
+			is_intro = FALSE;
+			into_the_game = FALSE;
 
 			//메인 스크롤 백그라운드
 			if (is_intro == FALSE) {
 				if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory 
 					|| (manager.getCurrentSceneID() == Game && into_the_game == TRUE)) {
 					background_main.Draw(mdc, rt.left, rt.top, rt.right, rt.bottom, Scanner_main, 0, 1500, 800);
-					logo.Draw(mdc, 450, logo_y, 600, 300, 0, 0, 600, 300);
+					//logo.Draw(mdc, rt.right/2-300, logo_y, 600, 300, 0, 0, 600, 300);
+					Sprite game_logo { L"./res/logo.png" };
+					game_logo.fix_ratio = true;
+					game_logo.position.y = logo_y / 300.0 * rt.bottom/3;
+					game_logo.draw(mdc, { rt.left, rt.top, rt.right, rt.bottom/3 });
 				}
 			}
 
@@ -2057,18 +2099,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 				//일시정지 씬
 				if (manager.isPaused() || is_resumed == TRUE) {
-					BG_paused.Draw(mdc, rt.left, pause_y, 1500, 800, 0, 0, 1500, 800);
-					CM_paused.Draw(mdc, rt.right - 550, CM_paused_y, 550, 800, 0, 0, 550, 800);
+					BG_paused.Draw(mdc, rt.left, rt.top + pause_y / 800.0 * rt.bottom, rt.right, rt.bottom, 0, 0, 1500, 800);
+					//CM_paused.Draw(mdc, rt.right - 550, CM_paused_y, 550, 800, 0, 0, 550, 800);
+					Sprite sp { L"./res/commando_paused.png" };
+					sp.fix_ratio = true;
+					sp.position.y = CM_paused_y / 800.0 * rt.bottom;
+					RECT r = convertRatio(rt, 550, 800, Right);
+					sp.draw(mdc, r);
 				}
 
 				manager.syncSize(hWnd); manager.show(mdc);
 			}
 
 
+			// 게임 시작시 애니메이션
 			if (into_the_game == TRUE || end_new_game == TRUE) {
-				background_game_start.Draw(mdc, new_bg_x, new_bg_y, 1500, 800, 0, 0, 1500, 800);
-				CM_game_start.Draw(mdc, CM_game_start_x, rt.top, 800, 800, 0, 0, 800, 800);
-				logo_game_start.Draw(mdc, 400, new_logo_y, 700, 300, 0, 0, 700, 300);
+				background_game_start.Draw(mdc, new_bg_x / 800.0 * rt.right, new_bg_y / 850.0 * rt.bottom, rt.right, rt.bottom, 0, 0, 1500, 800);
+				//CM_game_start.Draw(mdc, CM_game_start_x, rt.top, 800, 800, 0, 0, 800, 800);
+				Sprite sp { L"./res/commando_game_start.png" };
+				sp.fix_ratio = true;
+				sp.position.x = CM_game_start_x / 800.0 * rt.right;
+				sp.draw(mdc, rt);
+				//logo_game_start.Draw(mdc, 400, new_logo_y, 700, 300, 0, 0, 700, 300);
+				Sprite logo { L"./res/game_start_logo.png" };
+				logo.fix_ratio = true;
+				logo.position.y = new_logo_y / 850.0 * rt.bottom;
+				RECT r = percentOf(rt, 50, Up);
+				logo.draw(mdc, r);
 			}
 			
 			BitBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, SRCCOPY);
@@ -2103,7 +2160,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	WndClass.lpszClassName = lpszClass;
 	WndClass.hIconSm = LoadIcon(NULL, IDI_QUESTION);
 	RegisterClassEx(&WndClass);
-	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_EX_TOPMOST, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
+	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_OVERLAPPEDWINDOW, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
