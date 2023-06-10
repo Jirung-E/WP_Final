@@ -524,9 +524,13 @@ void show_interface(HDC mdc, RECT rt) {
 			200 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break;
 	}
+
 	//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
-	ammo_indicator(mdc, Gun::max_ammo(GUN_number), ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
-	 
+	ammo_indicator(mdc, Gun::max_ammo(GUN_number), ammo, ind_size / 1500.0 * rt.right, 
+		rt.right + (ind_x - 1360 - 120 + ss_x) / 1500.0 * rt.right, 
+		rt.bottom + (ind_y - 650 - 110 + landing_shake + ss_y) / 1500.0 * rt.right);
+	//ammo_indicator(mdc, Gun::max_ammo(GUN_number), ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
+
 	//경험치 수치 출력
 	show_exp(mdc, experience, rt.left + 130 + ss_x, rt.top + 3 + ss_y + landing_shake);
 	exp_icon.Draw(mdc, rt.left + 20 + ss_x, rt.top + 15 + ss_y + landing_shake, 100, 50, 0, 0, 100, 50);
