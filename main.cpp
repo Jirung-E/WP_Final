@@ -707,26 +707,30 @@ void show_player(HDC mdc, RECT rt) {
 	CM_w = player_image->GetWidth();
 	CM_h = player_image->GetHeight();
 	pw = CM_w / 1500.0 * rt.right;
-	//ph = CM_h / 800.0 * rt.bottom;
-	ph = CM_h / 1500.0 * rt.right;
-	//RECT r = { 0, 0, pw, ph };
-	//r = expandRatio(r, CM_w, CM_h);		// 비율 맞추기
-	//pw = r.right-r.left;
-	//ph = r.bottom-r.top;
+	ph = CM_h / 800.0 * rt.bottom;
+	//ph = CM_h / 1500.0 * rt.right;
+	RECT r = { 0, 0, pw, ph };
+	r = convertRatio(r, CM_w, CM_h, Down);		// 비율 맞추기
+	pw = r.right-r.left;
+	ph = r.bottom-r.top;
 	player_image->Draw(mdc, px, py, pw, ph, 0, 0, CM_w, CM_h);
 
 	GUN_w = gun_image->GetWidth();
 	GUN_h = gun_image->GetHeight();
 	gw = GUN_w / 1500.0 * rt.right;
-	//gh = GUN_h / 800.0 * rt.bottom;
-	gh = GUN_h / 1500.0 * rt.right;
-	//r = { 0, 0, gw, gh };
-	//r = expandRatio(r, GUN_w, GUN_h);		// 비율 맞추기
-	//gw = r.right-r.left;
-	//gh = r.bottom-r.top;
+	gh = GUN_h / 800.0 * rt.bottom;
+	//gh = GUN_h / 1500.0 * rt.right;
+	r = { 0, 0, gw, gh };
+	r = convertRatio(r, GUN_w, GUN_h, Down);
+	gw = r.right-r.left;
+	gh = r.bottom-r.top;
 	gun_image->Draw(mdc, gx, gy, gw, gh, 0, 0, GUN_w, GUN_h);
 
 	if(flame != nullptr) {
+		r = { 0, 0, fw, fh };
+		r = convertRatio(r, 1, 1, Down);
+		fw = r.right-r.left;
+		fh = r.bottom-r.top;
 		flame->Draw(mdc, fx, fy, fw, fh, 0, 0, 100, 100);
 	}
 }
@@ -768,11 +772,15 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 	int mw;
 	int mh;
 	for (int i = 0; i < ddx; i++) {
-		mx = (dl[i].x + ss_x)  / 1500.0 * rt.right;
+		mx = (dl[i].x + ss_x) / 1500.0 * rt.right;
 		my = (dl[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
 		if (dl[i].monster_type == 1) {
 			mw = 100 / 1500.0 * rt.right;
 			mh = 100 / 1500.0 * rt.right;
+			RECT r = { 0, 0, mw, mh };
+			r = convertRatio(r, 100, 100, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
 			if(dl[i].dir == 0) monster_dead_left.Draw(mdc, mx, my, mw, mh, 0, 0, 100, 100); 
 			else if(dl[i].dir == 1) monster_dead_right.Draw(mdc, mx, my, mw, mh, 0, 0, 100, 100); 
 		}
@@ -780,12 +788,20 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 			my = (dl[i].y + 50 + ss_y + landing_shake) / 1500.0 * rt.right;
 			mw = 200 / 1500.0 * rt.right;
 			mh = 200 / 1500.0 * rt.right;
-			if(dl[i].dir == 0) monster_big_dead_left.Draw(mdc, mx, my, 200, 200, 0, 0, 200, 200); 
-			else if (dl[i].dir == 1) monster_big_dead_right.Draw(mdc, mx, my, 200, 200, 0, 0, 200, 200); 
+			RECT r = { 0, 0, mw, mh };
+			r = convertRatio(r, 100, 100, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
+			if(dl[i].dir == 0) monster_big_dead_left.Draw(mdc, mx, my, mw, mh, 0, 0, 200, 200);
+			else if (dl[i].dir == 1) monster_big_dead_right.Draw(mdc, mx, my, mw, mh, 0, 0, 200, 200);
 		}
 		else if(dl[i].monster_type == 3) {
 			mw = 150 / 1500.0 * rt.right;
 			mh = 60 / 1500.0 * rt.right;
+			RECT r = { 0, 0, mw, mh };
+			r = convertRatio(r, 150, 60, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
 			monster_air_dead.Draw(mdc, mx, my, mw, mh, 0, 0, 150, 60);
 		}
 	} 
@@ -795,13 +811,20 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 		my = (mst_r[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
 		mw = 100 / 1500.0 * rt.right;
 		mh = mst_r[i].height / 1500.0 * rt.right;
+		RECT r = { 0, 0, mw, mh };
 		switch (mst_r[i].img_dir) {
 		case 0:
 			MST_w = monster_left.GetWidth(); MST_h = monster_left.GetHeight(); 
+			r = convertRatio(r, MST_w, MST_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
 			monster_left.Draw(mdc, mx, my, mw, mh, 0, 0, MST_w, MST_h);
 			break; 
 		case 1:
 			MST_w = monster_right.GetWidth(); MST_h = monster_right.GetHeight(); 
+			r = convertRatio(r, MST_w, MST_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
 			monster_right.Draw(mdc, mx, my, mw, mh, 0, 0, MST_w, MST_h);
 			break;
 		}
@@ -812,13 +835,20 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 		my = (mst_big[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
 		mw = 200 / 1500.0 * rt.right;
 		mh = mst_big[i].height / 1500.0 * rt.right;
+		RECT r = { 0, 0, mw, mh };
 		switch (mst_big[i].img_dir) {
 		case 0:
 			MST_big_w = monster_big_left.GetWidth(); MST_big_h = monster_big_left.GetHeight(); 
+			r = convertRatio(r, MST_big_w, MST_big_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
 			monster_big_left.Draw(mdc, mx, my, mw, mh, 0, 0, MST_big_w, MST_big_h);
 			break; 
 		case 1:
 			MST_big_w = monster_big_right.GetWidth(); MST_big_h = monster_big_right.GetHeight(); 
+			r = convertRatio(r, MST_big_w, MST_big_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
 			monster_big_right.Draw(mdc, mx, my, mw, mh, 0, 0, MST_big_w, MST_big_h);
 			break;
 		}
@@ -829,13 +859,20 @@ void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 		my = (mst_air[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
 		mw = 150 / 1500.0 * rt.right;
 		mh = mst_air[i].height / 1500.0 * rt.right;
+		RECT r = { 0, 0, mw, mh };
 		switch (mst_air[i].img_dir) {
 		case 0:
 			MST_air_w = monster_air_left[air].GetWidth(); MST_air_h = monster_air_left[air].GetHeight(); 
+			r = convertRatio(r, MST_air_w, MST_air_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
 			monster_air_left[air].Draw(mdc, mx, my, mw, mh, 0, 0, MST_air_w, MST_air_h);
 			break; 
 		case 1:
 			MST_air_w = monster_air_right[air].GetWidth(); MST_air_h = monster_air_right[air].GetHeight(); 
+			r = convertRatio(r, MST_air_w, MST_air_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
 			monster_air_right[air].Draw(mdc, mx, my, mw, mh, 0, 0, MST_air_w, MST_air_h);
 			break;
 		}
