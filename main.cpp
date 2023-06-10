@@ -2093,7 +2093,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 		}
 		if(into_the_game == FALSE) manager.keyboardInput(hWnd, wParam); 
-
+		//인트로 스킵
 		if (is_intro == TRUE && intro_delay == 0) {
 			switch (wParam) {
 			case VK_SPACE:
@@ -2102,7 +2102,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 				break;
 			}
 		}
-
+		//메인 메뉴 진입
 		if (is_intro == FALSE && is_menu == FALSE && intro_skip == false) {
 			switch (wParam) {
 			case VK_SPACE:
