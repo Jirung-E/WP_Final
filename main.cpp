@@ -2004,7 +2004,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_MOUSEMOVE:
 		mx = LOWORD(lParam); my = HIWORD(lParam);
-		if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver())  update_player_direction(mx);
+		if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver())  update_player_direction(mx * 1500.0 / rt.right);
 		break;
 
 	case WM_TIMER:
