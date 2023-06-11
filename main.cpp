@@ -518,22 +518,26 @@ void show_interface(HDC mdc, RECT rt) {
 	switch(GUN_number) {
 	case mg_42:
 		AMO_w = ammo_lmg_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
-		ammo_lmg_icon.Draw(mdc, rt.right + (-230 + ss_x) / 1500.0 * rt.right, rt.bottom + (-108 + landing_shake + ss_y) / 1500.0 * rt.right,
+		ammo_lmg_icon.Draw(mdc, rt.right + (-230 + ss_x) / 1500.0 * rt.right, 
+			rt.bottom + (-108 + landing_shake + ss_y) / 1500.0 * rt.right,
 			100 / 1500.0 * rt.right, 100 / 1500.0 * rt.right, 0, 0, AMO_w, AMO_h);
 		break;
 	case awp:
 		AMO_w = ammo_sniper_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
-		ammo_sniper_icon.Draw(mdc, rt.right + (-200 + ss_x) / 1500.0 * rt.right, rt.bottom + (-105 + landing_shake + ss_y) / 1500.0 * rt.right,
+		ammo_sniper_icon.Draw(mdc, rt.right + (-200 + ss_x) / 1500.0 * rt.right, 
+			rt.bottom + (-105 + landing_shake + ss_y) / 1500.0 * rt.right,
+			100 / 1500.0 * rt.right, 100 / 1500.0 * rt.right, 0, 0, AMO_w, AMO_h);
+		break;
+	case m1:
+		AMO_w = ammo_clip_icon.GetWidth(); AMO_h = ammo_clip_icon.GetHeight();
+		ammo_clip_icon.Draw(mdc, rt.right + (-240 + ss_x) / 1500.0 * rt.right, 
+			rt.bottom + (-108 + landing_shake + ss_y) / 1500.0 * rt.right, 
 			100 / 1500.0 * rt.right, 100 / 1500.0 * rt.right, 0, 0, AMO_w, AMO_h);
 		break;
 	default:
 		AMO_w = ammo_icon.GetWidth(); AMO_h = ammo_icon.GetHeight();
 		ammo_icon.Draw(mdc, rt.right + (-260 + ss_x) / 1500.0 * rt.right, rt.bottom + (-108 + landing_shake + ss_y) / 1500.0 * rt.right,
 			100 / 1500.0 * rt.right, 100 / 1500.0 * rt.right, 0, 0, AMO_w, AMO_h);
-	}
-	if (GUN_number == m1) {
-		AMO_w = ammo_clip_icon.GetWidth(); AMO_h = ammo_clip_icon.GetHeight();
-		ammo_clip_icon.Draw(mdc, rt.right - 240 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
 	}
 	 
 	//총 아이콘 및 장탄수 출력
@@ -565,9 +569,9 @@ void show_interface(HDC mdc, RECT rt) {
 		break;
 	case m1:
 		GUN_w = m1_right.GetWidth(); GUN_h = m1_right.GetHeight();
-		m1_right.Draw(mdc, rt.right - 450 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 200, 150, 0, 0, GUN_w, GUN_h);
+		m1_right.Draw(mdc, rt.right + (-450 + ss_x) / 1500.0 * rt.right, rt.bottom + (-150 + landing_shake + ss_y) / 1500.0 * rt.right, 
+			200 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break;
-
 	}
 
 	//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
@@ -686,8 +690,8 @@ void show_player(HDC mdc, RECT rt) {
 			gx = (CM_x - 80 + ss_x) / 1500.0 * rt.right;
 			break;
 		case m1:
-			GUN_w = m1_left.GetWidth(); GUN_h = m1_left.GetHeight();
-			m1_left.Draw(mdc, CM_x - 80 + ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
+			gun_image = &m1_left;
+			gx = (CM_x -80 + ss_x) / 1500.0 * rt.right;
 			break;
 		}
 
@@ -698,7 +702,7 @@ void show_player(HDC mdc, RECT rt) {
 			case mg_42:
 				fx = (CM_x - 220 + ss_x) / 1500.0 * rt.right;
 				break;
-      case awp: case m1:
+			case awp: case m1:
 				fx = (CM_x - 170 + ss_x) / 1500.0 * rt.right;
 				break;
 			default:
@@ -757,8 +761,8 @@ void show_player(HDC mdc, RECT rt) {
 			gx = (CM_x + 30 + ss_x) / 1500.0 * rt.right;
 			break;
 		case m1:
-			GUN_w = m1_right.GetWidth(); GUN_h = m1_right.GetHeight();
-			m1_right.Draw(mdc, CM_x + 30 + ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
+			gun_image = &m1_right;
+			gx = (CM_x + 30 + ss_x) / 1500.0 * rt.right;
 			break;
 		}
 
@@ -991,9 +995,10 @@ void show_grenade(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 }
 
 //클립 생성
-void make_clip() {
+void make_clip(RECT rt) {
 	clip_dir = CM_img_dir; clip_motion_dir = 1;
-	clip_x = CM_x + 50; clip_y = CM_y + 50;
+	clip_x = CM_x + 50;
+	clip_y = CM_y + 50;
 	clip_acc = 10; clip_frame = 0;
 	clip_created = TRUE;
 }
@@ -1371,7 +1376,7 @@ void shoot(RECT rt) {
 				ssystem->playSound(m1_distance, 0, false, &ch_gun2);
 				if (ammo == 8) {
 					ch_clip->stop(); ssystem->playSound(m1_clip, 0, false, &ch_clip);
-					make_clip();
+					make_clip(rt);
 				}
 				is_click = FALSE;
 				break;
@@ -2234,7 +2239,8 @@ void wm_paint(HDC mdc, RECT rt) {
 
 	//m1 게런드 클립 이미지 출력
 	if (clip_created == TRUE)
-		clip[clip_frame].Draw(mdc, clip_x + ss_x, clip_y + ss_y + landing_shake, 40, 40, 0, 0, 30, 30);
+		clip[clip_frame].Draw(mdc, (clip_x + ss_x) / 1500.0 * rt.right, (clip_y + ss_y + landing_shake) / 1500.0 * rt.right, 
+			40 / 1500.0 * rt.right, 40 / 1500.0 * rt.right, 0, 0, 30, 30);
 
 	//수류탄 이미지 출력
 	if(is_throw == TRUE || set_grenade == TRUE) show_grenade(mdc, ss_x, ss_y, landing_shake, rt);
@@ -2313,7 +2319,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 						ch_reload->stop(); ssystem->playSound(m1_reload, 0, false, &ch_reload);
 						if (ammo < 8) {
 							ch_clip->stop(); ssystem->playSound(m1_clip, 0, false, &ch_clip);
-							make_clip();
+							make_clip(rt);
 						}
 					}
 				} break;
@@ -2543,94 +2549,101 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_PAINT:
-			hdc = BeginPaint(hWnd, &ps);
-			mdc = CreateCompatibleDC(hdc);
-			hbitmap = CreateCompatibleBitmap(hdc, rt.right, rt.bottom);
-			(HBITMAP)SelectObject(mdc, hbitmap); 
+		hdc = BeginPaint(hWnd, &ps);
+		mdc = CreateCompatibleDC(hdc);
+		hbitmap = CreateCompatibleBitmap(hdc, rt.right, rt.bottom);
+		(HBITMAP)SelectObject(mdc, hbitmap); 
 
-			SetMapMode(mdc, MM_ANISOTROPIC);
-			SetWindowExtEx(mdc, rt.right, rt.bottom, NULL);
-			SetViewportExtEx(mdc, rt.right, rt.bottom, NULL);
-
-			is_intro = FALSE;
-			into_the_game = FALSE;
-			//인트로에 나오는 원 애니메이션 파트
-			if (is_intro == TRUE) {
-				ellipse_intro(mdc, rt, ellipse_size, r, g, b);
-				if(intro_logo_acc == 0 && intro_time > 155)	ellipse_intro2(mdc, rt, ellipse2_size);
-				//intro_logo.Draw(mdc, intro_logo_x, intro_logo_y, 700, 300, 0, 0, 700, 300);
-				Sprite intro_logo { L"./res/intro_logo.png" };
-				intro_logo.fix_ratio = true;
-				//intro_logo.position.x = intro_logo_x / 700.0 * rt.right;
-				intro_logo.position.y = intro_logo_y / 850.0 * rt.bottom;
-				RECT r = percentOf(rt, 50, Up);
-				intro_logo.draw(mdc, r);
-        
-        //인트로 전 로딩 단계 애니메이션 출력
-				if (intro_time == 500) {
-					SetBkMode(mdc, TRANSPARENT);
-					SetTextColor(mdc, RGB(255, 255, 255));
-					TextOut(mdc, 690, 600, L"Game is Loading...", lstrlen(L"Game is Loading..."));
-					CM_loading[loading_frame].Draw(mdc, 695, 450, 100, 120, 0, 0, 100, 120);
-				}
-			}
-
-			//메인 스크롤 백그라운드
-			else {
-        press_space(mdc, press_y);
-        
-				if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory 
-					|| (manager.getCurrentSceneID() == Game && into_the_game == TRUE)) {
-					RECT r = expandRatio(rt, 1500, 800, Down);
-					background_main.Draw(mdc, r.left, r.top, r.right-r.left, r.bottom-r.top, Scanner_main, 0, 1500, 800);
-					//logo.Draw(mdc, rt.right/2-300, logo_y, 600, 300, 0, 0, 600, 300);
-					Sprite game_logo { L"./res/logo.png" };
-					game_logo.fix_ratio = true;
-					game_logo.position.y = logo_y / 300.0 * rt.bottom/3;
-					game_logo.draw(mdc, { rt.left, rt.top, rt.right, rt.bottom/3 });
-				}
-
-				//인트로와 새 게임 애니메이션이 재생되지 않아야 게임 화면을 출력한다.
-				if (into_the_game == FALSE && is_menu == TRUE) {
-					if (manager.getCurrentSceneID() == Game) wm_paint(mdc, rt);
-
-					//일시정지 씬
-					if (manager.isPaused() || is_resumed == TRUE) {
-						if(pause_y >= 800) {
-							is_resumed = FALSE;
-						}
-						BG_paused.Draw(mdc, rt.left, rt.top + pause_y / 800.0 * rt.bottom, rt.right, rt.bottom, 0, 0, 1500, 800);
-						//CM_paused.Draw(mdc, rt.right - 550, CM_paused_y, 550, 800, 0, 0, 550, 800);
-						Sprite sp { L"./res/commando_paused.png" };
-						sp.fix_ratio = true;
-						sp.position.y = CM_paused_y / 800.0 * rt.bottom;
-						RECT r = convertRatio(rt, 550, 800, Right);
-						sp.draw(mdc, r);
-					}
-
-					manager.syncSize(hWnd); manager.show(mdc);
-				}
-			}
-
-			// 게임 시작시 애니메이션
-			if (into_the_game == TRUE || end_new_game == TRUE) {
-				background_game_start.Draw(mdc, new_bg_x / 800.0 * rt.right, new_bg_y / 850.0 * rt.bottom, rt.right, rt.bottom, 0, 0, 1500, 800);
-				//CM_game_start.Draw(mdc, CM_game_start_x, rt.top, 800, 800, 0, 0, 800, 800);
-				Sprite sp { L"./res/commando_game_start.png" };
-				sp.fix_ratio = true;
-				sp.position.x = CM_game_start_x / 800.0 * rt.right;
-				sp.draw(mdc, rt);
-				//logo_game_start.Draw(mdc, 400, new_logo_y, 700, 300, 0, 0, 700, 300);
-				Sprite logo { L"./res/game_start_logo.png" };
-				logo.fix_ratio = true;
-				logo.position.y = new_logo_y / 850.0 * rt.bottom;
-				RECT r = percentOf(rt, 50, Up);
-				logo.draw(mdc, r);
-			}
+		//is_intro = FALSE;
+		//into_the_game = FALSE;
+		//인트로에 나오는 원 애니메이션 파트
+		if (is_intro == TRUE) {
+			ellipse_intro(mdc, rt, ellipse_size, r, g, b);
+			if(intro_logo_acc == 0 && intro_time > 155)	ellipse_intro2(mdc, rt, ellipse2_size);
+			//intro_logo.Draw(mdc, intro_logo_x, intro_logo_y, 700, 300, 0, 0, 700, 300);
+			Sprite intro_logo { L"./res/intro_logo.png" };
+			intro_logo.fix_ratio = true;
+			//intro_logo.position.x = intro_logo_x / 700.0 * rt.right;
+			intro_logo.position.y = intro_logo_y / 850.0 * rt.bottom;
+			RECT r = percentOf(rt, 50, Up);
+			intro_logo.draw(mdc, r);
 			
-			BitBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, SRCCOPY);
+		//인트로 전 로딩 단계 애니메이션 출력
+			if (intro_time == 500) {
+				//SetBkMode(mdc, TRANSPARENT);
+				//SetTextColor(mdc, RGB(255, 255, 255));
+				//TextOut(mdc, 690, 600, L"Game is Loading...", lstrlen(L"Game is Loading..."));
+				int iw = 100 / 1500.0 * rt.right;
+				int ih = 120 / 1500.0 * rt.right;
+				CM_loading[loading_frame].Draw(mdc, rt.right/2 - iw/2, rt.bottom/2 - ih/2, 
+					iw, ih, 0, 0, 100, 120);
+				TextBox text { L"Game is Loading...", { 0, rt.bottom/2.0 + ih/2.0 }, double(rt.right), 80 / 1500.0 * rt.right };
+				text.font_size = 40 / 1500.0 * rt.right;
+				text.absolute = true;
+				text.bold = true;
+				text.text_color = White;
+				text.transparent_background = true;
+				text.transparent_border = true;
+				text.show(mdc, rt);
+			}
+		}
+
+		//메인 스크롤 백그라운드
+		else {
+			if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory 
+				|| (manager.getCurrentSceneID() == Game && into_the_game == TRUE)) {
+				RECT r = expandRatio(rt, 1500, 800, Down);
+				background_main.Draw(mdc, r.left, r.top, r.right-r.left, r.bottom-r.top, Scanner_main, 0, 1500, 800);
+				//logo.Draw(mdc, rt.right/2-300, logo_y, 600, 300, 0, 0, 600, 300);
+				Sprite game_logo { L"./res/logo.png" };
+				game_logo.fix_ratio = true;
+				game_logo.position.y = logo_y / 300.0 * rt.bottom/3;
+				game_logo.draw(mdc, { rt.left, rt.top, rt.right, rt.bottom/3 });
+			}
+
+			//인트로와 새 게임 애니메이션이 재생되지 않아야 게임 화면을 출력한다.
+			if (into_the_game == FALSE && is_menu == TRUE) {
+				if (manager.getCurrentSceneID() == Game) wm_paint(mdc, rt);
+
+				//일시정지 씬
+				if (manager.isPaused() || is_resumed == TRUE) {
+					if(pause_y >= 800) {
+						is_resumed = FALSE;
+					}
+					BG_paused.Draw(mdc, rt.left, rt.top + pause_y / 800.0 * rt.bottom, rt.right, rt.bottom, 0, 0, 1500, 800);
+					//CM_paused.Draw(mdc, rt.right - 550, CM_paused_y, 550, 800, 0, 0, 550, 800);
+					Sprite sp { L"./res/commando_paused.png" };
+					sp.fix_ratio = true;
+					sp.position.y = CM_paused_y / 800.0 * rt.bottom;
+					RECT r = convertRatio(rt, 550, 800, Right);
+					sp.draw(mdc, r);
+				}
+
+				manager.syncSize(hWnd); manager.show(mdc);
+			}
+
+			press_space(mdc, press_y, rt);
+		}
+
+		// 게임 시작시 애니메이션
+		if (into_the_game == TRUE || end_new_game == TRUE) {
+			background_game_start.Draw(mdc, new_bg_x / 800.0 * rt.right, new_bg_y / 850.0 * rt.bottom, rt.right, rt.bottom, 0, 0, 1500, 800);
+			//CM_game_start.Draw(mdc, CM_game_start_x, rt.top, 800, 800, 0, 0, 800, 800);
+			Sprite sp { L"./res/commando_game_start.png" };
+			sp.fix_ratio = true;
+			sp.position.x = CM_game_start_x / 800.0 * rt.right;
+			sp.draw(mdc, rt);
+			//logo_game_start.Draw(mdc, 400, new_logo_y, 700, 300, 0, 0, 700, 300);
+			Sprite logo { L"./res/game_start_logo.png" };
+			logo.fix_ratio = true;
+			logo.position.y = new_logo_y / 850.0 * rt.bottom;
+			RECT r = percentOf(rt, 50, Up);
+			logo.draw(mdc, r);
+		}
+			
+		BitBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, SRCCOPY);
 		
-			DeleteDC(mdc); DeleteObject(hbitmap); EndPaint(hWnd, &ps);
+		DeleteDC(mdc); DeleteObject(hbitmap); EndPaint(hWnd, &ps);
 		break;
 
 	case WM_DESTROY:
