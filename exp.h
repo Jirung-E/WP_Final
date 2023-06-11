@@ -1,18 +1,18 @@
 #pragma once
-//°æÇèÄ¡. exp·Î º¯¼ö ÀÌ¸§À» ÇÏ·Á ÇßÀ¸³ª Ãæµ¹·Î ÀÎÇØ ÀÌ·¸°Ô ÇÔ
+//ê²½í—˜ì¹˜. expë¡œ ë³€ìˆ˜ ì´ë¦„ì„ í•˜ë ¤ í–ˆìœ¼ë‚˜ ì¶©ëŒë¡œ ì¸í•´ ì´ë ‡ê²Œ í•¨
 extern int experience;
-//°æÇèÄ¡°¡ Áõ°¡ÇÏ´Â Á¤µµ¸¦ ÀúÀåÇÏ´Â º¯¼ö. °æÇèÄ¡ Áõ°¡ È¿°ú¸¦ Ãâ·ÂÇÒ ¶§ »ç¿ëÇÑ´Ù.
+//ê²½í—˜ì¹˜ê°€ ì¦ê°€í•˜ëŠ” ì •ë„ë¥¼ ì €ì¥í•˜ëŠ” ë³€ìˆ˜. ê²½í—˜ì¹˜ ì¦ê°€ íš¨ê³¼ë¥¼ ì¶œë ¥í•  ë•Œ ì‚¬ìš©í•œë‹¤.
 extern int prev_up;
-//°æÇèÄ¡°¡ Áõ°¡ÇÒ ¶§ °æÇèÄ¡ Áõ°¡ ÀÌº¥Æ®¸¦ ¹ß»ı½ÃÅ²´Ù.
+//ê²½í—˜ì¹˜ê°€ ì¦ê°€í•  ë•Œ ê²½í—˜ì¹˜ ì¦ê°€ ì´ë²¤íŠ¸ë¥¼ ë°œìƒì‹œí‚¨ë‹¤.
 extern BOOL exp_up;
 extern int exp_x;
 extern int exp_acc;
 extern int out;
 extern int exp_out_delay;
 
-//»óÁ¡ »ç¿îµå Àç»ı ¿©ºÎ
+//ìƒì  ì‚¬ìš´ë“œ ì¬ìƒ ì—¬ë¶€
 extern BOOL cant_buy_sound;
 extern BOOL buy_sound;
 
-void show_exp(HDC mdc, int experience, int x, int y);
-void show_exp_add(HDC mdc, int prev_up, int x, int y);
+void show_exp(HDC mdc, int experience, int x, int y, RECT rt);
+void show_exp_add(HDC mdc, int prev_up, int x, int y, RECT rt);

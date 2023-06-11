@@ -5,14 +5,39 @@ double percentOf(double num, double per) {
 	return num*per/100;
 }
 
-RECT percentOf(const RECT& rect, double per) {
+RECT percentOf(const RECT& rect, double per, const Direction& bias) {
 	RECT r = rect;
 	int w = rect.right - rect.left;
 	int h = rect.bottom - rect.top;
-	r.left += w * (100 - per)/2 / 100;
-	r.right -= w * (100 - per)/2 / 100;
-	r.top += h * (100 - per)/2 / 100;
-	r.bottom -= h * (100 - per)/2 / 100;
+
+	switch(bias) {
+	case Left:
+		r.right -= w * (100 - per) / 100;
+		r.top += h * (100 - per)/2 / 100;
+		r.bottom -= h * (100 - per)/2 / 100;
+		break;
+	case Right:
+		r.left += w * (100 - per) / 100;
+		r.top += h * (100 - per)/2 / 100;
+		r.bottom -= h * (100 - per)/2 / 100;
+		break;
+	case Up:
+		r.left += w * (100 - per)/2 / 100;
+		r.right -= w * (100 - per)/2 / 100;
+		r.bottom -= h * (100 - per) / 100;
+		break;
+	case Down:
+		r.left += w * (100 - per)/2 / 100;
+		r.right -= w * (100 - per)/2 / 100;
+		r.top += h * (100 - per) / 100;
+		break;
+	case None:
+		r.left += w * (100 - per)/2 / 100;
+		r.right -= w * (100 - per)/2 / 100;
+		r.top += h * (100 - per)/2 / 100;
+		r.bottom -= h * (100 - per)/2 / 100;
+		break;
+	}
 
 	return r;
 }

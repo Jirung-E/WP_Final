@@ -1,5 +1,6 @@
 #include <atlImage.h>
 #include "images.h"
+#include "TextBox.h"
 
 
 CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon, ammo_sniper_icon, ammo_clip_icon;
@@ -185,19 +186,28 @@ void ellipse_intro2(HDC mdc, RECT rt, int size) {
 
 }
 
-void press_space(HDC mdc, int y) {
-	HFONT hfont, oldfont;
-	hfont = CreateFont(50, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
-	oldfont = (HFONT)SelectObject(mdc, hfont);
-	SetBkMode(mdc, TRANSPARENT);
+void press_space(HDC mdc, int y, RECT rt) {
+	int pos_y = percentOf(rt.bottom, 80) + 2*(y-640) / 800.0 * rt.bottom;
+	if(pos_y > rt.bottom) {
+		return;
+	}
 
-	for (int i = -3; i <= 3; i++)
-		for (int j = -4; j <= 4; j++)
-			TextOut(mdc, 600 + i, y + j, L"- Press Space -", lstrlen(L"- Press Space -"));
+	TextBox text { L"- Press Space -", { 0, 0 }, double(rt.right), 50 / 1500.0 * rt.right };
+	text.font_size = 50 / 1500.0 * rt.right;
+	text.absolute = true;
+	text.transparent_background = true;
+	text.transparent_border = true;
+	text.bold = 4;
 
-	SetTextColor(mdc, RGB(255, 255, 255));
-	TextOut(mdc, 600, y, L"- Press Space -", lstrlen(L"- Press Space -"));
-
-	SelectObject(mdc, oldfont);
-	DeleteObject(hfont);
+	for(int i = -3; i <= 3; i++) {
+		for(int j = -4; j <= 4; j++) {
+			text.position.x = i;
+			text.position.y = pos_y + j;
+			text.show(mdc, rt);
+		}
+	}
+	text.text_color = White;
+	text.position.x = 0;
+	text.position.y = pos_y;
+	text.show(mdc, rt);
 }

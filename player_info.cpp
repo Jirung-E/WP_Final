@@ -23,47 +23,53 @@ int recovery_delay = 0; //ÇÃ·¹ÀÌ¾î Ã¼·Â È¸º¹ µô·¹ÀÌ
 void player_health(HDC mdc, RECT rt, double ss_x, double ss_y, double landing_shake, int health) {
 	TCHAR out[10];
 	HFONT hfont, oldfont;
-	hfont = CreateFont(60, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
+	hfont = CreateFont(60 / 1500.0 * rt.right, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
 	oldfont = (HFONT)SelectObject(mdc, hfont);
 	SetBkMode(mdc, TRANSPARENT);
 	SetTextColor(mdc, RGB(0, 0, 0));
+
+	int fx = (rt.left + 320 + ss_x) / 1500.0 * rt.right;
+	int fy = rt.bottom + (-60 + ss_y + landing_shake) / 1500.0 * rt.right;
+
 	wsprintf(out, L"%d", health);
 	for (int i = -3; i <= 3; i++)
 		for (int j = -4; j <= 4; j++)
-			TextOut(mdc, rt.left + 320 + ss_x + i, rt.bottom - 60 + ss_y + landing_shake + j, out, lstrlen(out));
+			TextOut(mdc, fx + i, fy + j, out, lstrlen(out));
 
 	SetTextColor(mdc, RGB(255, 255, 255));
 
-	TextOut(mdc, rt.left + 320 + ss_x, rt.bottom - 60 + ss_y + landing_shake, out, lstrlen(out));
+	TextOut(mdc, fx, fy, out, lstrlen(out));
 	SelectObject(mdc, oldfont);
 	DeleteObject(hfont);
 }
 
 //¼ö·ùÅº ´ë±â ½Ã°£ Ãâ·Â
-void show_gren_time(HDC mdc, double ss_x, double ss_y, double landing_shake, int gren_time) {
+void show_gren_time(HDC mdc, double ss_x, double ss_y, double landing_shake, int gren_time, RECT rt) {
 	TCHAR out[100] = { 0 };
 	HFONT hfont, oldfont;
-	hfont = CreateFont(60, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
+	hfont = CreateFont(60 / 1500.0 * rt.right, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
 	oldfont = (HFONT)SelectObject(mdc, hfont);
 	SetBkMode(mdc, TRANSPARENT);
+
+	int fx = (500 + ss_x) / 1500.0 * rt.right;
+	int fy = rt.bottom + (-70 + ss_y + landing_shake) / 1500.0 * rt.right;
 	
 	if (gren_time > 1) {
 		wsprintf(out, L"%d", gren_time);
 		SetTextColor(mdc, RGB(0, 0, 0));
 		for (int i = -3; i <= 3; i++)
 			for (int j = -4; j <= 4; j++)
-				TextOut(mdc, 500 + ss_x + i, 690 + ss_y + landing_shake + j, out, lstrlen(out));
+				TextOut(mdc, fx + i, fy + j, out, lstrlen(out));
 		SetTextColor(mdc, RGB(255, 255, 255));
-		TextOut(mdc, 500 + ss_x, 690 + ss_y + landing_shake, out, lstrlen(out));
+		TextOut(mdc, fx, fy, out, lstrlen(out));
 	}
-
-	if (gren_time == 0) {
+	else if (gren_time == 0) {
 		SetTextColor(mdc, RGB(0, 0, 0));
 		for (int i = -3; i <= 3; i++)
 			for (int j = -4; j <= 4; j++)
-				TextOut(mdc, 500 + ss_x + i, 690 + ss_y + landing_shake + j, L"L SHIFT", lstrlen(L"L SHIFT"));
+				TextOut(mdc, fx + i, fy + j, L"L SHIFT", lstrlen(L"L SHIFT"));
 		SetTextColor(mdc, RGB(255, 255, 255));
-		TextOut(mdc, 500 + ss_x, 690 + ss_y + landing_shake, L"L SHIFT", lstrlen(L"L SHIFT"));
+		TextOut(mdc, fx, fy, L"L SHIFT", lstrlen(L"L SHIFT"));
 	}
 
 	SelectObject(mdc, oldfont);

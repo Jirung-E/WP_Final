@@ -172,4 +172,4 @@ static int logo_acc_enter = 15;
 void push_cat(int idx);
 void ellipse_intro(HDC mdc, RECT rt, int size, double r, double g, double b);
 void ellipse_intro2(HDC mdc, RECT rt, int size);
-void press_space(HDC mdc, int y);
+void press_space(HDC mdc, int y, RECT rt);
