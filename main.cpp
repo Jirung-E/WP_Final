@@ -1231,50 +1231,52 @@ void check_hit_awp(RECT rt) {
 //hbrush 런처 전용 명중 판정
 void check_hit_hbrush() {
 	int is_kill_r = 0; int is_kill_big = 0;
-	for (int i = edx - 1; i >= 0; i--) {
-		for (int j = mdx_r - 1; j >= 0; j--) {
-			if (e[i].x >= mst_r[j].x && e[i].x <= mst_r[j].x + 100 && e[i].y >= mst_r[j].y) {
-				mst_r[j].hp -= 2;
-				if (mst_r[j].hp <= 0) {
-					if (j < mdx_r - 1 && is_kill_r == 0) {
+
+	for(int j = mdx_r - 1; j >= 0; j--) {
+		for(int i = edx - 1; i >= 0; i--) {
+			if(cal_dist(e[i].x, e[i].y, mst_r[j].x + 50, mst_r[j].y + 50) <= 50) {
+				if(mst_r[j].hp > 0) mst_r[j].hp -= 2;
+				if(mst_r[j].hp <= 0) {
+					if(j < mdx_r - 1 && is_kill_r == 0) {
 						dl[ddx].x = mst_r[j].x; dl[ddx].y = mst_r[j].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[j].img_dir;
 						dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 						monster_array_push_r(j, mdx_r--); experience += 5; prev_up = 5; exp_up = TRUE;
 						init_exp_animation(); is_kill_r = 1; kill_count++;
 					}
-					else if (j == mdx_r - 1 && is_kill_r == 0) {
+					else if(j == mdx_r - 1 && is_kill_r == 0) {
 						dl[ddx].x = mst_r[j].x; dl[ddx].y = mst_r[j].y; dl[ddx].monster_type = 1; dl[ddx].dir = mst_r[j].img_dir;
 						dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 						mdx_r--; experience += 5; prev_up = 5; exp_up = TRUE;
 						init_exp_animation(); is_kill_r = 1; kill_count++;
 					}
 					ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp);
-					is_kill_r = 0;
 				}
+				is_kill_r = 0;
 			}
 		}
 	}
 
-	for (int i = edx - 1; i >= 0; i--) {
-		for (int j = mdx_big - 1; j >= 0; j--) {
-			if (e[i].x >= mst_big[j].x && e[i].x <= mst_big[j].x + 200 && e[i].y >= mst_big[j].y) {
-				mst_big[j].hp -= 2;
-				if (mst_big[j].hp <= 0) {
-					if (j < mdx_big - 1 && is_kill_big == 0) {
+	for(int j = mdx_big - 1; j >= 0; j--) {
+		for(int i = edx - 1; i >= 0; i--) {
+			if(cal_dist(e[i].x, e[i].y, mst_big[j].x + 100, mst_big[j].y + 100) <= 100) {
+				if(mst_big[j].hp > 0) mst_big[j].hp -= 2;
+
+				if(mst_big[j].hp <= 0) {
+					if(j < mdx_big - 1 && is_kill_big == 0) {
 						dl[ddx].x = mst_big[j].x; dl[ddx].y = mst_big[j].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[j].img_dir;
 						dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 						monster_array_push_r(j, mdx_big--); experience += 7; prev_up = 7; exp_up = TRUE;
 						init_exp_animation(); is_kill_big = 1; kill_count++;
 					}
-					else if (j == mdx_big - 1 && is_kill_big == 0) {
+					else if(j == mdx_big - 1 && is_kill_big == 0) {
 						dl[ddx].x = mst_big[j].x; dl[ddx].y = mst_big[j].y; dl[ddx].monster_type = 2; dl[ddx].dir = mst_big[j].img_dir;
 						dl[ddx].acc = 20; dl[ddx++].motion_dir = 1;
 						mdx_big--; experience += 7; prev_up = 7; exp_up = TRUE;
 						init_exp_animation(); is_kill_big = 1; kill_count++;
 					}
 					ch_exp->stop(); ssystem->playSound(exp_get, 0, false, &ch_exp);
-					is_kill_big = 0;
 				}
+				is_kill_big = 0;
 			}
 		}
 	}
@@ -2208,7 +2210,7 @@ void update_shoot_animation() {
 void update_ellipse(RECT rt) {
 	//hbrush 런처 원 애니메이션
 	for (int i = edx - 1; i >= 0; i--) {
-		if (GUN_number == h_brush && e[i].size < 50) {
+		if (GUN_number == h_brush && e[i].size < 40) {
 			e[i].size += 2;
 			e[i].y -= 2;
 		}
