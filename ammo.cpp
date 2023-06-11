@@ -41,6 +41,21 @@ int after_delay;       //이 변수가 연사 속도 수치와 다르면 마우스를 아무리 빨리 
 
 int reload_delay; //mg_42 재장전 속도 조정 변수
 
+ellipse e[100];
+int edx = 0;
+
+double incline;
+double rect_x_end, rect_y_end;
+double rect_x_start, rect_y_start;
+int rect_size_x = 20, rect_size_y = 20;
+int rect_dir;
+BOOL is_lazer = FALSE;
+BOOL can_make_rect = TRUE;
+BOOL is_rect = FALSE;
+int rect_acc;
+int rect_delay;
+int rect_delete_delay;
+
 
 //총알 궤적 그리기
 void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2, int GUN_number, RECT rt) { 
@@ -78,22 +93,22 @@ void ammo_indicator(HDC mdc, int max_ammo, int ammo, int ind_size, int ind_x, in
 	SetBkMode(mdc, TRANSPARENT);
 	SetTextColor(mdc, RGB(255, 212, 0));
 
-	if ((max_ammo - ammo) / 100 > 0 && max_ammo - ammo > 0) {        //총알이 세 자릿수 남았을 때
+	if((max_ammo - ammo) / 100 > 0 && max_ammo - ammo > 0) {        //총알이 세 자릿수 남았을 때
 		wsprintf(lpout, L"%d", max_ammo - ammo);
 		TextOut(mdc, ind_x - 30, ind_y, lpout, lstrlen(lpout));
 	}
-	else if ((max_ammo - ammo) / 10 > 0 && max_ammo - ammo > 0) {       //총알이 두 자릿수 남았을 때
+	else if((max_ammo - ammo) / 10 > 0 && max_ammo - ammo > 0) {       //총알이 두 자릿수 남았을 때
 		wsprintf(lpout, L"%d", max_ammo - ammo);
 		TextOut(mdc, ind_x, ind_y, lpout, lstrlen(lpout));
 	}
-	else if ((max_ammo - ammo) / 10 == 0 && max_ammo - ammo > 0) { //총알이 한 자릿수 남았을 때
+	else if((max_ammo - ammo) / 10 == 0 && max_ammo - ammo > 0) { //총알이 한 자릿수 남았을 때
 		wsprintf(lpout, L" %d", max_ammo - ammo);
 		TextOut(mdc, ind_x, ind_y, lpout, lstrlen(lpout));
 	}
 
-	if (max_ammo - ammo == 0)                                //총알 모두 소모 시 재장전 표시 
+	if(max_ammo - ammo == 0)                                //총알 모두 소모 시 재장전 표시 
 		ammo_empty = 1;
-	
+
 	SelectObject(mdc, oldfont);
 	DeleteObject(hfont);
 
@@ -102,7 +117,7 @@ void ammo_indicator(HDC mdc, int max_ammo, int ammo, int ind_size, int ind_x, in
 	SetBkMode(mdc, TRANSPARENT);
 	SetTextColor(mdc, RGB(255, 0, 0));
 
-	if (ammo_empty == 1) //총알 모두 소모 시 재장전 표시 
+	if(ammo_empty == 1) //총알 모두 소모 시 재장전 표시 
 		TextOut(mdc, ind_x, ind_y, L" R", lstrlen(L" R"));
 
 	SelectObject(mdc, oldfont);
@@ -153,4 +168,20 @@ int cal_dist(double x1, double y1, double x2, double y2) {
 //총마다 다른 대미지 계산
 int cal_damage(int monster_hp, int GUN_number) {
 	return monster_hp - Gun::damage(GUN_number);
+}
+
+void push_ellipse(int del, int idx) {
+	for(int i = del; i < idx; i++) {
+		e[i].x = e[i + 1].x;
+		e[i].y = e[i + 1].y;
+		e[i].acc = e[i + 1].acc;
+		e[i].size = e[i + 1].size;
+		e[i].dir = e[i + 1].dir;
+	}
+	idx--;
+	e[idx].x = -400;
+	e[idx].y = 1500;
+	e[idx].size = 0;
+	e[idx].acc = 0;
+	e[idx].dir = -1;
 }
