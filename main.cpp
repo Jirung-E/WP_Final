@@ -538,7 +538,7 @@ void show_interface(HDC mdc, RECT rt) {
 	exp_icon.Draw(mdc, rt.left + (20 + ss_x) / 1500.0 * rt.right, rt.top + (15 + ss_y + landing_shake) / 1500.0 * rt.right, 
 		100 / 1500.0 * rt.right, 50 / 1500.0 * rt.right, 0, 0, 100, 50);
 	show_exp_add(mdc, prev_up, (exp_x + ss_x) / 1500.0 * rt.right, rt.top + (70 + ss_y + landing_shake) / 1500.0 * rt.right, rt);
-	 
+	
 	//재장전 게이지 출력
 	if (reload == 1)
 		reload_indicator(mdc, (CM_x + ss_x) / 1500.0 * rt.right, (CM_y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
@@ -1994,7 +1994,7 @@ void wm_rbuttondown() {
 
 //그리기 파트
 void wm_paint(HDC mdc, RECT rt) {
-	//////////////////////// 버퍼
+	// 버퍼
 	BG_w = 1500; BG_h = BackGround.GetHeight();
 	BackGround.Draw(mdc, rt.left + ss_x / 1500.0 * rt.right, rt.top + (-30 + landing_shake + ss_y) / 800.0 * rt.bottom, 
 		rt.right, rt.bottom + 30 / 800.0 * rt.bottom,
@@ -2327,6 +2327,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 					//일시정지 씬
 					if (manager.isPaused() || is_resumed == TRUE) {
+						if(pause_y >= 800) {
+							is_resumed = FALSE;
+						}
 						BG_paused.Draw(mdc, rt.left, rt.top + pause_y / 800.0 * rt.bottom, rt.right, rt.bottom, 0, 0, 1500, 800);
 						//CM_paused.Draw(mdc, rt.right - 550, CM_paused_y, 550, 800, 0, 0, 550, 800);
 						Sprite sp { L"./res/commando_paused.png" };
