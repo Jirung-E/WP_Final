@@ -23,7 +23,7 @@ FMOD::Sound* rifle_reload, * lmg_reload, * sniper_reload, *m1_reload, *m1_clip, 
 FMOD::Sound* hurt, * dead, * cat_hit_ground, * cat_stop, * ex_sound, * pin_sound, * bounce, *hbrush_shoot;
 FMOD::Sound* mst_idle_sound1, * mst_idle_sound2, *mst_attack_sound1, *mst_attack_sound2, *button_sound, *weapon_select, *weapon_button, *start_button, *quit_button;
 FMOD::Sound* pause, * resume, *game_bgm, *main_bgm, *gameover_bgm, *pause_bgm, *next_round, *intro, *new_game, *woosh, *cant_buy, *buy;
-FMOD::Sound* hbrush_lazer, * rect_sound, *rect_hit, *rect_dead;
+FMOD::Sound* hbrush_lazer, * rect_sound, *rect_hit, *rect_dead, *hbrush_reload;
 
 //gun sound
 FMOD::Channel* ch_gun = 0;
@@ -177,6 +177,7 @@ void IMG_FILE_LOAD() {
 	ammo_lmg_icon.Load(L".\\res\\ammo_lmg_icon.png");
 	ammo_sniper_icon.Load(L".\\res\\ammo_sniper_icon.png");
 	ammo_clip_icon.Load(L".\\res\\ammo_clip_icon.png");
+	ammo_hbrush_icon.Load(L".\\res\\ammo_hbrush_icon.png");
 	zoom_complited.Load(L".\\res\\zoom_complited.png");
 	zoom_targeted.Load(L".\\res\\zoom_targeted.png");
 
@@ -300,6 +301,7 @@ void set_FMOD() {
 	ssystem->createSound(".\\res\\sounds\\hbrush_lazer.wav", FMOD_DEFAULT, 0, &hbrush_lazer);
 	ssystem->createSound(".\\res\\sounds\\rect_hit.wav", FMOD_DEFAULT, 0, &rect_hit);
 	ssystem->createSound(".\\res\\sounds\\rect_dead.wav", FMOD_DEFAULT, 0, &rect_dead);
+	ssystem->createSound(".\\res\\sounds\\hbrush_reload.wav", FMOD_DEFAULT, 0, &hbrush_reload);
 }
 
 //몬스터 공격 사운드
@@ -499,17 +501,21 @@ void show_interface(HDC mdc, RECT rt) {
 		AMO_w = ammo_icon.GetWidth(); AMO_h = ammo_icon.GetHeight();
 		ammo_icon.Draw(mdc, rt.right - 260 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
 	} 
-	if (GUN_number == mg_42) {
+	else if (GUN_number == mg_42) {
 		AMO_w = ammo_lmg_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
 		ammo_lmg_icon.Draw(mdc, rt.right - 230 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
 	} 
-	if (GUN_number == awp) {
+	else if (GUN_number == awp) {
 		AMO_w = ammo_sniper_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
 		ammo_sniper_icon.Draw(mdc, rt.right - 200 + ss_x, rt.bottom - 105 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
 	}
-	if (GUN_number == m1) {
+	else if (GUN_number == m1) {
 		AMO_w = ammo_clip_icon.GetWidth(); AMO_h = ammo_clip_icon.GetHeight();
 		ammo_clip_icon.Draw(mdc, rt.right - 240 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
+	}
+	else if (GUN_number == h_brush) {
+		AMO_w = ammo_hbrush_icon.GetWidth(); AMO_h = ammo_hbrush_icon.GetHeight();
+		ammo_hbrush_icon.Draw(mdc, rt.right - 250 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
 	}
 	 
 	//총 아이콘 및 장탄수 출력
@@ -2302,14 +2308,17 @@ void wm_lbuttondown() {
 		if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
 			ch_reload->stop(); ssystem->playSound(rifle_reload, 0, false, &ch_reload); //사운드 재생 
 		}
-		if (GUN_number == mg_42) {
+		else if (GUN_number == mg_42) {
 			ch_reload->stop(); ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생 
 		}
-		if (GUN_number == awp) {
+		else if (GUN_number == awp) {
 			ch_reload->stop(); ssystem->playSound(sniper_reload, 0, false, &ch_reload); 
 		}
-		if (GUN_number == m1) {
+		else if (GUN_number == m1) {
 			ch_reload->stop(); ssystem->playSound(m1_reload, 0, false, &ch_reload);
+		}
+		else if (GUN_number == h_brush) {
+			ch_reload->stop(); ssystem->playSound(hbrush_reload, 0, false, &ch_reload);
 		}
 	}
 
@@ -2425,19 +2434,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					if(GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
 						ch_reload->stop(); ssystem->playSound(rifle_reload, 0, false, &ch_reload); //사운드 재생 
 					}
-					if(GUN_number == mg_42) {
+					else if(GUN_number == mg_42) {
 						ch_reload->stop(); ssystem->playSound(lmg_reload, 0, false, &ch_reload); //사운드 재생 
 					}
-					if(GUN_number == awp) {
+					else if(GUN_number == awp) {
 						ch_reload->stop(); ssystem->playSound(sniper_reload, 0, false, &ch_reload);
 						is_zoom = FALSE; avail_awp = FALSE; 
 					}
-					if (GUN_number == m1) {
+					else if (GUN_number == m1) {
 						ch_reload->stop(); ssystem->playSound(m1_reload, 0, false, &ch_reload);
 						if (ammo < 8) {
 							ch_clip->stop(); ssystem->playSound(m1_clip, 0, false, &ch_clip);
 							make_clip();
 						}
+					}
+					else if (GUN_number == h_brush) {
+						ch_reload->stop(); ssystem->playSound(hbrush_reload, 0, false, &ch_reload);
 					}
 				} break;
 				 

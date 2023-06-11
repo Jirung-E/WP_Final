@@ -2,7 +2,7 @@
 
 #include <atlimage.h>
 
-extern CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon, ammo_sniper_icon, ammo_clip_icon;
+extern CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon, ammo_sniper_icon, ammo_clip_icon, ammo_hbrush_icon;
 extern CImage commando_right, commando_left, commando_jump_right, commando_jump_left;
 extern CImage commando_fire_right, commando_fire_left, commando_jump_fire_right, commando_jump_fire_left, commando_zoom_right, commando_zoom_left;
 extern CImage SCAR_H_right, SCAR_H_left, M16_right, M16_left, MP44_right, MP44_left, MG42_right, MG42_left, AWP_right, AWP_left, hbrush_right, hbrush_left;
