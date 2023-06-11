@@ -66,9 +66,9 @@ extern BOOL is_hit;
 
 int calc_spawn_timer(int spawn_timer_max);
 
-void spawn_monster_regular(int mdx, int BG_scanner, RECT rt);
-void spawn_monster_big(int mdx_big, int BG_scanner, RECT rt);
-void spawn_monster_air(int mdx_air, int BG_scanner, RECT rt);
+void spawn_monster_regular(int mdx, int BG_scanner);
+void spawn_monster_big(int mdx_big, int BG_scanner);
+void spawn_monster_air(int mdx_air, int BG_scanner);
 
 void update_monster_dir_r(double monster_x, double CM_x, int mdx);
 void update_monster_dir_big(double monster_x, double CM_x, int mdx_big);

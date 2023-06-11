@@ -7,9 +7,12 @@
 using tstring = std::basic_string<TCHAR>;
 static std::random_device rd;
 
+enum Direction {
+	Right, Down, Left, Up, None
+};
 
 double percentOf(double num, double per);
-RECT percentOf(const RECT& rect, double per);
+RECT percentOf(const RECT& rect, double per, const Direction& bias = None);
 
 
 enum Color {
@@ -40,10 +43,6 @@ double getRandomNumberOf(const Range& range, double interval = 1);
 COLORREF getRandomColor();
 COLORREF getRandomColor(const Range& r, const Range& g, const Range& b, const Range& base = { 0, 0 });
 COLORREF getRandomColor(int r, int g, int b, const Range& base = { 0, 0xff });
-
-enum Direction {
-	Right, Down, Left, Up, None
-};
 
 POINT getCenterOf(const RECT& rect);
 RECT rectToSquare(const RECT& rect, const Direction& bias = None);

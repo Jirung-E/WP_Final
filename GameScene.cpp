@@ -212,7 +212,7 @@ void GameScene::drawScore(const HDC& hdc) const {
     if (!game_over && !is_paused) {
         TCHAR lpout[100];
         HFONT hfont, oldfont;
-        hfont = CreateFont(round_size, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
+        hfont = CreateFont(round_size / 1500.0 * valid_area.right, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
         oldfont = (HFONT)SelectObject(hdc, hfont);
         SetBkMode(hdc, TRANSPARENT);
         SetTextColor(hdc, RGB(0, 0, 0));
@@ -221,15 +221,17 @@ void GameScene::drawScore(const HDC& hdc) const {
         wsprintf(lpout, L"ROUND %d", game_round);
         for (int i = -3; i <= 3; i++)
             for (int j = -4; j <= 4; j++)
-                TextOut(hdc, ss_x + round_x + i, ss_y + landing_shake + 5 + j, lpout, lstrlen(lpout));
+                TextOut(hdc, (ss_x + round_x + i) / 1500.0 * valid_area.right, (ss_y + landing_shake + 5 + j) / 1500.0 * valid_area.right, 
+                    lpout, lstrlen(lpout));
         if (round_up == FALSE)  SetTextColor(hdc, RGB(255, 255, 255));
         else if (round_up == TRUE) SetTextColor(hdc, RGB(0, 255, 0));
-        TextOut(hdc, round_x + ss_x, 5 + ss_y + landing_shake, lpout, lstrlen(lpout));
+        TextOut(hdc, (round_x + ss_x) / 1500.0 * valid_area.right, (5 + ss_y + landing_shake) / 1500.0 * valid_area.right, 
+            lpout, lstrlen(lpout));
 
         SelectObject(hdc, oldfont);
         DeleteObject(hfont);
 
-        hfont = CreateFont(40, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
+        hfont = CreateFont(40 / 1500.0 * valid_area.right, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
         oldfont = (HFONT)SelectObject(hdc, hfont);
         SetBkMode(hdc, TRANSPARENT);
         SetTextColor(hdc, RGB(0, 0, 0));
@@ -238,9 +240,11 @@ void GameScene::drawScore(const HDC& hdc) const {
         wsprintf(lpout, L"%d KILLS to GO", game_round * 5 - kill_count);
         for (int i = -3; i <= 3; i++)
             for (int j = -3; j <= 3; j++)
-                TextOut(hdc, ss_x + 350 + i, ss_y + landing_shake + 10 + j, lpout, lstrlen(lpout));
+                TextOut(hdc, (ss_x + 350 + i) / 1500.0 * valid_area.right, (ss_y + landing_shake + 10 + j) / 1500.0 * valid_area.right, 
+                    lpout, lstrlen(lpout));
         SetTextColor(hdc, RGB(255, 255, 255));
-        TextOut(hdc, 350 + ss_x, 10 + ss_y + landing_shake, lpout, lstrlen(lpout));
+        TextOut(hdc, (350 + ss_x) / 1500.0 * valid_area.right, (10 + ss_y + landing_shake) / 1500.0 * valid_area.right, 
+            lpout, lstrlen(lpout));
 
         SelectObject(hdc, oldfont);
         DeleteObject(hfont);

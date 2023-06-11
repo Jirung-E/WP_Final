@@ -13,10 +13,10 @@ int out = 1;
 int exp_out_delay;
 
 //°æÇèÄ¡ ¼öÄ¡ Ç¥½Ã ÇÔ¼ö
-void show_exp(HDC mdc, int experience, int x, int y) {
+void show_exp(HDC mdc, int experience, int x, int y, RECT rt) {
 	HFONT hfont, oldfont;
 	TCHAR exp_tchar[1000] = { 0 };
-	hfont = CreateFont(70, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
+	hfont = CreateFont(70 / 1500.0 * rt.right, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
 	oldfont = (HFONT)SelectObject(mdc, hfont);
 	SetBkMode(mdc, TRANSPARENT);
 	SetTextColor(mdc, RGB(0, 0, 0));
@@ -33,10 +33,10 @@ void show_exp(HDC mdc, int experience, int x, int y) {
 }
 
 //°æÇèÄ¡ È¹µæ ¼öÄ¡ Ç¥½Ã ÇÔ¼ö
-void show_exp_add(HDC mdc, int prev_up, int x, int y) {
+void show_exp_add(HDC mdc, int prev_up, int x, int y, RECT rt) {
 	HFONT hfont, oldfont;
 	TCHAR exp_tchar[10] = { 0 };
-	hfont = CreateFont(50, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
+	hfont = CreateFont(50 / 1500.0 * rt.right, 0, 0, 0, FW_BOLD, 0, 0, 0, HANGEUL_CHARSET, 0, 0, 0, VARIABLE_PITCH | FF_ROMAN, TEXT("¸¼Àº °íµñ"));
 	oldfont = (HFONT)SelectObject(mdc, hfont);
 	SetBkMode(mdc, TRANSPARENT);
 	SetTextColor(mdc, RGB(0, 0, 0));

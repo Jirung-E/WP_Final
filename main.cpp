@@ -3,6 +3,7 @@
 #include <atlImage.h>
 #include <math.h>
 #include <random>
+#include <thread>
 #include "GameManager.h"
 #include "monster_info.h"//몬스터 정보 헤더
 #include "ammo.h"        //총알 정보 헤더
@@ -372,63 +373,71 @@ void mouse_fastClick_prevention() {
 }
 
 //조준점 출력
-void show_target(HDC mdc, int mouse_x, int mouse_y, double var) {
+void show_target(HDC mdc, int mouse_x, int mouse_y, double var, RECT rt) {
 	HPEN hpen, oldpen;
-	hpen = CreatePen(PS_SOLID, 12, RGB(0, 0, 0));
+	hpen = CreatePen(PS_SOLID, 12 / 1500.0 * rt.right, RGB(0, 0, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
-	MoveToEx(mdc, mouse_x + 12 + var, mouse_y, NULL);
-	LineTo(mdc, mouse_x + 41 + var, mouse_y);
-	MoveToEx(mdc, mouse_x - 12 - var, mouse_y, NULL);
-	LineTo(mdc, mouse_x - 41 - var, mouse_y);
-	MoveToEx(mdc, mouse_x, mouse_y - 12 - var, NULL);
-	LineTo(mdc, mouse_x, mouse_y - 41 - var);
-	MoveToEx(mdc, mouse_x, mouse_y + 12 + var, NULL);
-	LineTo(mdc, mouse_x, mouse_y + 41 + var);
+	int s = (12 + var) / 1500.0 * rt.right;
+	int S = (41 + var) / 1500.0 * rt.right;
+	MoveToEx(mdc, mouse_x + s, mouse_y, NULL);
+	LineTo(mdc, mouse_x + S, mouse_y);
+	MoveToEx(mdc, mouse_x - s, mouse_y, NULL);
+	LineTo(mdc, mouse_x - S, mouse_y);
+	MoveToEx(mdc, mouse_x, mouse_y - s, NULL);
+	LineTo(mdc, mouse_x, mouse_y - S);
+	MoveToEx(mdc, mouse_x, mouse_y + s, NULL);
+	LineTo(mdc, mouse_x, mouse_y + S);
 
 	SelectObject(mdc, oldpen); DeleteObject(hpen);
 	 
-	hpen = CreatePen(PS_SOLID, 5, RGB(40, 40, 40));
+	hpen = CreatePen(PS_SOLID, 5 / 1500.0 * rt.right, RGB(40, 40, 40));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
 	//awp일 경우 관통 범위 표시
 	if (GUN_number == awp) {
-		MoveToEx(mdc, mouse_x - 500, mouse_y - 40, NULL);
-		LineTo(mdc, mouse_x - 500, mouse_y + 40); 
-		MoveToEx(mdc, mouse_x + 500, mouse_y - 40, NULL);
-		LineTo(mdc, mouse_x + 500, mouse_y + 40);
+		s = 40 / 1500.0 * rt.right;
+		S = 500 / 1500.0 * rt.right;
+		MoveToEx(mdc, mouse_x - S, mouse_y - s, NULL);
+		LineTo(mdc, mouse_x - S, mouse_y + s);
+		MoveToEx(mdc, mouse_x + S, mouse_y - s, NULL);
+		LineTo(mdc, mouse_x + S, mouse_y + s);
 	} 
 	SelectObject(mdc, oldpen); DeleteObject(hpen);
 	 
-	hpen = CreatePen(PS_SOLID, 5, RGB(0, 255, 0));
+	hpen = CreatePen(PS_SOLID, 5 / 1500.0 * rt.right, RGB(0, 255, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
-	MoveToEx(mdc, mouse_x + 13 + var, mouse_y, NULL);
-	LineTo(mdc, mouse_x + 40 + var, mouse_y);
-	MoveToEx(mdc, mouse_x - 13 - var, mouse_y, NULL);
-	LineTo(mdc, mouse_x - 40 - var, mouse_y);
-	MoveToEx(mdc, mouse_x, mouse_y - 13 - var, NULL);
-	LineTo(mdc, mouse_x, mouse_y - 40 - var);
-	MoveToEx(mdc, mouse_x, mouse_y + 13 + var, NULL);
-	LineTo(mdc, mouse_x, mouse_y + 40 + var);
+	s = (13 + var) / 1500.0 * rt.right;
+	S = (40 + var) / 1500.0 * rt.right;
+	MoveToEx(mdc, mouse_x + s, mouse_y, NULL);
+	LineTo(mdc, mouse_x + S, mouse_y);
+	MoveToEx(mdc, mouse_x - s, mouse_y, NULL);
+	LineTo(mdc, mouse_x - S, mouse_y);
+	MoveToEx(mdc, mouse_x, mouse_y - s, NULL);
+	LineTo(mdc, mouse_x, mouse_y - S);
+	MoveToEx(mdc, mouse_x, mouse_y + s, NULL);
+	LineTo(mdc, mouse_x, mouse_y + S);
 
 	SelectObject(mdc, oldpen); DeleteObject(hpen); 
 }
 
 //히트 포인트 표시
-void show_hit(HDC mdc, int hit_x, int hit_y) {
+void show_hit(HDC mdc, int hit_x, int hit_y, RECT rt) {
 	HPEN hpen, oldpen;
-	hpen = CreatePen(PS_SOLID, 4, RGB(255, 0, 0));
+	hpen = CreatePen(PS_SOLID, 4 / 1500.0 * rt.right, RGB(255, 0, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 
-	MoveToEx(mdc, hit_x - 5, hit_y - 5, NULL);
-	LineTo(mdc, hit_x - 15, hit_y - 15);
-	MoveToEx(mdc, hit_x + 5, hit_y - 5, NULL);
-	LineTo(mdc, hit_x + 15, hit_y - 15);
-	MoveToEx(mdc, hit_x - 5, hit_y + 5, NULL);
-	LineTo(mdc, hit_x - 15, hit_y + 15);
-	MoveToEx(mdc, hit_x + 5, hit_y + 5, NULL);
-	LineTo(mdc, hit_x + 15, hit_y + 15);
+	int s = 5 / 1500.0 * rt.right;
+	int S = 15 / 1500.0 * rt.right;
+	MoveToEx(mdc, hit_x - s, hit_y - s, NULL);
+	LineTo(mdc, hit_x - S, hit_y - S);
+	MoveToEx(mdc, hit_x + s, hit_y - s, NULL);
+	LineTo(mdc, hit_x + S, hit_y - S);
+	MoveToEx(mdc, hit_x - s, hit_y + s, NULL);
+	LineTo(mdc, hit_x - S, hit_y + S);
+	MoveToEx(mdc, hit_x + s, hit_y + s, NULL);
+	LineTo(mdc, hit_x + S, hit_y + S);
 
 	SelectObject(mdc, oldpen);
 	DeleteObject(hpen);
@@ -440,13 +449,17 @@ void init_exp_animation() {
 }
 
 //정조준 완료 표시
-void show_zoom_complited(HDC mdc) {
-	zoom_complited.Draw(mdc, CM_x - 25 + ss_x, CM_y - ypos_zc + ss_y + landing_shake, 150, 150, 0, 0, 100, 100);
+void show_zoom_complited(HDC mdc, RECT rt) {
+	zoom_complited.Draw(mdc, (CM_x - 25 + ss_x) / 1500.0 * rt.right, (CM_y - ypos_zc + ss_y + landing_shake) / 800.0 * rt.bottom, 
+		150 / 1500.0 * rt.right, 150 / 1500.0 * rt.right,
+		0, 0, 100, 100);
 }
 
 //awp 관통 대상 탐색
-void find_target(int mx, int my) {
+void find_target(int mx, int my, RECT rt) {
 	//마우스 좌표 mx +- 500 범위 내에 몬스터가 있을 시 관통 대상이 된다. 
+	mx = mx * 1500.0 / rt.right;
+	my = my * 800.0 / rt.bottom;
 	for (int i = 0; i < mdx_r; i++) {
 		if (CM_img_dir == 0 && mst_r[i].x <= mx && mst_r[i].x >= mx - 500 && my >= mst_r[i].y && my <= mst_r[i].y + 100) mst_r[i].targeted = 1; 
 		else if (CM_img_dir == 1 && mst_r[i].x + 100 >= mx && mst_r[i].x + 100 <= mx + 500 && my >= mst_r[i].y && my <= mst_r[i].y + 100) mst_r[i].targeted = 1; 
@@ -460,13 +473,24 @@ void find_target(int mx, int my) {
 }
 
 //awp 관통 대상 표시
-void show_awp_targeted(HDC mdc) {
+void show_awp_targeted(HDC mdc, RECT rt) {
 	//관통 대상이 된 몬스터는 따로 표시된다.
+	int tx;
+	int ty;
+	int tw = 100 / 1500.0 * rt.right;
 	for (int i = 0; i < mdx_r; i++) {
-		if (mst_r[i].targeted == 1) zoom_targeted.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y - 90 + ss_x + landing_shake, 100, 100, 0, 0, 100, 100); 
+		if(mst_r[i].targeted == 1) {
+			tx = (mst_r[i].x + ss_x) / 1500.0 * rt.right;
+			ty = (mst_r[i].y - 90 + ss_x + landing_shake) / 800.0 * rt.bottom;
+			zoom_targeted.Draw(mdc, tx, ty, tw, tw, 0, 0, 100, 100);
+		}
 	} 
 	for (int i = 0; i < mdx_big; i++) {
-		if (mst_big[i].targeted == 1) zoom_targeted.Draw(mdc, mst_big[i].x + 50 + ss_x, mst_big[i].y - 90 + landing_shake, 100, 100, 0, 0, 100, 100); 
+		if(mst_big[i].targeted == 1) {
+			tx = (mst_big[i].x + 50 + ss_x) / 1500.0 * rt.right;
+			ty = (mst_big[i].y - 90 + landing_shake) / 800.0 * rt.bottom;
+			zoom_targeted.Draw(mdc, tx, ty, tw, tw, 0, 0, 100, 100);
+		}
 	}
 }
 
@@ -474,25 +498,38 @@ void show_awp_targeted(HDC mdc) {
 void show_interface(HDC mdc, RECT rt) {
 	//장탄수 표시기 배경
 	IND_w = indicator_back.GetWidth(); IND_h = indicator_back.GetHeight();
-	indicator_back.Draw(mdc, rt.right - 600 + ss_x, rt.bottom - 110 + landing_shake + ss_y, 600, 110, 0, 0, IND_w, IND_h);
+	indicator_back.Draw(mdc, rt.right + (-600 + ss_x) / 1500.0 * rt.right, rt.bottom + (-110 + landing_shake + ss_y) / 1500.0 * rt.right,
+		600 / 1500.0 * rt.right, 110 / 1500.0 * rt.right, 0, 0, IND_w, IND_h);
 
 	//수류탄 대기 시간 출력
-	show_gren_time(mdc, ss_x, ss_y, landing_shake, gren_time);
-	if (able_grenade == TRUE) avail_grenade.Draw(mdc, 420 + ss_x, 680 + ss_y + landing_shake, 80, 80, 0, 0, 100, 100); 
-	if(able_grenade == FALSE) unavail_grenade.Draw(mdc, 420 + ss_x, 680 + ss_y + landing_shake, 80, 80, 0, 0, 100, 100);
+	show_gren_time(mdc, ss_x, ss_y, landing_shake, gren_time, rt);
+	if(able_grenade == TRUE) {
+		avail_grenade.Draw(mdc, (420 + ss_x) / 1500.0 * rt.right, rt.bottom + (-80 + ss_y + landing_shake) / 1500.0 * rt.right,
+			80 / 1500.0 * rt.right, 80 / 1500.0 * rt.right,
+			0, 0, 100, 100);
+	}
+	else {
+		unavail_grenade.Draw(mdc, (420 + ss_x) / 1500.0 * rt.right, rt.bottom + (-80 + ss_y + landing_shake) / 1500.0 * rt.right,
+			80 / 1500.0 * rt.right, 80 / 1500.0 * rt.right,
+			0, 0, 100, 100);
+	}
 		 
 	//총알 아이콘
-	if (GUN_number == scar_h || GUN_number == m16 || GUN_number == mp_44) {
-		AMO_w = ammo_icon.GetWidth(); AMO_h = ammo_icon.GetHeight();
-		ammo_icon.Draw(mdc, rt.right - 260 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
-	} 
-	if (GUN_number == mg_42) {
+	switch(GUN_number) {
+	case mg_42:
 		AMO_w = ammo_lmg_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
-		ammo_lmg_icon.Draw(mdc, rt.right - 230 + ss_x, rt.bottom - 108 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
-	} 
-	if (GUN_number == awp) {
+		ammo_lmg_icon.Draw(mdc, rt.right + (-230 + ss_x) / 1500.0 * rt.right, rt.bottom + (-108 + landing_shake + ss_y) / 1500.0 * rt.right,
+			100 / 1500.0 * rt.right, 100 / 1500.0 * rt.right, 0, 0, AMO_w, AMO_h);
+		break;
+	case awp:
 		AMO_w = ammo_sniper_icon.GetWidth(); AMO_h = ammo_lmg_icon.GetHeight();
-		ammo_sniper_icon.Draw(mdc, rt.right - 200 + ss_x, rt.bottom - 105 + landing_shake + ss_y, 100, 100, 0, 0, AMO_w, AMO_h);
+		ammo_sniper_icon.Draw(mdc, rt.right + (-200 + ss_x) / 1500.0 * rt.right, rt.bottom + (-105 + landing_shake + ss_y) / 1500.0 * rt.right,
+			100 / 1500.0 * rt.right, 100 / 1500.0 * rt.right, 0, 0, AMO_w, AMO_h);
+		break;
+	default:
+		AMO_w = ammo_icon.GetWidth(); AMO_h = ammo_icon.GetHeight();
+		ammo_icon.Draw(mdc, rt.right + (-260 + ss_x) / 1500.0 * rt.right, rt.bottom + (-108 + landing_shake + ss_y) / 1500.0 * rt.right,
+			100 / 1500.0 * rt.right, 100 / 1500.0 * rt.right, 0, 0, AMO_w, AMO_h);
 	}
 	if (GUN_number == m1) {
 		AMO_w = ammo_clip_icon.GetWidth(); AMO_h = ammo_clip_icon.GetHeight();
@@ -503,23 +540,28 @@ void show_interface(HDC mdc, RECT rt) {
 	switch (GUN_number) {
 	case scar_h:
 		GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetWidth();
-		SCAR_H_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
+		SCAR_H_right.Draw(mdc, rt.right + (-430 + ss_x) / 1500.0 * rt.right, rt.bottom + (-150 + landing_shake + ss_y) / 1500.0 * rt.right,
+			150 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break; 
 	case m16:
 		GUN_w = M16_right.GetWidth(); GUN_h = M16_right.GetWidth();
-		M16_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
+		M16_right.Draw(mdc, rt.right + (-430 + ss_x) / 1500.0 * rt.right, rt.bottom + (-150 + landing_shake + ss_y) / 1500.0 * rt.right,
+			150 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break; 
 	case mp_44:
 		GUN_w = MP44_right.GetWidth(); GUN_h = MP44_right.GetWidth();
-		MP44_right.Draw(mdc, rt.right - 430 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 150, 150, 0, 0, GUN_w, GUN_h);
+		MP44_right.Draw(mdc, rt.right + (-430 + ss_x) / 1500.0 * rt.right, rt.bottom + (-150 + landing_shake + ss_y) / 1500.0 * rt.right,
+			150 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break; 
 	case mg_42:
 		GUN_w = MG42_right.GetWidth(); GUN_h = MG42_right.GetHeight();
-		MG42_right.Draw(mdc, rt.right - 500 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 250, 150, 0, 0, GUN_w, GUN_h);
+		MG42_right.Draw(mdc, rt.right + (-500 + ss_x), rt.bottom + (-150 + landing_shake + ss_y) / 1500.0 * rt.right,
+			250 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break; 
 	case awp:
 		GUN_w = AWP_right.GetWidth(); GUN_h = AWP_right.GetHeight();
-		AWP_right.Draw(mdc, rt.right - 450 + ss_x, rt.bottom - 150 + landing_shake + ss_y, 200, 150, 0, 0, GUN_w, GUN_h);
+		AWP_right.Draw(mdc, rt.right + (-450 + ss_x) / 1500.0 * rt.right, rt.bottom + (-150 + landing_shake + ss_y) / 1500.0 * rt.right,
+			200 / 1500.0 * rt.right, 150 / 1500.0 * rt.right, 0, 0, GUN_w, GUN_h);
 		break;
 	case m1:
 		GUN_w = m1_right.GetWidth(); GUN_h = m1_right.GetHeight();
@@ -527,92 +569,121 @@ void show_interface(HDC mdc, RECT rt) {
 		break;
 
 	}
+
 	//mdc 오른쪽에 최대 장탄수, 그 오른쪽에 현재 장탄수 입력
-	ammo_indicator(mdc, Gun::max_ammo(GUN_number), ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
-	 
+	ammo_indicator(mdc, Gun::max_ammo(GUN_number), ammo, ind_size / 1500.0 * rt.right, 
+		rt.right + (ind_x - 1360 - 120 + ss_x) / 1500.0 * rt.right, 
+		rt.bottom + (ind_y - 650 - 110 + landing_shake + ss_y) / 1500.0 * rt.right);
+	//ammo_indicator(mdc, Gun::max_ammo(GUN_number), ammo, ind_size, ind_x + ss_x, ind_y + landing_shake + ss_y);
+
 	//경험치 수치 출력
-	show_exp(mdc, experience, rt.left + 130 + ss_x, rt.top + 3 + ss_y + landing_shake);
-	exp_icon.Draw(mdc, rt.left + 20 + ss_x, rt.top + 15 + ss_y + landing_shake, 100, 50, 0, 0, 100, 50);
-	show_exp_add(mdc, prev_up, exp_x + ss_x, rt.top + 70 + ss_y + landing_shake);
-	 
+	show_exp(mdc, experience, rt.left + (130 + ss_x) / 1500.0 * rt.right, rt.top + (3 + ss_y + landing_shake) / 1500.0 * rt.right, rt);
+	exp_icon.Draw(mdc, rt.left + (20 + ss_x) / 1500.0 * rt.right, rt.top + (15 + ss_y + landing_shake) / 1500.0 * rt.right, 
+		100 / 1500.0 * rt.right, 50 / 1500.0 * rt.right, 0, 0, 100, 50);
+	show_exp_add(mdc, prev_up, (exp_x + ss_x) / 1500.0 * rt.right, rt.top + (70 + ss_y + landing_shake) / 1500.0 * rt.right, rt);
+	
 	//재장전 게이지 출력
 	if (reload == 1)
-		reload_indicator(mdc, CM_x + ss_x, CM_y - 30 + landing_shake + ss_y, CM_x + reload_x + ss_x, CM_y - 10 + landing_shake + ss_y, CM_x + ss_x, CM_y - 30 + landing_shake + ss_y, CM_x + 100 + ss_x, CM_y - 10 + landing_shake + ss_y);
+		reload_indicator(mdc, (CM_x + ss_x) / 1500.0 * rt.right, (CM_y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(CM_x + reload_x + ss_x) / 1500.0 * rt.right, (CM_y - 10 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(CM_x + ss_x) / 1500.0 * rt.right, (CM_y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(CM_x + 100 + ss_x) / 1500.0 * rt.right, (CM_y - 10 + landing_shake + ss_y) / 800.0 * rt.bottom);
 	 
 	//몬스터 체력 게이지 출력
 	for (int i = 0; i < mdx_r; i++)
-		monster_hp_ind(mdc, mst_r[i].x + ss_x, mst_r[i].y - 30 + landing_shake + ss_y, mst_r[i].x + mst_r[i].hp * 2 + ss_x, mst_r[i].y - 15 + landing_shake + ss_y,
-			mst_r[i].x + ss_x, mst_r[i].y - 30 + landing_shake + ss_y, mst_r[i].x + 100 + ss_x, mst_r[i].y - 15 + landing_shake + ss_y);
+		monster_hp_ind(mdc, (mst_r[i].x + ss_x) / 1500.0 * rt.right, (mst_r[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_r[i].x + mst_r[i].hp * 2 + ss_x) / 1500.0 * rt.right, (mst_r[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_r[i].x + ss_x) / 1500.0 * rt.right, (mst_r[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_r[i].x + 100 + ss_x) / 1500.0 * rt.right, (mst_r[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom);
 	//대형 몬스터
 	for (int i = 0; i < mdx_big; i++)
-		monster_hp_ind(mdc, mst_big[i].x + ss_x, mst_big[i].y - 30 + landing_shake + ss_y, mst_big[i].x + mst_big[i].hp * 2 + ss_x, mst_big[i].y - 15 + landing_shake + ss_y,
-			mst_big[i].x + ss_x, mst_big[i].y - 30 + landing_shake + ss_y, mst_big[i].x + 200 + ss_x, mst_big[i].y - 15 + landing_shake + ss_y);
+		monster_hp_ind(mdc, (mst_big[i].x + ss_x) / 1500.0 * rt.right, (mst_big[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_big[i].x + mst_big[i].hp * 2 + ss_x) / 1500.0 * rt.right, (mst_big[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_big[i].x + ss_x) / 1500.0 * rt.right, (mst_big[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_big[i].x + 200 + ss_x) / 1500.0 * rt.right, (mst_big[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom);
 	//공중 몬스터
 	for (int i = 0; i < mdx_air; i++)
-		monster_hp_ind(mdc, mst_air[i].x + ss_x, mst_air[i].y - 30 + landing_shake + ss_y, mst_air[i].x + mst_air[i].hp * 5 + ss_x, mst_air[i].y - 15 + landing_shake + ss_y,
-			mst_air[i].x + ss_x, mst_air[i].y - 30 + landing_shake + ss_y, mst_air[i].x + 150 + ss_x, mst_air[i].y - 15 + landing_shake + ss_y);
+		monster_hp_ind(mdc, (mst_air[i].x + ss_x) / 1500.0 * rt.right, (mst_air[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_air[i].x + mst_air[i].hp * 5 + ss_x) / 1500.0 * rt.right, (mst_air[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_air[i].x + ss_x) / 1500.0 * rt.right, (mst_air[i].y - 30 + landing_shake + ss_y) / 800.0 * rt.bottom,
+			(mst_air[i].x + 150 + ss_x) / 1500.0 * rt.right, (mst_air[i].y - 15 + landing_shake + ss_y) / 800.0 * rt.bottom);
+
 	//플레이어 체력, 따로 만들기 귀찮아서 몬스터 체력 게이지로 공용
-	monster_hp_ind(mdc, (rt.left + 10) + ss_x, (rt.bottom - 30) + landing_shake + ss_y, (rt.left + 10) + (health * 3) + ss_x, (rt.bottom - 10) + landing_shake + ss_y,
-	(rt.left + 10) + ss_x, (rt.bottom - 30) + landing_shake + ss_y, (rt.left + 10) + 300 + ss_x, (rt.bottom - 10) + landing_shake + ss_y);
+	monster_hp_ind(mdc, rt.left + (10 + ss_x) / 1500.0 * rt.right, rt.bottom + (-40 + landing_shake + ss_y) / 1500.0 * rt.right,
+		rt.left + (10 + (health * 3) + ss_x) / 1500.0 * rt.right, rt.bottom + (-10 + landing_shake + ss_y) / 1500.0 * rt.right,
+		rt.left + (10 + ss_x) / 1500.0 * rt.right, rt.bottom + (-40 + landing_shake + ss_y) / 1500.0 * rt.right,
+		rt.left + (10 + 300 + ss_x) / 1500.0 * rt.right, rt.bottom + (-10 + landing_shake + ss_y) / 1500.0 * rt.right);
 
 	//플레이어 체력 숫자 표시
 	player_health(mdc, rt, ss_x, ss_y, landing_shake, health);
 }
 
 //플레이어 이미지, 총 이미지 출력
-void show_player(HDC mdc) {
+void show_player(HDC mdc, RECT rt) {
+	int px = (CM_x + ss_x) / 1500.0 * rt.right;
+	int py = (CM_y + landing_shake + ss_y) / 800.0 * rt.bottom;
+	int pw;
+	int ph;
+	int gx;
+	int gy = (CM_y + landing_shake + ss_y) / 800.0 * rt.bottom;
+	int gw;
+	int gh;
+	int fx;
+	int fy = fy = (CM_y + landing_shake + ss_y) / 800.0 * rt.bottom;;
+	int fw = 100 / 1500.0 * rt.right;
+	int fh = 100 / 800.0 * rt.bottom;
+	CImage* player_image = nullptr;
+	CImage* gun_image = nullptr;
+	CImage* flame = nullptr;
+
 	switch (CM_img_dir) { //플레이어, 총 이미지 출력
 	case 0:
 		//플레이어 이미지 좌픅
 		if (CM_jump == 0) {
 			//awp 정조준 시 스코프를 바라보는 모습을 취함
 			if (is_zoom == TRUE) {
-				CM_w = commando_zoom_left.GetWidth(); CM_h = commando_zoom_left.GetHeight();
-				commando_zoom_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h);
+				player_image = &commando_zoom_left;
 			} 
 			else {
 				if (is_draw == TRUE) {
-					CM_w = commando_fire_left.GetWidth(); CM_h = commando_fire_left.GetHeight();
-					commando_fire_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+					player_image = &commando_fire_left;
 				}
-				else if (is_draw == FALSE) {
-					CM_w = commando_left.GetWidth(); CM_h = commando_left.GetHeight();
-					commando_left.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+				else {
+					player_image = &commando_left;
 				}
 			}
 		} 
 		else if (CM_jump == 1 || CM_jump == 2) {
 			if (is_draw == TRUE) {
-				CM_w = commando_jump_fire_left.GetWidth(); CM_h = commando_jump_fire_left.GetHeight();
-				commando_jump_fire_left.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+				player_image = &commando_jump_fire_left;
 			}
-			else if (is_draw == FALSE) {
-				CM_w = commando_jump_left.GetWidth(); CM_h = commando_jump_left.GetHeight();
-				commando_jump_left.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+			else {
+				player_image = &commando_jump_left;
 			}
+			py = (CM_y - 10 + landing_shake + ss_y) / 800.0 * rt.bottom;
 		}
 
 		//총 좌측
 		switch (GUN_number) {
 		case scar_h:
-			GUN_w = SCAR_H_left.GetWidth(); GUN_h = SCAR_H_left.GetHeight();
-			SCAR_H_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &SCAR_H_left;
+			gx = (CM_x - 40 + ss_x) / 1500.0 * rt.right;
 			break; 
 		case m16:
-			GUN_w = M16_left.GetWidth(); GUN_h = M16_left.GetHeight();
-			M16_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &M16_left;
+			gx = (CM_x - 40 + ss_x) / 1500.0 * rt.right;
 			break; 
 		case mp_44:
-			GUN_w = MP44_left.GetWidth(); GUN_h = MP44_left.GetHeight();
-			MP44_left.Draw(mdc, CM_x - 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &MP44_left;
+			gx = (CM_x - 40 + ss_x) / 1500.0 * rt.right;
 			break; 
 		case mg_42:
-			GUN_w = MG42_left.GetWidth(); GUN_h = MG42_left.GetHeight();
-			MG42_left.Draw(mdc, CM_x - 120 + ss_x, CM_y + landing_shake + ss_y, 200, 100, 0, 0, GUN_w, GUN_h);
+			gun_image = &MG42_left;
+			gx = (CM_x - 120 + ss_x) / 1500.0 * rt.right;
 			break; 
 		case awp:
-			GUN_w = AWP_left.GetWidth(); GUN_h = AWP_left.GetHeight();
-			AWP_left.Draw(mdc, CM_x - 80 +ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
+			gun_image = &AWP_left;
+			gx = (CM_x - 80 + ss_x) / 1500.0 * rt.right;
 			break;
 		case m1:
 			GUN_w = m1_left.GetWidth(); GUN_h = m1_left.GetHeight();
@@ -621,65 +692,69 @@ void show_player(HDC mdc) {
 		}
 
 		//불꽃 좌측
-		if (is_draw == TRUE && GUN_number != mg_42 && GUN_number != awp && GUN_number != m1)
-			flame_left.Draw(mdc, CM_x - 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100); 
-		if (is_draw == TRUE && GUN_number == mg_42)
-			flame_left.Draw(mdc, CM_x - 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100); 
-		if (is_draw == TRUE && (GUN_number == awp || GUN_number == m1))
-			flame_left.Draw(mdc, CM_x - 170 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
+		if(is_draw == TRUE) {
+			flame = &flame_left;
+			switch(GUN_number) {
+			case mg_42:
+				fx = (CM_x - 220 + ss_x) / 1500.0 * rt.right;
+				break;
+      case awp: case m1:
+				fx = (CM_x - 170 + ss_x) / 1500.0 * rt.right;
+				break;
+			default:
+				fx = (CM_x - 140 + ss_x) / 1500.0 * rt.right;
+			}
+		}
 
 		break;
 		//////////////////////
 	case 1:
 		//플레이어 우측
-		if (CM_jump == 0) {
-			if (is_zoom == TRUE) {
-				CM_w = commando_zoom_right.GetWidth(); CM_h = commando_zoom_right.GetHeight();
-				commando_zoom_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h);
+		if(CM_jump == 0) {
+			//awp 정조준 시 스코프를 바라보는 모습을 취함
+			if(is_zoom == TRUE) {
+				player_image = &commando_zoom_right;
 			}
 			else {
-				if (is_draw == TRUE) {
-					CM_w = commando_fire_right.GetWidth(); CM_h = commando_fire_right.GetHeight();
-					commando_fire_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+				if(is_draw == TRUE) {
+					player_image = &commando_fire_right;
 				}
-				else if (is_draw == FALSE) {
-					CM_w = commando_right.GetWidth(); CM_h = commando_right.GetHeight();
-					commando_right.Draw(mdc, CM_x + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, CM_w, CM_h); //플레이어 이미지 출력
+				else {
+					player_image = &commando_right;
 				}
 			}
 		}
-		else if (CM_jump == 1 || CM_jump == 2) {
-			if (is_draw == TRUE) {
-				CM_w = commando_jump_fire_right.GetWidth(); CM_h = commando_jump_fire_right.GetHeight();
-				commando_jump_fire_right.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+		else if(CM_jump == 1 || CM_jump == 2) {
+			if(is_draw == TRUE) {
+				player_image = &commando_jump_fire_right;
 			}
-			else if (is_draw == FALSE) {
-				CM_w = commando_jump_right.GetWidth(); CM_h = commando_jump_right.GetHeight();
-				commando_jump_right.Draw(mdc, CM_x + ss_x, CM_y - 10 + landing_shake + ss_y, 100, 120, 0, 0, CM_w, CM_h); //플레이어 점프 이미지 출력
+			else {
+				player_image = &commando_jump_right;
 			}
+			py = (CM_y - 10 + landing_shake + ss_y) / 800.0 * rt.bottom;
 		}
 
 		//총 우측
-		switch (GUN_number) {
+		switch(GUN_number) {
 		case scar_h:
-			GUN_w = SCAR_H_right.GetWidth(); GUN_h = SCAR_H_right.GetHeight();
-			SCAR_H_right.Draw(mdc, CM_x + 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h);
+			gun_image = &SCAR_H_right;
+			gx = (CM_x + 40 + ss_x) / 1500.0 * rt.right;
 			break;
 		case m16:
-			GUN_w = M16_right.GetWidth(); GUN_h = M16_right.GetHeight();
-			M16_right.Draw(mdc, CM_x + 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &M16_right;
+			gx = (CM_x + 40 + ss_x) / 1500.0 * rt.right;
 			break;
 		case mp_44:
-			GUN_w = MP44_right.GetWidth(); GUN_h = MP44_right.GetHeight();
-			MP44_right.Draw(mdc, CM_x + 40 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &MP44_right;
+			gx = (CM_x + 40 + ss_x) / 1500.0 * rt.right;
 			break;
 		case mg_42:
-			GUN_w = MG42_right.GetWidth();  GUN_h = MG42_left.GetHeight();
-			MG42_right.Draw(mdc, CM_x + 20 + ss_x, CM_y + landing_shake + ss_y, 200, 100, 0, 0, GUN_w, GUN_h); //반드시 총기 위치는 플레이어 '+-20'을 기준으로 함
+			gun_image = &MG42_right;
+			gx = (CM_x + 20 + ss_x) / 1500.0 * rt.right;
 			break;
 		case awp:
-			GUN_w = AWP_right.GetWidth(); GUN_h = AWP_right.GetHeight();
-			AWP_right.Draw(mdc, CM_x + 30 + ss_x, CM_y + landing_shake + ss_y, 150, 100, 0, 0, GUN_w, GUN_h);
+			gun_image = &AWP_right;
+			gx = (CM_x + 30 + ss_x) / 1500.0 * rt.right;
 			break;
 		case m1:
 			GUN_w = m1_right.GetWidth(); GUN_h = m1_right.GetHeight();
@@ -688,28 +763,63 @@ void show_player(HDC mdc) {
 		}
 
 		//불꽃 우측
-		if (is_draw == TRUE && GUN_number != mg_42 && GUN_number != awp && GUN_number != m1)
-			flame_right.Draw(mdc, CM_x + 140 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
-
-		if(is_draw == TRUE && GUN_number == mg_42)
-			flame_right.Draw(mdc, CM_x + 220 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
-
-		if (is_draw == TRUE && (GUN_number == awp || GUN_number == m1))
-			flame_right.Draw(mdc, CM_x + 170 + ss_x, CM_y + landing_shake + ss_y, 100, 100, 0, 0, 100, 100);
+		if(is_draw == TRUE) {
+			flame = &flame_right;
+			switch(GUN_number) {
+			case mg_42:
+				fx = (CM_x + 220 + ss_x) / 1500.0 * rt.right;
+				break;
+      case awp: case m1:
+				fx = (CM_x + 170 + ss_x) / 1500.0 * rt.right;
+				break;
+			default:
+				fx = (CM_x + 140 + ss_x) / 1500.0 * rt.right;
+			}
+		}
 
 		break;
+	}
+
+	CM_w = player_image->GetWidth();
+	CM_h = player_image->GetHeight();
+	pw = CM_w / 1500.0 * rt.right;
+	ph = CM_h / 800.0 * rt.bottom;
+	//ph = CM_h / 1500.0 * rt.right;
+	RECT r = { 0, 0, pw, ph };
+	r = convertRatio(r, CM_w, CM_h, Down);		// 비율 맞추기
+	pw = r.right-r.left;
+	ph = r.bottom-r.top;
+	player_image->Draw(mdc, px, py, pw, ph, 0, 0, CM_w, CM_h);
+
+	GUN_w = gun_image->GetWidth();
+	GUN_h = gun_image->GetHeight();
+	gw = GUN_w / 1500.0 * rt.right;
+	gh = GUN_h / 800.0 * rt.bottom;
+	//gh = GUN_h / 1500.0 * rt.right;
+	r = { 0, 0, gw, gh };
+	r = convertRatio(r, GUN_w, GUN_h, Down);
+	gw = r.right-r.left;
+	gh = r.bottom-r.top;
+	gun_image->Draw(mdc, gx, gy, gw, gh, 0, 0, GUN_w, GUN_h);
+
+	if(flame != nullptr) {
+		r = { 0, 0, fw, fh };
+		r = convertRatio(r, 1, 1, Down);
+		fw = r.right-r.left;
+		fh = r.bottom-r.top;
+		flame->Draw(mdc, fx, fy, fw, fh, 0, 0, 100, 100);
 	}
 }
 
 //몬스터 생성
-void make_monster(RECT rt) {
+void make_monster() {
 	//spawn_timer의 수치가 0이 되면 몬스터가 한 마리씩 스폰
 	//일반 몬스터
 	spawn_timer_r--;
 	if (spawn_timer_r == 0) {
 		spawn_timer_r = calc_spawn_timer(spawn_timer_r_max);		// 원래값 500
 		if (mdx_r < 99) {
-			spawn_monster_regular(mdx_r, BG_scanner, rt); mdx_r++;
+			spawn_monster_regular(mdx_r, BG_scanner); mdx_r++;
 		}
 	}  
 	//대형 몬스터
@@ -717,7 +827,7 @@ void make_monster(RECT rt) {
 	if (spawn_timer_big == 0) {
 		spawn_timer_big = calc_spawn_timer(spawn_timer_big_max);	// 원래값 1000
 		if (mdx_big < 99) {
-			spawn_monster_big(mdx_big, BG_scanner, rt); mdx_big++;
+			spawn_monster_big(mdx_big, BG_scanner); mdx_big++;
 		}
 	} 
 	//공중 몬스터
@@ -725,78 +835,159 @@ void make_monster(RECT rt) {
 	if (spawn_timer_air == 0) {
 		spawn_timer_air = calc_spawn_timer(spawn_timer_air_max);	// 원래값 600
 		if (mdx_air < 99) {
-			spawn_monster_air(mdx_air, BG_scanner, rt); mdx_air++;
+			spawn_monster_air(mdx_air, BG_scanner); mdx_air++;
 		}
 	}
 }
 
 //몬스터 이미지 출력
-void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake) {
+void show_monster(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 	//죽은 몬스터 출력
+	int mx;
+	int my;
+	int mw;
+	int mh;
 	for (int i = 0; i < ddx; i++) {
+		mx = (dl[i].x + ss_x) / 1500.0 * rt.right;
+		my = (dl[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
 		if (dl[i].monster_type == 1 || dl[i].monster_type == 4 || dl[i].monster_type == 5) {
-			if(dl[i].dir == 0) monster_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100); 
-			else if(dl[i].dir == 1) monster_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + ss_y + landing_shake, 100, 100, 0, 0, 100, 100); 
+			mw = 100 / 1500.0 * rt.right;
+			mh = 100 / 1500.0 * rt.right;
+			my += mh;
+			RECT r = { 0, 0, mw, mh };
+			r = convertRatio(r, 100, 100, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
+			my -= mh;
+			if(dl[i].dir == 0) monster_dead_left.Draw(mdc, mx, my, mw, mh, 0, 0, 100, 100); 
+			else if(dl[i].dir == 1) monster_dead_right.Draw(mdc, mx, my, mw, mh, 0, 0, 100, 100); 
 		}
 		else if (dl[i].monster_type == 2 || dl[i].monster_type == 6 || dl[i].monster_type == 7) {
-			if(dl[i].dir == 0) monster_big_dead_left.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200); 
-			else if (dl[i].dir == 1) monster_big_dead_right.Draw(mdc, dl[i].x + ss_x, dl[i].y + 50 + ss_y + landing_shake, 200, 200, 0, 0, 200, 200); 
+			my = (dl[i].y + 50 + ss_y + landing_shake) / 800.0 * rt.bottom;
+			mw = 200 / 1500.0 * rt.right;
+			mh = 200 / 1500.0 * rt.right;
+			my += mh;
+			RECT r = { 0, 0, mw, mh };
+			r = convertRatio(r, 100, 100, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
+			my -= mh;
+			if(dl[i].dir == 0) monster_big_dead_left.Draw(mdc, mx, my, mw, mh, 0, 0, 200, 200);
+			else if (dl[i].dir == 1) monster_big_dead_right.Draw(mdc, mx, my, mw, mh, 0, 0, 200, 200);
 		}
-		else if (dl[i].monster_type == 3) monster_air_dead.Draw(mdc, dl[i].x + ss_x, dl[i].y  + ss_y + landing_shake, 150, 60, 0, 0, 150, 60); 
+		else if(dl[i].monster_type == 3) {
+			mw = 150 / 1500.0 * rt.right;
+			mh = 60 / 1500.0 * rt.right;
+			my += mh;
+			RECT r = { 0, 0, mw, mh };
+			r = convertRatio(r, 150, 60, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
+			my -= mh;
+			monster_air_dead.Draw(mdc, mx, my, mw, mh, 0, 0, 150, 60);
+		}
 	} 
 	//일반 몬스터 출력
 	for (int i = 0; i < mdx_r; i++) {
+		mx = (mst_r[i].x + ss_x)  / 1500.0 * rt.right;
+		my = (mst_r[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
+		mw = 100 / 1500.0 * rt.right;
+		mh = mst_r[i].height / 1500.0 * rt.right;
+		my += mh;
+		RECT r = { 0, 0, mw, mh };
 		switch (mst_r[i].img_dir) {
 		case 0:
 			MST_w = monster_left.GetWidth(); MST_h = monster_left.GetHeight(); 
-			monster_left.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y + ss_y + landing_shake, 100, mst_r[i].height, 0, 0, MST_w, MST_h);
+			r = convertRatio(r, MST_w, MST_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
+			my -= mh;
+			monster_left.Draw(mdc, mx, my, mw, mh, 0, 0, MST_w, MST_h);
 			break; 
 		case 1:
 			MST_w = monster_right.GetWidth(); MST_h = monster_right.GetHeight(); 
-			monster_right.Draw(mdc, mst_r[i].x + ss_x, mst_r[i].y + ss_y + landing_shake, 100, mst_r[i].height, 0, 0, MST_w, MST_h);
+			r = convertRatio(r, MST_w, MST_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
+			my -= mh;
+			monster_right.Draw(mdc, mx, my, mw, mh, 0, 0, MST_w, MST_h);
 			break;
 		}
 	} 
 	//대형 몬스터 출력
 	for (int i = 0; i < mdx_big; i++) {
+		mx = (mst_big[i].x + ss_x)  / 1500.0 * rt.right;
+		my = (mst_big[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
+		mw = 200 / 1500.0 * rt.right;
+		mh = mst_big[i].height / 1500.0 * rt.right;
+		my += mh;
+		RECT r = { 0, 0, mw, mh };
 		switch (mst_big[i].img_dir) {
 		case 0:
 			MST_big_w = monster_big_left.GetWidth(); MST_big_h = monster_big_left.GetHeight(); 
-			monster_big_left.Draw(mdc, mst_big[i].x + ss_x, mst_big[i].y + ss_y + landing_shake, 200, mst_big[i].height, 0, 0, MST_big_w, MST_big_h);
+			r = convertRatio(r, MST_big_w, MST_big_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
+			my -= mh;
+			monster_big_left.Draw(mdc, mx, my, mw, mh, 0, 0, MST_big_w, MST_big_h);
 			break; 
 		case 1:
 			MST_big_w = monster_big_right.GetWidth(); MST_big_h = monster_big_right.GetHeight(); 
-			monster_big_right.Draw(mdc, mst_big[i].x + ss_x, mst_big[i].y + ss_y + landing_shake, 200, mst_big[i].height , 0, 0, MST_big_w, MST_big_h);
+			r = convertRatio(r, MST_big_w, MST_big_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
+			my -= mh;
+			monster_big_right.Draw(mdc, mx, my, mw, mh, 0, 0, MST_big_w, MST_big_h);
 			break;
 		}
 	} 
 	//공중 몬스터 출력
 	for (int i = 0; i < mdx_air; i++) {
+		mx = (mst_air[i].x + ss_x)  / 1500.0 * rt.right;
+		my = (mst_air[i].y + ss_y + landing_shake) / 800.0 * rt.bottom;
+		mw = 150 / 1500.0 * rt.right;
+		mh = mst_air[i].height / 1500.0 * rt.right;
+		my += mh;
+		RECT r = { 0, 0, mw, mh };
 		switch (mst_air[i].img_dir) {
 		case 0:
 			MST_air_w = monster_air_left[air].GetWidth(); MST_air_h = monster_air_left[air].GetHeight(); 
-			monster_air_left[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, mst_air[i].height, 0, 0, MST_air_w, MST_air_h);
+			r = convertRatio(r, MST_air_w, MST_air_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
+			my -= mh;
+			monster_air_left[air].Draw(mdc, mx, my, mw, mh, 0, 0, MST_air_w, MST_air_h);
 			break; 
 		case 1:
 			MST_air_w = monster_air_right[air].GetWidth(); MST_air_h = monster_air_right[air].GetHeight(); 
-			monster_air_right[air].Draw(mdc, mst_air[i].x + ss_x, mst_air[i].y + ss_y + landing_shake, 150, mst_air[i].height, 0, 0, MST_air_w, MST_air_h);
+			r = convertRatio(r, MST_air_w, MST_air_h, Down);		// 비율 맞추기
+			mw = r.right-r.left;
+			mh = r.bottom-r.top;
+			my -= mh;
+			monster_air_right[air].Draw(mdc, mx, my, mw, mh, 0, 0, MST_air_w, MST_air_h);
 			break;
 		}
 	}
 }
 
 //탄피 출력
-void show_catridge(HDC mdc, int ss_x, int ss_y, int landing_shake) {
+void show_catridge(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 	for (int i = cdx - 1; i >= 0; i--)
-		catridge[gc[i].frame].Draw(mdc, gc[i].x + ss_x, gc[i].y + ss_y + landing_shake, 20, 20, 0, 0, 20, 20);
+		catridge[gc[i].frame].Draw(mdc, (gc[i].x + ss_x) / 1500.0 * rt.right, (gc[i].y + ss_y + landing_shake) / 800.0 * rt.bottom, 
+			20 / 1500.0 * rt.right, 20 / 1500.0 * rt.right, 
+			0, 0, 20, 20);
 }
 
 //수류탄 출력
-void show_grenade(HDC mdc, int ss_x, int ss_y, int landing_shake) {
+void show_grenade(HDC mdc, int ss_x, int ss_y, int landing_shake, RECT rt) {
 	if(is_throw == TRUE || (set_grenade == TRUE && is_boom == FALSE))
-		grenade[g_frame].Draw(mdc, gren_x + ss_x, gren_y + ss_y + landing_shake, 60, 60, 0, 0, 60, 60);
+		grenade[g_frame].Draw(mdc, (gren_x + ss_x) / 1500.0 * rt.right, (gren_y + ss_y + landing_shake) / 800.0 * rt.bottom,
+			60 / 1500.0 * rt.right, 60 / 1500.0 * rt.right, 
+			0, 0, 60, 60);
 	if (is_boom == TRUE)
-		explode[ex_frame].Draw(mdc, (gren_x - 180) + ss_x, (gren_y - 250) + ss_y + landing_shake, 400, 400, 0, 0, 100, 100);
+		explode[ex_frame].Draw(mdc, ((gren_x - 180) + ss_x) / 1500.0 * rt.right, ((gren_y - 250) + ss_y + landing_shake) / 800.0 * rt.bottom,
+			400 / 1500.0 * rt.right, 400 / 1500.0 * rt.right, 
+			0, 0, 100, 100);
 }
 
 //클립 생성
@@ -815,7 +1006,7 @@ void update_player_direction(int mouse_x) {
 }
 
 //플레이어 위치 업데이트
-void update_player_position(RECT rt) {
+void update_player_position() {
 //점프
 	if (CM_jump == 1) { //위로 올라가는 중
 		CM_y -= CM_jump_acc; CM_jump_acc--; //위로 올라갈수록 가속이 줄어듬
@@ -854,7 +1045,7 @@ void update_player_position(RECT rt) {
 		} 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) CM_x -= 15;   
 			//배경 인식 좌표가 10이되고 플레이어가 다시 가운데로 이동할 때까지 플레이어만 움직임 
-		if (CM_x <= rt.left) CM_x += 15;  
+		if (CM_x <= 0) CM_x += 15;  
 			//벽에 닿으면 이동 중지      
 	} 
 	else if (CM_move_dir == 1) { //우측 이동
@@ -867,7 +1058,7 @@ void update_player_position(RECT rt) {
 			gren_x -= 15; BG_scanner += 15; clip_x -= 15;
 		} 
 		if ((BG_scanner <= 10 && CM_x <= 700) || (BG_scanner >= 2990 && CM_x >= 700)) CM_x += 15; 
-		if (CM_x + 100 >= rt.right) CM_x -= 15; 
+		if (CM_x + 100 >= 1500) CM_x -= 15; 
 	} 
 }
 
@@ -907,7 +1098,9 @@ void update_monster_position() {
 }
 
 //AWP 전용 몬스터 명중 판정
-void check_hit_awp() {
+void check_hit_awp(RECT rt) {
+	int hit_x = ::hit_x * 1500.0 / rt.right;
+	int hit_y = ::hit_y * 800.0 / rt.bottom;
 	//조건문 중복 방지 변수
 	int is_kill_r = 0; int is_kill_big = 0; int is_kill_air = 0;
 	//최소 한 마리의 몬스터를 맞추어야 관통 효과가 발동된다
@@ -994,7 +1187,9 @@ void check_hit_awp() {
 }
 
 //몬스터 명중 판정
-void check_hit() {
+void check_hit(RECT rt) {
+	int hit_x = ::hit_x * 1500.0 / rt.right;
+	int hit_y = ::hit_y * 800.0 / rt.bottom;
 	//조건문 중복 방지 변수
 	int is_kill = 0;
 	//일반 몬스터 히트 판정
@@ -1002,8 +1197,8 @@ void check_hit() {
 		if (hit_x >= mst_r[i].x && hit_x <= mst_r[i].x + 100 && hit_y >= mst_r[i].y && hit_y <= mst_r[i].y + 100) {
 			hit = i;    //조준점 내부의 좌표가 몬스터 이미지 내부에 위치하면 히트로 판정되어 총알은 해당 몬스터에 가로막힌다.
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
-			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
-			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+			ammo_x2 = ::hit_x;
+			ammo_y2 = ::hit_y;
 
 			mst_r[hit].hp = cal_damage(mst_r[hit].hp, GUN_number);
 			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
@@ -1033,8 +1228,8 @@ void check_hit() {
 		if (hit_x >= mst_big[i].x && hit_x <= mst_big[i].x + 200 && hit_y >= mst_big[i].y && hit_y <= mst_big[i].y + 200) {
 			hit = i;
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
-			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
-			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+			ammo_x2 = ::hit_x;
+			ammo_y2 = ::hit_y;
 
 			mst_big[hit].hp = cal_damage(mst_big[hit].hp, GUN_number);
 			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
@@ -1062,8 +1257,8 @@ void check_hit() {
 		if (hit_x >= mst_air[i].x && hit_x <= mst_air[i].x + 150 && hit_y >= mst_air[i].y && hit_y <= mst_air[i].y + 60) {
 			hit = i;
 			angle = atan2(hit_y - (CM_y + 60), hit_x - (CM_x + 50));
-			ammo_x2 = ammo_x1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * cos(angle);
-			ammo_y2 = ammo_y1 + cal_dist(CM_x + 50, CM_y + 60, hit_x, hit_y) * sin(angle);
+			ammo_x2 = ::hit_x;
+			ammo_y2 = ::hit_y;
 
 			mst_air[hit].hp = cal_damage(mst_air[hit].hp, GUN_number);
 			ch_hit->stop(); ssystem->playSound(hit_sound, 0, false, &ch_hit); //사운드 재생
@@ -1101,23 +1296,34 @@ void make_shake(int shake_acc, int shake_end) {
 }
 
 //총알 발사 시 수행되는 작업 모음
-void make_rand_ammo(int ammo, int max_ammo) {
+void make_rand_ammo(int ammo, int max_ammo, RECT rt) {
 	if (ammo + 1 == max_ammo) empty = 1;							//총알 소모가 정히진 값에 도달하면 더 이상 발사되지 않는다
 
 	std::random_device rd_ammo; std::mt19937 gen(rd_ammo()); 
-	std::uniform_int_distribution<int> x(mx - (10 + var), mx + (10 + var)); //분산도가 넓어질수록 정확도가 떨어지게됨
-	std::uniform_int_distribution<int> y(my - (10 + var), my + (10 + var));
+	int v = (10 + var) / 1500.0 * rt.right;
+	std::uniform_int_distribution<int> x(mx - v, mx + v); //분산도가 넓어질수록 정확도가 떨어지게됨
+	std::uniform_int_distribution<int> y(my - v, my + v);
 	hit_x = x(gen); hit_y = y(gen);									//이 좌표가 몬스터의 이미지 안쪽에 위치해야 대미지 판정을 받는다.
-	angle = atan2(y(gen) - (CM_y + 60), x(gen) - (CM_x + 50));      //atan2 함수로 총알이 그려지는 각도를 계산한다.
+	//angle = atan2((hit_y - (CM_y + 60)) / 1500.0 * rt.right, (hit_x - (CM_x + 50)) / 800.0 * rt.bottom);      //atan2 함수로 총알이 그려지는 각도를 계산한다.
 	ammo_x1 = CM_x + 50; ammo_y1 = CM_y + 60;
-	ammo_x2 = ammo_x1 + (1500 * cos(angle)); ammo_y2 = ammo_y1 + (1500 * sin(angle));
+
+	Point p1 = { hit_x, hit_y };
+	Point p2 = { ammo_x1 / 1500.0 * rt.right, ammo_y1 / 800.0 * rt.bottom };
+	Vector dir = (p1 - p2).unit() * (rt.right + rt.bottom);
+	ammo_x2 = p2.x + dir.x;
+	ammo_y2 = p2.y + dir.y;
+	//ammo_x2 = ammo_x1 + (rt.right * cos(angle)); ammo_y2 = ammo_y1 + (rt.right * sin(angle));
 	 
 	//히트 판정
-	if(GUN_number != awp) check_hit();
-		 
-	//AWP일 경우 전용 히트 판정 함수 사용
-	if (GUN_number == awp) check_hit_awp();
-		 
+	switch(GUN_number) {
+	case awp:
+		//AWP일 경우 전용 히트 판정 함수 사용
+		check_hit_awp(rt);
+		break;
+	default:
+		check_hit(rt);
+	}
+
 	is_draw = TRUE; draw_hit = TRUE; //그리기 시작
 	ind_effect = 1; shake_effect = 1; //각각 인터페이스 이펙트, 흔들림 이펙트
 	shoot_delay = 0;	//딜레이는 0이되어 다시 딜레이가 증가하기 시작
@@ -1126,12 +1332,12 @@ void make_rand_ammo(int ammo, int max_ammo) {
 }
 
 //사격
-void shoot() {
+void shoot(RECT rt) {
 	if (is_click == TRUE && reload == 0 && empty == 0) {
 		if(shoot_delay < Gun::shoot_speed(GUN_number))
 			shoot_delay++;
 		if(shoot_delay == Gun::shoot_speed(GUN_number)) {
-			make_rand_ammo(ammo, Gun::max_ammo(GUN_number)); //최대 장탄수를 오른쪽 인수에 적는다
+			make_rand_ammo(ammo, Gun::max_ammo(GUN_number), rt); //최대 장탄수를 오른쪽 인수에 적는다
 			var += Gun::recoil(GUN_number); ammo++;
 			is_zoom = FALSE; avail_awp = FALSE;
 			ch_gun->stop(); ch_gun2->stop(); 
@@ -1835,6 +2041,9 @@ void UI_animation() {
 	if (manager.isPaused()) {
 		if (pause_acc > 0) {
 			pause_y -= pause_acc; pause_acc -= 4;
+			if(pause_y < 0) {
+				pause_y = 0;
+			}
 		}
 		if (pause_acc == 0) {
 			if (cm_pause_acc > 0) {
@@ -1842,19 +2051,24 @@ void UI_animation() {
 			}
 		}
 	}
-	if (!manager.isPaused() && is_resumed == TRUE) {
-		if (pause_acc > 0) {
-			pause_y += pause_acc--; pause_acc -= 4;
+	else {
+		if(is_resumed == TRUE) {
+			if(pause_acc > 0) {
+				pause_y += pause_acc--; pause_acc -= 4;
+			}
+			if(cm_pause_acc > 0) {
+				CM_paused_y += cm_pause_acc--; cm_pause_acc -= 4;
+			}
+			if(pause_acc == 0) is_resumed = FALSE;
 		}
-		if (cm_pause_acc > 0) {
-			CM_paused_y += cm_pause_acc--; cm_pause_acc -= 4;
-		}
-		if (pause_acc == 0) is_resumed = FALSE;
 	}
+
 	//게임 오버 화면 애니메이션
 	if (manager.isGameOver()) {
 		if (death_acc > 0) death_x += death_acc--;
+		if(death_x > 1000) death_x = 1000;
 	}
+
 	//메인화면 및 아머리씬 배경 스크롤 애니메이션
 	if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory || (manager.getCurrentSceneID() == Game && into_the_game == TRUE)) {
 		if (Scanner_main < 1500) Scanner_main += 5; 
@@ -1862,19 +2076,27 @@ void UI_animation() {
 	}
 
 	//로고 애니메이션
+	switch(manager.getCurrentSceneID()) {
 	//메인->아머리씬으로 이동 시
-	if (manager.getCurrentSceneID() == Armory && main_to_armory == TRUE) {
-		if (logo_acc > 0) logo_y -= logo_acc--; 
-		if (logo_acc == 0) main_to_armory = FALSE;  
-	}
+	case Armory:
+		if(main_to_armory == TRUE) {
+			if(logo_acc > 0) logo_y -= logo_acc--;
+			if(logo_acc == 0) main_to_armory = FALSE;
+		}
+		break;
 	//아머리씬->메인으로 이동 시
-	if (manager.getCurrentSceneID() == Main && armory_to_main == TRUE) {
-		if (logo_acc > 0) logo_y += logo_acc--; 
-		if (logo_acc == 0) armory_to_main = FALSE; 
-	}
+	case Main:
+		if(armory_to_main == TRUE) {
+			if(logo_acc > 0) logo_y += logo_acc--;
+			if(logo_acc == 0) armory_to_main = FALSE;
+		}
+		break;
 	//새 게임 시작 시
-	if (manager.getCurrentSceneID() == Game && into_the_game == TRUE) {
-		if (logo_acc > 0) logo_y -= logo_acc--; 
+	case Game:
+		if(into_the_game == TRUE) {
+			if(logo_acc > 0) logo_y -= logo_acc--;
+		}
+		break;
 	}
 }
 
@@ -1910,7 +2132,12 @@ void new_game_animation(RECT rt) {
 		ch_bgm->stop(); ssystem->playSound(new_game, 0, false, &ch_bgm);
 		new_game_sound = TRUE;	logo_acc = 30; logo_y = 50; //로고 위치 초기화
 	}
-	if (new_acc > 0) new_bg_y -= new_acc--; 
+	if(new_acc > 0) {
+		new_bg_y -= new_acc--;
+		if(new_bg_y < 0) {
+			new_bg_y = 0;
+		}
+	}
 	if (new_acc == 0) {
 		if (new_logo_move == 1) {
 			if (new_logo_acc > 0) new_logo_y -= new_logo_acc--;
@@ -1976,46 +2203,50 @@ void wm_rbuttondown() {
 
 //그리기 파트
 void wm_paint(HDC mdc, RECT rt) {
-	//////////////////////// 버퍼
+	// 버퍼
 	BG_w = 1500; BG_h = BackGround.GetHeight();
-	BackGround.Draw(mdc, rt.left + ss_x, rt.top - 30 + landing_shake + ss_y, rt.right, rt.bottom + 30, BG_scanner, 0, BG_w, BG_h);
+	BackGround.Draw(mdc, rt.left + ss_x / 1500.0 * rt.right, rt.top + (-30 + landing_shake + ss_y) / 800.0 * rt.bottom, 
+		rt.right, rt.bottom + 30 / 800.0 * rt.bottom,
+		BG_scanner, 0, BG_w, BG_h);
 	//BG_scanner가 클수록 배경은 오른쪽으로 이동하게 됨
 
 	//정조준 완료 시에 관통 대상 표시
 	if (GUN_number == awp && is_zoom == TRUE && empty == 0 && reload == 0 && r_pressed == 0) {
-		find_target(mx, my); show_awp_targeted(mdc); 
+		find_target(mx, my, rt); show_awp_targeted(mdc, rt); 
 	}
 
 	//awp 정조준 완료 표시
-	show_zoom_complited(mdc);
+	show_zoom_complited(mdc, rt);
 
 	//몬스터 이미지 출력
-	show_monster(mdc, ss_x, ss_y, landing_shake);
+	show_monster(mdc, ss_x, ss_y, landing_shake, rt);
 
 	//총알 궤적 그리기
-	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1, ammo_y1, ammo_x2, ammo_y2, GUN_number);
+	if (is_draw == TRUE) draw_ammo(mdc, ammo_x1 / 1500.0 * rt.right, ammo_y1 / 800.0 * rt.bottom,
+		ammo_x2, ammo_y2, GUN_number, rt);
+	//make_rand_ammo
 
 	//플레이어 이미지 출력
-	show_player(mdc);
+	show_player(mdc, rt);
 
 	//탄피 이미지 출력
-	show_catridge(mdc, ss_x, ss_y, landing_shake);
+	show_catridge(mdc, ss_x, ss_y, landing_shake, rt);
 
 	//m1 게런드 클립 이미지 출력
 	if (clip_created == TRUE)
 		clip[clip_frame].Draw(mdc, clip_x + ss_x, clip_y + ss_y + landing_shake, 40, 40, 0, 0, 30, 30);
 
 	//수류탄 이미지 출력
-	if(is_throw == TRUE || set_grenade == TRUE) show_grenade(mdc, ss_x, ss_y, landing_shake);
+	if(is_throw == TRUE || set_grenade == TRUE) show_grenade(mdc, ss_x, ss_y, landing_shake, rt);
 		 
 	//히트 포인트 그리기
-	if (draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2);
+	if (draw_hit == TRUE) show_hit(mdc, ammo_x2, ammo_y2, rt);
 
 	//인터페이스 출력
 	show_interface(mdc, rt);
 
 	//조준점 출력
-	if (!manager.isPaused() && !manager.isGameOver()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var);
+	if (!manager.isPaused() && !manager.isGameOver()) show_target(mdc, mx + ss_x, my + ss_y + landing_shake, var, rt);
 
 	//게임 오버 씬
 	if (manager.isGameOver()) {
@@ -2024,13 +2255,19 @@ void wm_paint(HDC mdc, RECT rt) {
 		oldbrush = (HBRUSH)SelectObject(mdc, hbrush); 
 		Rectangle(mdc, rt.left, rt.top, rt.right, rt.bottom); 
 		SelectObject(mdc, oldbrush); DeleteObject(hbrush); 
-		CM_dead.Draw(mdc, death_x, 200, 500, 500, 0, 0, 500, 500);
+		//CM_dead.Draw(mdc, death_x, 200, 500, 500, 0, 0, 500, 500);
+		Sprite sp { L"./res/commando_dead.png" };
+		sp.fix_ratio = true;
+		sp.position.x = death_x / 1500.0 * rt.right - percentOf(rectToSquare(rt, Left).right, 70);
+		sp.size_per = 70;
+		sp.draw(mdc, rt);
 	} 
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	HDC hdc, mdc;  PAINTSTRUCT ps; HBITMAP hbitmap; RECT rt;
-	 
+	GetClientRect(hWnd, &rt);
+
 	switch(uMsg) {
 	case WM_CREATE:
 		set_FMOD(); IMG_FILE_LOAD();  //초기 세팅
@@ -2175,14 +2412,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_MOUSEMOVE:
 		mx = LOWORD(lParam); my = HIWORD(lParam);
-		if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver())  update_player_direction(mx);
+		if(manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver())  update_player_direction(mx * 1500.0 / rt.right);
 		break;
 
 	case WM_TIMER:
 		switch (wParam) {
 		case UPDATE: //게임 전체 타이머
-			GetClientRect(hWnd, &rt);
-
 			//인트로 전 로딩 화면 로딩 애니메이션
 			if (intro_delay > 0) {
 				if(loading_delay < 15) loading_delay++;
@@ -2192,92 +2427,113 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 					else if (loading_frame == 1) loading_frame = 0;
 				}
 			}
-
-			//인트로 중에는 인트로 외에는 어떠한 다른 작업도 실행되지 않는다.
-			if (is_intro == TRUE) {
-				if (intro_delay > 0) intro_delay--;
-				if (intro_delay == 0) intro_animation();
-			}
-
+      
 			//인트로 진입 시 로고 애니메이션
 			if (is_menu == TRUE) {
 				if (press_acc > 0) press_y += press_acc--;
 				if (logo_acc_enter > 0) logo_y -= logo_acc_enter--;
 			}
+        
+      //인트로 중에는 인트로 외에는 어떠한 다른 작업도 실행되지 않는다.
+			if (is_intro == TRUE) {
+				if (intro_delay > 0) intro_delay--;
+				if (intro_delay == 0) intro_animation();
+			}
+			else {
+				//인트로가 끝나면 버튼 사운드 출력과 UI애니메이션을 출력한다.
+				play_button_sound(); UI_animation();
+				//인트로와 새 게임 애니메이션이 재생되지 않아야 게임을 업데이트 한다.
+				if(into_the_game == FALSE) {
+					manager.update(hWnd);
+
+					switch(manager.getCurrentSceneID()) {
+					case Main:
+						//메인 화면 브금
+						if(main_bgm_on == FALSE) {
+							ch_bgm->stop(); ssystem->playSound(main_bgm, 0, false, &ch_bgm);
+							main_bgm_on = TRUE; gameover_bgm_on = FALSE; game_bgm_on = FALSE;
+						}
+						break;
+					case Game:
+						//인 게임 브금
+						if(!manager.isPaused() && !manager.isGameOver()) {
+							//인 게임
+							std::thread other { [&]() {
+								update_monster_direction(CM_x); update_player_position();
+								update_monster_position();      check_monster_attack();         
+								make_monster();	                shoot(rt);
+								index_auto_delete();			grenade_process();
+
+								//연사 속도가 느린 총을 마우스 광클로 빨리 쏘는 꼼수 방지
+								if(can_shoot == FALSE) mouse_fastClick_prevention();
+
+								//체력이 100보다 낮을 경우 자가 회복
+								if(health < 100) {
+									if(recovery_delay < 100) recovery_delay++;
+									if(recovery_delay == 100) {
+										health++; recovery_delay = 0;
+									}
+								}
+								//대미지를 연속으로 입지 않도록 쿨타임을 조성한다.
+								if(cool_time > 0) cool_time--;
+							} };
+
+							std::thread anim { [&]() {
+								update_shoot_animation();
+								monster_animation();
+							} };
+
+							std::thread sound { [&]() {
+								play_idle_sound();
+								play_player_sound();
+								//라운드 업 사운드
+								if(round_up_sound == TRUE) {
+									ch_round->stop();
+									ssystem->playSound(next_round, 0, false, &ch_round);
+									round_up_sound = FALSE;
+								}
+								if(game_bgm_on == FALSE) {
+									ch_bgm->stop(); ssystem->playSound(game_bgm, 0, false, &ch_bgm);
+									main_bgm_on = FALSE; pause_bgm_on = FALSE; game_bgm_on = TRUE;
+								}
+							} };
+
+							other.join();
+							anim.join();
+							sound.join();
+						}
+						else {
+							//게임 오버 브금
+							if(manager.isGameOver() && gameover_bgm_on == FALSE) {
+								ch_bgm->stop(); ssystem->playSound(gameover_bgm, 0, false, &ch_bgm);
+								gameover_bgm_on = TRUE; game_bgm_on = FALSE;
+							}
+							//일시 정지 브금
+							else if(manager.isPaused() && pause_bgm_on == FALSE) {
+								ch_bgm->stop(); ssystem->playSound(pause_bgm, 0, false, &ch_bgm);
+								game_bgm_on = FALSE; pause_bgm_on = TRUE;
+							}
+						}
+						break;
+					}
+				}
+			}
 
 			//새 게임 시작 시 애니메이션을 재생한다.
 			if (into_the_game == TRUE) new_game_animation(rt);
-			if (into_the_game == FALSE && end_new_game == TRUE) {
-				CM_game_start_x += 100;
-				if (CM_game_start_x > rt.left - 500) {
-					new_bg_x += 100;
-					if (whoosh_sound == FALSE) {
-						ch_round->stop();  ssystem->playSound(woosh, 0, false, &ch_round);
-						whoosh_sound = TRUE;
-					}
-				}
-				if (CM_game_start_x > rt.right) {
-					end_new_game = FALSE; whoosh_sound = FALSE;
-				}
-			}
-
-			//인트로가 끝나면 버튼 사운드 출력과 UI애니메이션을 출력한다.
-			if (is_intro == FALSE) {
-				play_button_sound(); UI_animation(); 
-			}
-
-			//인트로와 새 게임 애니메이션이 재생되지 않아야 게임을 업데이트 한다.
-			if (is_intro == FALSE && into_the_game == FALSE) {
-				 manager.update(hWnd);
-				
-				//메인 화면 브금
-				if (manager.getCurrentSceneID() == Main && main_bgm_on == FALSE) {
-					ch_bgm->stop(); ssystem->playSound(main_bgm, 0, false, &ch_bgm);
-					main_bgm_on = TRUE; gameover_bgm_on = FALSE; game_bgm_on = FALSE;
-				}
-				//인 게임 브금
-				if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver() && game_bgm_on == FALSE) {
-					ch_bgm->stop(); ssystem->playSound(game_bgm, 0, false, &ch_bgm);
-					main_bgm_on = FALSE; pause_bgm_on = FALSE; game_bgm_on = TRUE;
-				}
-				//게임 오버 브금
-				if (manager.isGameOver() && gameover_bgm_on == FALSE) {
-					ch_bgm->stop(); ssystem->playSound(gameover_bgm, 0, false, &ch_bgm);
-					gameover_bgm_on = TRUE; game_bgm_on = FALSE;
-				}
-				//일시 정지 브금
-				if (manager.isPaused() && pause_bgm_on == FALSE) {
-					ch_bgm->stop(); ssystem->playSound(pause_bgm, 0, false, &ch_bgm);
-					game_bgm_on = FALSE; pause_bgm_on = TRUE;
-				}
-				
-				//인 게임
-				if (manager.getCurrentSceneID() == Game && !manager.isPaused() && !manager.isGameOver()) {
-					update_monster_direction(CM_x); update_player_position(rt);
-					update_monster_position();      update_shoot_animation();
-					check_monster_attack();         monster_animation();
-					make_monster(rt);               shoot();
-					index_auto_delete();			grenade_process();
-					play_idle_sound();				play_player_sound();
-
-					//연사 속도가 느린 총을 마우스 광클로 빨리 쏘는 꼼수 방지
-					if (can_shoot == FALSE) mouse_fastClick_prevention();
-
-					//체력이 100보다 낮을 경우 자가 회복
-					if (health < 100) {
-						if (recovery_delay < 100) recovery_delay++;
-						if (recovery_delay == 100) {
-							health++; recovery_delay = 0;
+			else {
+				if(end_new_game == TRUE) {
+					CM_game_start_x += 100;
+					if(CM_game_start_x > rt.left - 500) {
+						new_bg_x += 100;
+						if(whoosh_sound == FALSE) {
+							ch_round->stop();  ssystem->playSound(woosh, 0, false, &ch_round);
+							whoosh_sound = TRUE;
 						}
 					}
-					//라운드 업 사운드
-					if (round_up_sound == TRUE) {
-						ch_round->stop();
-						ssystem->playSound(next_round, 0, false, &ch_round);
-						round_up_sound = FALSE;
+					if(CM_game_start_x > rt.right) {
+						end_new_game = FALSE; whoosh_sound = FALSE;
 					}
-					//대미지를 연속으로 입지 않도록 쿨타임을 조성한다.
-					if (cool_time > 0) cool_time--;
 				}
 			}
 
@@ -2287,19 +2543,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		break;
 
 	case WM_PAINT:
-			GetClientRect(hWnd, &rt);
 			hdc = BeginPaint(hWnd, &ps);
 			mdc = CreateCompatibleDC(hdc);
 			hbitmap = CreateCompatibleBitmap(hdc, rt.right, rt.bottom);
 			(HBITMAP)SelectObject(mdc, hbitmap); 
 
+			SetMapMode(mdc, MM_ANISOTROPIC);
+			SetWindowExtEx(mdc, rt.right, rt.bottom, NULL);
+			SetViewportExtEx(mdc, rt.right, rt.bottom, NULL);
+
+			is_intro = FALSE;
+			into_the_game = FALSE;
 			//인트로에 나오는 원 애니메이션 파트
 			if (is_intro == TRUE) {
 				ellipse_intro(mdc, rt, ellipse_size, r, g, b);
 				if(intro_logo_acc == 0 && intro_time > 155)	ellipse_intro2(mdc, rt, ellipse2_size);
-				intro_logo.Draw(mdc, intro_logo_x, intro_logo_y, 700, 300, 0, 0, 700, 300);
-
-				//인트로 전 로딩 단계 애니메이션 출력
+				//intro_logo.Draw(mdc, intro_logo_x, intro_logo_y, 700, 300, 0, 0, 700, 300);
+				Sprite intro_logo { L"./res/intro_logo.png" };
+				intro_logo.fix_ratio = true;
+				//intro_logo.position.x = intro_logo_x / 700.0 * rt.right;
+				intro_logo.position.y = intro_logo_y / 850.0 * rt.bottom;
+				RECT r = percentOf(rt, 50, Up);
+				intro_logo.draw(mdc, r);
+        
+        //인트로 전 로딩 단계 애니메이션 출력
 				if (intro_time == 500) {
 					SetBkMode(mdc, TRANSPARENT);
 					SetTextColor(mdc, RGB(255, 255, 255));
@@ -2309,35 +2576,56 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 			}
 
 			//메인 스크롤 백그라운드
-			if (is_intro == FALSE) {
+			else {
+        press_space(mdc, press_y);
+        
 				if (manager.getCurrentSceneID() == Main || manager.getCurrentSceneID() == Armory 
 					|| (manager.getCurrentSceneID() == Game && into_the_game == TRUE)) {
-					background_main.Draw(mdc, rt.left, rt.top, rt.right, rt.bottom, Scanner_main, 0, 1500, 800);
-					logo.Draw(mdc, 450, logo_y, 600, 300, 0, 0, 600, 300);
+					RECT r = expandRatio(rt, 1500, 800, Down);
+					background_main.Draw(mdc, r.left, r.top, r.right-r.left, r.bottom-r.top, Scanner_main, 0, 1500, 800);
+					//logo.Draw(mdc, rt.right/2-300, logo_y, 600, 300, 0, 0, 600, 300);
+					Sprite game_logo { L"./res/logo.png" };
+					game_logo.fix_ratio = true;
+					game_logo.position.y = logo_y / 300.0 * rt.bottom/3;
+					game_logo.draw(mdc, { rt.left, rt.top, rt.right, rt.bottom/3 });
+				}
+
+				//인트로와 새 게임 애니메이션이 재생되지 않아야 게임 화면을 출력한다.
+				if (into_the_game == FALSE && is_menu == TRUE) {
+					if (manager.getCurrentSceneID() == Game) wm_paint(mdc, rt);
+
+					//일시정지 씬
+					if (manager.isPaused() || is_resumed == TRUE) {
+						if(pause_y >= 800) {
+							is_resumed = FALSE;
+						}
+						BG_paused.Draw(mdc, rt.left, rt.top + pause_y / 800.0 * rt.bottom, rt.right, rt.bottom, 0, 0, 1500, 800);
+						//CM_paused.Draw(mdc, rt.right - 550, CM_paused_y, 550, 800, 0, 0, 550, 800);
+						Sprite sp { L"./res/commando_paused.png" };
+						sp.fix_ratio = true;
+						sp.position.y = CM_paused_y / 800.0 * rt.bottom;
+						RECT r = convertRatio(rt, 550, 800, Right);
+						sp.draw(mdc, r);
+					}
+
+					manager.syncSize(hWnd); manager.show(mdc);
 				}
 			}
 
-			if (is_intro == FALSE) press_space(mdc, press_y);
-				
-
-			//인트로와 새 게임 애니메이션이 재생되지 않아야 게임 화면을 출력한다.
-			if (is_intro == FALSE && into_the_game == FALSE && is_menu == TRUE) {
-				if (manager.getCurrentSceneID() == Game) wm_paint(mdc, rt);
-
-				//일시정지 씬
-				if (manager.isPaused() || is_resumed == TRUE) {
-					BG_paused.Draw(mdc, rt.left, pause_y, 1500, 800, 0, 0, 1500, 800);
-					CM_paused.Draw(mdc, rt.right - 550, CM_paused_y, 550, 800, 0, 0, 550, 800);
-				}
-
-				manager.syncSize(hWnd); manager.show(mdc);
-			}
-
-
+			// 게임 시작시 애니메이션
 			if (into_the_game == TRUE || end_new_game == TRUE) {
-				background_game_start.Draw(mdc, new_bg_x, new_bg_y, 1500, 800, 0, 0, 1500, 800);
-				CM_game_start.Draw(mdc, CM_game_start_x, rt.top, 800, 800, 0, 0, 800, 800);
-				logo_game_start.Draw(mdc, 400, new_logo_y, 700, 300, 0, 0, 700, 300);
+				background_game_start.Draw(mdc, new_bg_x / 800.0 * rt.right, new_bg_y / 850.0 * rt.bottom, rt.right, rt.bottom, 0, 0, 1500, 800);
+				//CM_game_start.Draw(mdc, CM_game_start_x, rt.top, 800, 800, 0, 0, 800, 800);
+				Sprite sp { L"./res/commando_game_start.png" };
+				sp.fix_ratio = true;
+				sp.position.x = CM_game_start_x / 800.0 * rt.right;
+				sp.draw(mdc, rt);
+				//logo_game_start.Draw(mdc, 400, new_logo_y, 700, 300, 0, 0, 700, 300);
+				Sprite logo { L"./res/game_start_logo.png" };
+				logo.fix_ratio = true;
+				logo.position.y = new_logo_y / 850.0 * rt.bottom;
+				RECT r = percentOf(rt, 50, Up);
+				logo.draw(mdc, r);
 			}
 			
 			BitBlt(hdc, 0, 0, rt.right, rt.bottom, mdc, 0, 0, SRCCOPY);
@@ -2372,7 +2660,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	WndClass.lpszClassName = lpszClass;
 	WndClass.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	RegisterClassEx(&WndClass);
-	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_EX_TOPMOST, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
+	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_OVERLAPPEDWINDOW, 100, 50, 1500, 800, NULL, (HMENU)NULL, hInstance, NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 

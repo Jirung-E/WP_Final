@@ -43,10 +43,10 @@ int reload_delay; //mg_42 재장전 속도 조정 변수
 
 
 //총알 궤적 그리기
-void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2, int GUN_number) { 
-	if (GUN_number != awp) {
+void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2, int GUN_number, RECT rt) { 
+	if(GUN_number == awp) {
 		HPEN hpen, oldpen;
-		hpen = CreatePen(PS_SOLID, 7, RGB(255, 212, 0));
+		hpen = CreatePen(PS_SOLID, 15 / 1500.0 * rt.right, RGB(255, 212, 0));
 		oldpen = (HPEN)SelectObject(mdc, hpen);
 
 		MoveToEx(mdc, x1, y1, NULL);
@@ -55,10 +55,9 @@ void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2, int GUN_numb
 		SelectObject(mdc, oldpen);
 		DeleteObject(hpen);
 	}
-
-	if (GUN_number == awp) {
+	else {
 		HPEN hpen, oldpen;
-		hpen = CreatePen(PS_SOLID, 15, RGB(255, 212, 0));
+		hpen = CreatePen(PS_SOLID, 7 / 1500.0 * rt.right, RGB(255, 212, 0));
 		oldpen = (HPEN)SelectObject(mdc, hpen);
 
 		MoveToEx(mdc, x1, y1, NULL);
