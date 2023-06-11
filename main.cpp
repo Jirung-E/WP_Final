@@ -3,7 +3,6 @@
 #include <atlImage.h>
 #include <math.h>
 #include <random>
-#include <thread>
 #include "GameManager.h"
 #include "monster_info.h"//몬스터 정보 헤더
 #include "ammo.h"        //총알 정보 헤더
@@ -1463,9 +1462,9 @@ void draw_ellipse(HDC mdc, double x, double y, int size) {
 }
 
 //런처 레이저 생성
-void make_lazer() {
-	rect_x_end = mx;
-	rect_y_end = my;
+void make_lazer(RECT rt) {
+	rect_x_end = mx * 1500.0 / rt.right;
+	rect_y_end = my * 800.0 / rt.bottom;
 	rect_x_start = CM_x + 50;
 	rect_y_start = CM_y + 50;
 	incline = atan2(rect_y_end - rect_y_start, rect_x_end - rect_x_start);
@@ -1475,16 +1474,17 @@ void make_lazer() {
 }
 
 //런처 레이저 그리기
-void draw_rect_shoot(HDC mdc, double x, double y, double incline) {
+void draw_rect_shoot(HDC mdc, double x, double y, double incline, RECT rt) {
 	HPEN hpen, oldpen;
 	HBRUSH hbrush, oldbrush;
 
-	hpen = CreatePen(PS_SOLID, 5, RGB(0, 0, 0));
+	hpen = CreatePen(PS_SOLID, 5 / 1500.0 * rt.right, RGB(0, 0, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 	hbrush = CreateSolidBrush(RGB(255, 255, 255));
 	oldbrush = (HBRUSH)SelectObject(mdc, hbrush);
 
-	Rectangle(mdc, x + cos(incline) - 20, y + sin(incline) - 20, x + cos(incline) + 20, y + sin(incline) + 20);
+	Rectangle(mdc, (x + cos(incline) - 20) / 1500.0 * rt.right, (y + sin(incline) - 20) / 800.0 * rt.bottom, 
+		(x + cos(incline) + 20) / 1500.0 * rt.right, (y + sin(incline) + 20) / 1500.0 * rt.right);
 
 	SelectObject(mdc, oldpen);
 	DeleteObject(hpen);
@@ -1493,16 +1493,17 @@ void draw_rect_shoot(HDC mdc, double x, double y, double incline) {
 }
 
 //생성된 사각형 그리기
-void draw_rect(HDC mdc, double x, double y, int sizex, int sizey) {
+void draw_rect(HDC mdc, double x, double y, int sizex, int sizey, RECT rt) {
 	HPEN hpen, oldpen;
 	HBRUSH hbrush, oldbrush;
 
-	hpen = CreatePen(PS_SOLID, 5, RGB(0, 0, 0));
+	hpen = CreatePen(PS_SOLID, 5 / 1500.0 * rt.right, RGB(0, 0, 0));
 	oldpen = (HPEN)SelectObject(mdc, hpen);
 	hbrush = CreateSolidBrush(RGB(255, 255, 255));
 	oldbrush = (HBRUSH)SelectObject(mdc, hbrush);
 
-	Rectangle(mdc, x - sizex, y - sizey, x + sizex, y + sizey);
+	Rectangle(mdc, (x - sizex) / 1500.0 * rt.right, (y - sizey) / 800.0 * rt.bottom,
+		(x + sizex) / 1500.0 * rt.right, (y + sizey) / 1500.0 * rt.right);
 
 	SelectObject(mdc, oldpen);
 	DeleteObject(hpen);
@@ -1664,8 +1665,8 @@ void shoot(RECT rt) {
 		}
 	}
 
-	if (ammo == 0 && reload == 0 && empty == 0 && is_rclick == TRUE && can_make_rect == TRUE && GUN_number == h_brush && my <= CM_y - 200) {
-		make_lazer();
+	if (ammo == 0 && reload == 0 && empty == 0 && is_rclick == TRUE && can_make_rect == TRUE && GUN_number == h_brush && my <= (CM_y - 200) / 800.0 * rt.bottom) {
+		make_lazer(rt);
 		ch_rect->stop(); ssystem->playSound(hbrush_lazer, 0, false, &ch_rect);
 		can_make_rect = FALSE;
 		is_rclick = FALSE;
@@ -1816,13 +1817,15 @@ void update_shoot_animation() {
 		rect_x_start += 25 * cos(incline);
 		rect_y_start += 25 * sin(incline);
 
-		if (rect_dir == 0 && rect_x_start <= rect_x_end && rect_y_start <= rect_y_end) {
-			is_lazer = FALSE;
-			is_rect = TRUE;
-		}
-		if (rect_dir == 1 && rect_x_start >= rect_x_end && rect_y_start <= rect_y_end) {
-			is_lazer = FALSE;
-			is_rect = TRUE;
+		if(rect_y_start <= rect_y_end) {
+			if(rect_dir == 0 && rect_x_start <= rect_x_end) {
+				is_lazer = FALSE;
+				is_rect = TRUE;
+			}
+			if(rect_dir == 1 && rect_x_start >= rect_x_end) {
+				is_lazer = FALSE;
+				is_rect = TRUE;
+			}
 		}
 	}
 
@@ -2591,7 +2594,7 @@ void wm_paint(HDC mdc, RECT rt) {
 
 	//사각형 출력
 	if (is_rect == TRUE)
-		draw_rect(mdc, rect_x_start + ss_x, rect_y_start + ss_y + landing_shake, rect_size_x, rect_size_y);
+		draw_rect(mdc, rect_x_start + ss_x, rect_y_start + ss_y + landing_shake, rect_size_x, rect_size_y, rt);
 
 	//몬스터 이미지 출력
 	show_monster(mdc, ss_x, ss_y, landing_shake, rt);
@@ -2601,7 +2604,7 @@ void wm_paint(HDC mdc, RECT rt) {
 		ammo_x2, ammo_y2, GUN_number, rt);
 	//make_rand_ammo
 	
-	if (is_lazer == TRUE) draw_rect_shoot(mdc, rect_x_start, rect_y_start, incline);
+	if (is_lazer == TRUE) draw_rect_shoot(mdc, rect_x_start, rect_y_start, incline, rt);
 
 	//플레이어 이미지 출력
 	show_player(mdc, rt);
@@ -2610,7 +2613,7 @@ void wm_paint(HDC mdc, RECT rt) {
 	show_catridge(mdc, ss_x, ss_y, landing_shake, rt);
 
 	for (int i = 0; i < edx; i ++)
-		draw_ellipse(mdc, e[i].x, e[i].y, e[i].size);
+		draw_ellipse(mdc, e[i].x / 1500.0 * rt.right, e[i].y / 800.0 * rt.bottom, e[i].size / 1500.0 * rt.right);
 
 	//m1 게런드 클립 이미지 출력
 	if (clip_created == TRUE)
