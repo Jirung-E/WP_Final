@@ -5,7 +5,7 @@
 CImage BackGround, indicator_back, ammo_icon, ammo_lmg_icon, ammo_sniper_icon, ammo_clip_icon;
 CImage commando_right, commando_left, commando_jump_right, commando_jump_left;
 CImage commando_fire_right, commando_fire_left, commando_jump_fire_right, commando_jump_fire_left, commando_zoom_right, commando_zoom_left;
-CImage SCAR_H_right, SCAR_H_left, M16_right, M16_left, MP44_right, MP44_left, MG42_right, MG42_left, AWP_right, AWP_left;
+CImage SCAR_H_right, SCAR_H_left, M16_right, M16_left, MP44_right, MP44_left, MG42_right, MG42_left, AWP_right, AWP_left, hbrush_right, hbrush_left;
 CImage m1_right, m1_left;
 CImage monster_right, monster_left, monster_big_right, monster_big_left;
 CImage monster_air_right[3], monster_air_left[3];

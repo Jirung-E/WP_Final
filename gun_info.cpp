@@ -16,6 +16,8 @@ int Gun::damage(int gun_id) {
         return 100;
     case m1: 
         return 30;
+    case h_brush:
+        return 2;
     }
     return 0;
 }
@@ -34,6 +36,8 @@ int Gun::shoot_speed(int gun_id) {
         return 100;
     case m1:
         return 0;
+    case h_brush:
+        return 30;
     }
     return 0;
 }
@@ -52,6 +56,8 @@ int Gun::max_ammo(int gun_id) {
         return 5;
     case m1:
         return 8;
+    case h_brush:
+        return 10;
     }
     return 0;
 }
@@ -83,6 +89,8 @@ int Gun::reload_speed(int gun_id) {
         return 2;
     case m1:
         return 5;
+    case h_brush:
+        return 1;
     }
     return 0;
 }
@@ -101,6 +109,8 @@ int Gun::recoil(int gun_id) {
         return 0;
     case m1:
         return 60;
+    case h_brush:
+        return 0;
     }
     return 0;
 }
@@ -118,6 +128,8 @@ int Gun::shake(int gun_id) {
     case awp:
         return 20;
     case m1:
+        return 15;
+    case h_brush:
         return 15;
     }
     return 0;
@@ -137,6 +149,8 @@ int Gun::shake_time(int gun_id) {
         return 50;
     case m1:
         return 10;
+    case h_brush: 
+        return 10;
     }
     return 0;
 }
@@ -155,6 +169,8 @@ int Gun::price(int gun_id) {
         return 1000;
     case m1:
         return 1200;
+    case h_brush:
+        return 2500;
     }
     return 0;
 }
@@ -173,6 +189,8 @@ int Gun::speed_info(int gun_id) {
         return 46;
     case m1:
         return 0;
+    case h_brush:
+        return 200;
     }
     return 0;
 }
