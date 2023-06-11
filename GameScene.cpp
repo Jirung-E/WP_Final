@@ -109,6 +109,16 @@ void GameScene::setUp() {
     //탄클립 초기화
     clip_created = FALSE;
     clip_motion_dir = -1;
+
+    //사각형 초기화
+    is_lazer = FALSE;
+    is_rect = FALSE;
+    can_make_rect = TRUE;
+    rect_size_x = 20;
+    rect_size_y = 20;
+    rect_acc = 0;
+    rect_delay = 0;
+    rect_delete_delay = 0;
 }
 
 

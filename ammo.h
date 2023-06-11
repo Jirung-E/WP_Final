@@ -1,4 +1,25 @@
 #pragma once
+struct ellipse {
+	int size;
+	double x, y;
+	int dir;
+	int acc;
+};
+
+extern int edx; //ellipse-index
+extern double incline;
+extern double rect_x_end, rect_y_end;
+extern double rect_x_start, rect_y_start;
+extern int rect_size_x, rect_size_y;
+extern int rect_dir;
+extern BOOL is_lazer;
+extern BOOL can_make_rect;
+extern BOOL is_rect;
+extern int rect_acc;
+extern int rect_delay;
+extern int rect_delete_delay;
+
+
 extern BOOL is_draw;					  //TRUE일 시 총알 궤적을 그림
 extern int ammo;							      //장탄 수
 extern int draw_timer;							  //궤적이 그려지는 시간을 정한다. 수치가 높을수록 더 오랫동안 그려진다.
@@ -35,5 +56,4 @@ void draw_ammo(HDC mdc, double x1, double y1, double x2, double y2, int GUN_numb
 void ammo_indicator(HDC mdc, int max_ammo, int ammo, int ind_size, int ind_x, int ind_y);
 void reload_indicator(HDC mdc, int x, int y, int x2, int y2, int x3, int y3, int x4, int y4);
 int cal_damage(int monster_hp, int GUN_number);
-
-
+void push_ellipse(int del, int idx);
